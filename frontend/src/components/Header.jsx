@@ -1,194 +1,274 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { HiOutlineMenu, HiOutlineX } from "react-icons/hi";
-import { FaUserCircle } from "react-icons/fa";
+import { FaUserCircle, FaUser } from "react-icons/fa";
+import { useAuth } from "../context/AuthContext";
+import { GiProgression } from "react-icons/gi";
+import { IoMdSettings } from "react-icons/io";
+import { FiLogOut } from "react-icons/fi";
+import toast from "react-hot-toast";
+
 const Header = () => {
+  const { user, isLogin, setUser, setIsLogin } = useAuth();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
-  const isLogin = false;
-  const user = false;
+  const [profileOpen, setProfileOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
-  const handleMobileNavigate = () => {
-    navigate("/user-dashboard");
-    setMenuOpen(false);
+  const logout = () => {
+    sessionStorage.removeItem("HealthUP"); // clear storage
+    setUser(null); // reset user
+    setIsLogin(false); // update login state
+    navigate("/"); // redirect home
+    toast.success("Logout Successfully !");
   };
 
-  const handledDesktopNavigate = () => {
-    navigate("/user-dashboard");
-  };
-
-  const handleLogout = () => {
-    navigate("/logout");
-    setMenuOpen(false);
-  };
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setProfileOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
     <>
       {/* HEADER */}
 
-      <header className="sticky top-0 left-0 overflow-auto w-full z-50 bg-(--color-primary) shadow-md">
-        <div className="flex justify-between items-center px-6 py-4">
+      <header className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-full px-6">
+        <div
+          className="max-w-5xl mx-auto flex items-center justify-between 
+                  px-8 py-3 rounded-full 
+                  bg-[#0f172a]/80 backdrop-blur-xl 
+                  border border-white/10 shadow-xl"
+        >
           {/* Logo */}
-
-          <Link to="/" className="text-2xl font-bold text-white">
+          <Link
+            to="/"
+            className="text-2xl font-bold bg-linear-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent"
+          >
             HealthUP
           </Link>
 
-          {/* ================= DESKTOP NAV ================= */}
-
-          <nav className="hidden md:flex items-center gap-8 text-white font-medium">
-            <Link to="/" className="hover:text-(--color-accent)">
+          {/* Desktop Nav */}
+          <nav className="hidden md:flex items-center gap-8 text-gray-300 font-medium">
+            <Link className="hover:text-purple-400 transition" to="/">
               Home
             </Link>
-            <Link to="/about" className="hover:text-(--color-accent)">
+
+            <Link className="hover:text-purple-400 transition" to="/about">
               About
             </Link>
-            <Link to="/contact" className="hover:text-(--color-accent)">
+
+            <Link className="hover:text-purple-400 transition" to="/contact">
               Contact
             </Link>
-
-            {/* Login setup */}
-
-            <div className="flex gap-4">
-              {isLogin ? (
-                <div className="flex justify-between gap-3 items-center">
-                  <div className="text-(--color-secondary) font-bold">
-                    Hey, Nitish
-                  </div>
-                  <div
-                    onClick={handledDesktopNavigate}
-                    className="cursor-pointer"
-                  >
-                    {user ? (
-                      <img
-                        src={user?.photo?.url}
-                        className="w-8 h-8 rounded-full object-cover border-2 border-(--color-background)"
-                      />
-                    ) : (
-                      <FaUserCircle className="w-6 h-6 text-white" />
-                    )}
-                    {/* */}
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <button
-                    onClick={() => {
-                      navigate("/login");
-                    }}
-                    className="text-(--color-secondary) hover:underline cursor-pointer text-lg"
-                  >
-                    Login
-                  </button>
-                  <button
-                    onClick={() => {
-                      navigate("/SignUp");
-                    }}
-                    className="text-(--color-secondary) hover:underline cursor-pointer text-lg"
-                  >
-                    Sign Up
-                  </button>
-                </>
-              )}
-            </div>
           </nav>
 
-          {/* ================= MOBILE MENU ICON ================= */}
+          {/* Auth Section */}
+          <div className="hidden md:block">
+            {!isLogin ? (
+              <div className="flex gap-4">
+                <button
+                  onClick={() => navigate("/login")}
+                  className="px-5 py-1.5 rounded-full border border-purple-400 
+                       hover:bg-linear-to-r from-purple-500 to-blue-500 
+                       transition text-white cursor-pointer"
+                >
+                  Login
+                </button>
 
-          {menuOpen && isLogin ? (
-            <div onClick={() => setMenuOpen(true)}>
-              <div className="flex justify-between gap-3 items-center">
-                <div className="text-(--color-accent) font-bold">
-                  Hey, Nitish Yadav
-                </div>
-                <div className="cursor-pointer">
-                  {user ? (
+                <button
+                  onClick={() => navigate("/signup")}
+                  className="px-5 py-1.5 rounded-full 
+                       bg-linear-to-r from-purple-500 to-blue-500 
+                       transition text-white cursor-pointer"
+                >
+                  Sign Up
+                </button>
+              </div>
+            ) : (
+              <div className="relative ml-4" ref={dropdownRef}>
+                <div
+                  onClick={() => setProfileOpen(!profileOpen)}
+                  className="cursor-pointer flex items-center gap-2"
+                >
+                  {user?.photo?.url ? (
                     <img
-                      src={user?.photo?.url}
-                      className="w-8 h-8 rounded-full object-cover border-2 border-(--color-background)"
+                      src={user.photo.url}
+                      className="w-9 h-9 rounded-full object-cover border border-white/20"
                     />
                   ) : (
-                    <FaUserCircle className="w-6 h-6 text-white" />
+                    <FaUserCircle className="w-8 h-8 text-purple-400" />
                   )}
                 </div>
+
+                {profileOpen && (
+                  <div
+                    className="absolute right-0 mt-4 w-72 rounded-2xl 
+  bg-white text-gray-800
+  shadow-2xl overflow-hidden
+  border border-gray-200"
+                  >
+                    {/* Gradient Top Banner */}
+                    <div className="bg-linear-to-r from-purple-500 to-blue-500 p-5 text-white">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="w-12 h-12 rounded-full 
+        flex items-center justify-center font-bold"
+                        >
+                          {user?.photo?.url ? (
+                            <img
+                              src={user.photo.url}
+                              className="w-9 h-9 rounded-full object-cover border border-white/20"
+                            />
+                          ) : (
+                            <FaUserCircle className="w-12 h-12 text-purple-400" />
+                          )}
+                        </div>
+
+                        <div>
+                          <p className="font-semibold">{user?.fullName}</p>
+                          <p className="text-xs text-white/80">
+                            HealthUP Member
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Menu Items */}
+                    <div className="p-2">
+                      <button
+                        className="w-full text-left px-4 py-2 rounded-lg 
+       transition font-medium flex items-center gap-4 hover:bg-purple-50 cursor-pointer"
+                        onClick={() => {
+                          navigate("/user-dashboard");
+                          setProfileOpen(!profileOpen);
+                          ref = { dropdownRef };
+                        }}
+                      >
+                        <FaUser className="text-xl" /> Profile
+                      </button>
+
+                      <button
+                        className="w-full text-left px-4 py-2 rounded-lg 
+      hover:bg-blue-50 transition font-medium flex items-center gap-4 cursor-pointer"
+                        onClick={() => {
+                          navigate("/user-dashboard");
+                          setProfileOpen(!profileOpen);
+                          ref = { dropdownRef };
+                        }}
+                      >
+                        <GiProgression className="text-xl" /> My Progress
+                      </button>
+
+                      <button
+                        className="w-full text-left px-4 py-2 rounded-lg 
+      hover:bg-indigo-50 transition font-medium flex items-center gap-4 cursor-pointer"
+                        onClick={() => {
+                          navigate("/user-dashboard");
+                          setProfileOpen(!profileOpen);
+                          ref = { dropdownRef };
+                        }}
+                      >
+                        <IoMdSettings className="text-xl " /> Settings
+                      </button>
+
+                      <div className="border-t my-2"></div>
+
+                      <button
+                        className="w-full text-left px-4 py-2 rounded-lg 
+      hover:bg-red-50 transition text-red-500 font-semibold flex items-center gap-4 cursor-pointer"
+                       onClick={logout}
+                      >
+                        <FiLogOut className="text-xl " /> Logout
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
-            </div>
-          ) : (
-            <HiOutlineMenu
-              className="w-7 h-7 text-white cursor-pointer md:hidden"
-              onClick={() => setMenuOpen(true)}
-            />
-          )}
+            )}
+          </div>
+
+          {/* Mobile Menu Icon */}
+          <HiOutlineMenu
+            className="w-7 h-7 md:hidden cursor-pointer text-white"
+            onClick={() => setMenuOpen(true)}
+          />
         </div>
       </header>
 
-      {/* ================= MOBILE OVERLAY ================= */}
-
+      {/* Overlay */}
       <div
-        className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity duration-300 md:hidden ${
-          menuOpen ? "opacity-100 visible" : "opacity-0 invisible"
+        className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden transition ${
+          menuOpen ? "visible opacity-100" : "invisible opacity-0"
         }`}
         onClick={() => setMenuOpen(false)}
       />
 
-      {/* ================= MOBILE DRAWER ================= */}
-
-      {isLogin ? (
-        <div
-          className={`fixed top-15 right-0 h-fit w-[50%] max-w-sm bg-(--color-primary)/40 text-white z-50 transform transition-transform duration-300 md:hidden ${
-            menuOpen ? "translate-x-0" : "translate-x-full"
-          }`}
-        >
-          <nav className="flex flex-col gap-6 px-5 py-5 text-lg font-medium">
-            <button onClick={handleMobileNavigate} className="cursor-pointer">
-              Account
-            </button>
-
-            <button onClick={handleLogout} className="cursor-pointer">
-              Logout
-            </button>
-          </nav>
+      {/* Mobile Drawer */}
+      <div
+        className={`fixed right-0 top-0 h-full w-[50%] max-w-sm bg-[#020617] text-white z-50 transform transition-transform duration-300 md:hidden ${
+          menuOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        <div className="flex justify-between items-center px-6 py-5 border-b border-white/10">
+          <span className="text-xl font-semibold">HealthUP</span>
+          <HiOutlineX
+            className="w-7 h-7 cursor-pointer"
+            onClick={() => setMenuOpen(false)}
+          />
         </div>
-      ) : (
-        <div
-          className={`fixed top-0 right-0 h-full w-[50%] max-w-sm bg-(--color-primary) text-white z-50 transform transition-transform duration-300 md:hidden ${
-            menuOpen ? "translate-x-0" : "translate-x-full"
-          }`}
-        >
-          {/* Drawer Header */}
 
-          <div className="flex justify-between items-center px-6 py-5 border-b border-(--color-background)">
-            <span className="text-xl font-semibold">HealthUP</span>
-            <HiOutlineX
-              className="w-7 h-7 cursor-pointer"
-              onClick={() => setMenuOpen(false)}
-            />
+        <nav className="flex flex-col gap-6 px-6 py-10 text-lg">
+          <Link to="/" onClick={() => setMenuOpen(false)}>
+            Home
+          </Link>
+
+          <Link to="/about" onClick={() => setMenuOpen(false)}>
+            About
+          </Link>
+
+          <Link to="/contact" onClick={() => setMenuOpen(false)}>
+            Contact
+          </Link>
+
+          <div className="border-t border-white pt-6 mt-4">
+            {!isLogin ? (
+              <>
+                <div className="flex flex-col">
+                  <Link to="/login" onClick={() => setMenuOpen(false)}>
+                    Login
+                  </Link>
+                  <br />
+                  <Link to="/signup" onClick={() => setMenuOpen(false)}>
+                    Sign Up
+                  </Link>
+                </div>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => {
+                    navigate("/user-dashboard");
+                    setMenuOpen(false);
+                  }}
+                >
+                  Profile
+                </button>
+                <br />
+                <button onClick={logout} className="text-red-400">
+                  Logout
+                </button>
+              </>
+            )}
           </div>
-
-          {/* Drawer Links */}
-
-          <nav className="flex flex-col gap-6 px-5 py-10 text-lg font-medium">
-            <Link to="/" onClick={() => setMenuOpen(false)}>
-              Home
-            </Link>
-            <Link to="/about" onClick={() => setMenuOpen(false)}>
-              About
-            </Link>
-            <Link to="/contact" onClick={() => setMenuOpen(false)}>
-              Contact
-            </Link>
-
-            <div className="border-t border-(--color-background) pt-6 mt-4 flex flex-col gap-6">
-              <Link to="/login" onClick={() => setMenuOpen(false)}>
-                Login
-              </Link>
-              <Link to="/signup" onClick={() => setMenuOpen(false)}>
-                Sign Up
-              </Link>
-            </div>
-          </nav>
-        </div>
-      )}
+        </nav>
+      </div>
     </>
   );
 };

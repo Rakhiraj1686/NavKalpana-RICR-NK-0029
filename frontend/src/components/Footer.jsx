@@ -4,68 +4,96 @@ import { FaGithub, FaLinkedin, FaInstagram } from "react-icons/fa";
 
 const Footer = () => {
   return (
-    <footer className="bg-(--color-primary) text-white">
-      {/* Main Footer Content */}
+    <footer className="bg-[#020617] text-white border-t border-white/10">
 
-      <div className="px-6 md:px-16 py-10 grid gap-6 md:grid-cols-4">
-        {/* Brand Section */}
+      {/* Main Footer */}
+      <div className="px-6 md:px-20 py-16 grid gap-10 md:grid-cols-4">
 
+        {/* Brand */}
         <div>
-          <h2 className="text-2xl font-bold mb-3 text-(--color-accent)">
+          <h2 className="text-2xl font-bold mb-4 bg-linear-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
             HealthUP
           </h2>
-          <p className="text-gray-300 leading-relaxed text-sm">
-            Adaptive Fitness Intelligence Platform that generates personalized
-            workout & diet plans using intelligent habit-based adjustments.
+          <p className="text-gray-400 text-sm">
+            Adaptive Fitness Intelligence platform delivering personalized
+            workout & diet plans powered by AI-driven habit tracking.
           </p>
         </div>
 
-        {/* Quick Links */}
-
+        {/* Navigation */}
         <div>
-          <h3 className="text-lg font-semibold mb-3">Quick Links</h3>
-          <div className="flex flex-col gap-3 text-gray-300 text-sm">
-            <Link to="/" className="hover:text-(--color-accent)">
+          <h3 className="font-semibold mb-4 text-white">
+            Quick Links
+          </h3>
+
+          <div className="flex flex-col gap-3 text-gray-400 text-sm">
+            <Link className="hover:text-purple-400 transition" to="/">
               Home
             </Link>
-            <Link to="/about" className="hover:text-(--color-accent)">
+            <Link className="hover:text-purple-400 transition" to="/about">
               About
             </Link>
-            <Link to="/contact" className="hover:text-(--color-accent)">
+            <Link className="hover:text-purple-400 transition" to="/contact">
               Contact
             </Link>
           </div>
         </div>
 
         {/* Features */}
-
         <div>
-          <h3 className="text-lg font-semibold mb-3">Core Features</h3>
-          <div className="flex flex-col gap-3 text-gray-300 text-sm">
-            <span>Workout Generator</span>
-            <span>Diet Planner</span>
-            <span>Habit Intelligence</span>
-            <span>AI Fitness Assistant</span>
+          <h3 className="font-semibold mb-4 text-white">
+            Core Features
+          </h3>
+
+          <div className="flex flex-col gap-3 text-gray-400 text-sm">
+            <span className="hover:text-purple-400 transition">
+              Workout Generator
+            </span>
+            <span className="hover:text-purple-400 transition">
+              Diet Planner
+            </span>
+            <span className="hover:text-purple-400 transition">
+              Habit Intelligence
+            </span>
+            <span className="hover:text-purple-400 transition">
+              AI Fitness Assistant
+            </span>
           </div>
         </div>
 
-        {/* Contact / Social */}
-
+        {/* Contact */}
         <div>
-          <h3 className="font-semibold mb-3 text-sm">Connect</h3>
+          <h3 className="font-semibold mb-4 text-white">
+            Connect
+          </h3>
 
-          <p className="text-gray-300 ">📞 989898XXXX</p>
+          <p className="text-gray-400 text-sm mb-2">
+            📞 989898XXXX
+          </p>
 
-          <p className="text-gray-300">✉️ support@healthup.com</p>
+          <p className="text-gray-400 text-sm mb-4">
+            ✉️ support@healthup.com
+          </p>
 
-          <div className="flex gap-5 mt-4 text-xl">
-            <a href="#" className="hover:text-(--color-accent)">
+          <div className="flex gap-6 text-xl">
+            <a
+              href="#"
+              className="text-gray-400 hover:text-purple-400 hover:scale-110 transition"
+            >
               <FaGithub />
             </a>
-            <a href="#" className="hover:text-(--color-accent)">
+
+            <a
+              href="#"
+              className="text-gray-400 hover:text-purple-400 hover:scale-110 transition"
+            >
               <FaLinkedin />
             </a>
-            <a href="#" className="hover:text-(--color-accent)">
+
+            <a
+              href="#"
+              className="text-gray-400 hover:text-purple-400 hover:scale-110 transition"
+            >
               <FaInstagram />
             </a>
           </div>
@@ -73,9 +101,8 @@ const Footer = () => {
       </div>
 
       {/* Bottom Bar */}
-
-      <div className="border-t border-(--color-background) text-center py-6 text-gray-400 text-sm">
-        © {new Date().getFullYear()} HealthUP. All rights reserved.
+      <div className="border-t border-white/10 text-center py-6 text-gray-500 text-sm">
+        © {new Date().getFullYear()} HealthUP - Built with ❤️ for smarter fitness.
       </div>
     </footer>
   );
