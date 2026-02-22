@@ -9,6 +9,8 @@ const Contact = () => {
     message: "",
   });
 
+  const [isLoading, setIsLoading] = useState(false);
+
   const handleClear = () => {
     setContactData({
       fullName: "",
@@ -16,7 +18,6 @@ const Contact = () => {
       message: "",
     });
   };
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -31,92 +32,109 @@ const Contact = () => {
       toast.success("Message sent successfully");
       handleClear();
     } catch (error) {
-      console.log(error);
-      toast.error("Error in sendng message");
+      toast.error("Error sending message");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="bg-(--color-background) text-white min-h-screen px-6 md:px-16 py-20">
-      {/* Heading */}
+    <div className="min-h-screen bg-linear-to-br from-[#020617] to-[#0f172a] text-white py-32 px-6 relative overflow-hidden">
 
-      <div className="text-center mb-16">
-        <h1 className="text-4xl md:text-5xl text-(--color-secondary) font-bold mb-4">
-          Contact Us
-        </h1>
-        <p className="text-gray-500 max-w-2xl mx-auto">
-          Have questions, suggestions, or collaboration ideas? Reach out to the
-          HealthUP team.
-        </p>
-      </div>
+      {/* Background Glow */}
+      <div className="absolute w-96 h-96 bg-purple-600/20 rounded-full blur-[120px] -top-20 -left-20" />
+      <div className="absolute w-96 h-96 bg-blue-600/20 rounded-full blur-[120px] -bottom-20 -right-20" />
 
-      {/* Contact Grid */}
+      <div className="max-w-6xl mx-auto relative py-12 z-10">
 
-      <div className="grid md:grid-cols-2 gap-12">
-        {/* Contact Info */}
+        {/* Header */}
+        <div className="text-center mb-16">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-linear-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+            Let’s Improve Health Together
+          </h1>
 
-        <div className="bg-(--color-primary) p-8 rounded-lg shadow-lg">
-          <h2 className="text-2xl font-semibold mb-6 text-(--color-accent)">
-            Get in Touch
-          </h2>
-
-          <p className="mb-4 text-gray-300">📧 Email: support@healthup.com</p>
-
-          <p className="mb-4 text-gray-300">🌐 GitHub: github.com/your-repo</p>
-
-          <p className="text-gray-300">📍 Location : India</p>
+          <p className="text-gray-400 max-w-2xl mx-auto">
+            Questions, feedback, or collaboration ideas — HealthUP is always
+            open to meaningful conversations that help build better health
+            experiences for everyone.
+          </p>
         </div>
 
-        {/* Contact Form */}
+        {/* Main Grid */}
+        <div className="grid md:grid-cols-2 gap-12">
 
-        <div className="bg-(--color-primary) p-8 rounded-lg shadow-lg">
-          <form
-            className="flex flex-col gap-5"
-            onSubmit={submitContact}
-            onReset={handleClear}
-          >
-            <input
-              type="text"
-              name="fullName"
-              placeholder="Enter your name"
-              value={contactData.fullName}
-              onChange={handleChange}
-              disabled={isLoading}
-              required
-              className="w-full h-fit px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 transition disabled:cursor-not-allowed disabled:bg-gray-200"
-            />
+          {/* Info Card */}
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-2xl shadow-xl">
 
-            <input
-              type="text"
-              name="email"
-              placeholder="xyz123@example.com"
-              value={contactData.email}
-              onChange={handleChange}
-              disabled={isLoading}
-              required
-              className="w-full h-fit px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 transition disabled:cursor-not-allowed disabled:bg-gray-200"
-            />
+            <h2 className="text-xl font-semibold mb-6 text-purple-400">
+              Connect With HealthUP
+            </h2>
 
-            <textarea
-              name="message"
-              value={contactData.message}
-              onChange={handleChange}
-              disabled={isLoading}
-              placeholder="Explain your query in detail..."
-              rows="4"
-              className="w-full h-fit px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 transition disabled:cursor-not-allowed disabled:bg-gray-200"
-            ></textarea>
+            <p className="text-gray-300 mb-6 leading-relaxed">
+              Whether you want to share feedback, discuss partnerships,
+              report issues, or simply learn more about HealthUP — 
+              we’re here to listen and respond quickly.
+            </p>
 
-            <button
-              type="submit"
-              className="bg-(--color-accent) py-3 rounded-md hover:opacity-90 transition cursor-pointer flex items-center gap-2 justify-center"
+            <div className="space-y-4 text-gray-300">
+              <p>📧 support@healthup.com</p>
+              <p>🌐 github.com/your-repo</p>
+              <p>📍 India</p>
+            </div>
+          </div>
+
+          {/* Form Card */}
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-2xl shadow-xl">
+
+            <form
+              onSubmit={submitContact}
+              onReset={handleClear}
+              className="flex flex-col gap-6"
             >
-              <FiSend />
-              <span> Send Message</span>
-            </button>
-          </form>
+              <input
+                type="text"
+                name="fullName"
+                placeholder="Full Name"
+                value={contactData.fullName}
+                onChange={handleChange}
+                disabled={isLoading}
+                required
+                className="bg-white/5 border border-white/10 px-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none placeholder-gray-400"
+              />
+
+              <input
+                type="email"
+                name="email"
+                placeholder="Email Address"
+                value={contactData.email}
+                onChange={handleChange}
+                disabled={isLoading}
+                required
+                className="bg-white/5 border border-white/10 px-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none placeholder-gray-400"
+              />
+
+              <textarea
+                name="message"
+                rows="4"
+                placeholder="Your message..."
+                value={contactData.message}
+                onChange={handleChange}
+                disabled={isLoading}
+                className="bg-white/5 border border-white/10 px-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none placeholder-gray-400"
+              />
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="bg-linear-to-r from-purple-500 to-blue-500 py-3 rounded-xl font-semibold hover:scale-105 transition shadow-lg flex items-center justify-center gap-2"
+              >
+                <FiSend />
+                {isLoading ? "Sending..." : "Send Message"}
+              </button>
+            </form>
+
+          </div>
+
         </div>
       </div>
     </div>

@@ -9,6 +9,8 @@ import {
   AiOutlineSafety,
 } from "react-icons/ai";
 import toast from "react-hot-toast";
+import api from "../config/Api";
+import { useAuth } from "../context/AuthContext";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -18,6 +20,7 @@ const Login = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { setUser, setIsLogin } = useAuth();
 
   const handleClear = () => {
     setFormData({
@@ -31,87 +34,93 @@ const Login = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     try {
+      const res = await api.post("/auth/login", formData);
       console.log("Login Data", formData);
-      toast.success("Login successfully !");
-      handleClear();
+      toast.success(res.data.message);
+      setUser(res.data.data);
+      setIsLogin(true);
+      sessionStorage.setItem("HealthUP", JSON.stringify(res.data.data));
       navigate("/user-dashboard");
+      handleClear();
     } catch (error) {
-      console.log(error);
-      toast.error("Error in Login process");
+      console.log({ error });
+      toast.error(error?.response?.data?.message || "Unknown Error");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="h-full bg-linear-to-br from-blue-50 to-indigo-100 py-15 px-4 flex items-center justify-center">
-      <div className="w-full max-w-md">
-        {/* Header */}
+    <div className="min-h-screen py-28 flex items-center justify-center bg-linear-to-br from-[#020617] to-[#0f172a] px-4 relative overflow-hidden">
+      {/* Background Glow */}
+      <div className="absolute w-100 h-100 bg-purple-600/20 rounded-full blur-[120px] -top-20 -left-20" />
+      <div className="absolute w-87.5 h-87.5 bg-blue-600/20 rounded-full blur-[120px] -bottom-20 -right-20" />
 
-        <div className="flex flex-col items-center space-y-2 pb-6">
-          <div className="text-4xl p-5 rounded-full bg-white text-(--color-primary)">
+      <div className="w-full max-w-md relative z-10">
+        {/* Header */}
+        <div className="flex flex-col items-center mb-8">
+          <div className="text-4xl p-5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-purple-400">
             <AiOutlineSafety />
           </div>
-          <div className="text-3xl font-bold text-(--color-secondary)">
-            Login
-          </div>
-          <div className="text-sm text-(--color-secondary)">
-            Sign in to continue
-          </div>
+
+          <h2 className="text-3xl font-bold mt-4 bg-linear-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+            Welcome Back
+          </h2>
+
+          <p className="text-gray-400 text-sm">Sign in to continue</p>
         </div>
 
-        {/* Card */}
-
-        <div className="bg-white rounded-xl shadow-2xl overflow-hidden">
+        {/* Login Card */}
+        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-8">
           <form
-            className="p-8 space-y-5"
             onSubmit={handleSubmit}
             onReset={handleClear}
+            className="space-y-6"
           >
             {/* Email */}
-
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address <span className="text-red-500">*</span>
+              <label className="text-gray-300 text-sm mb-2 block">
+                Email Address
               </label>
 
               <div className="relative">
-                <LuUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xl" />
+                <LuUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+
                 <input
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
                   disabled={isLoading}
-                  placeholder="Enter your registered email"
                   required
-                  className="w-full px-10 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 transition"
+                  placeholder="Enter your email"
+                  className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:ring-2 focus:ring-purple-500 outline-none transition"
                 />
               </div>
             </div>
 
             {/* Password */}
-
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Password <span className="text-red-500">*</span>
+              <label className="text-gray-300 text-sm mb-2 block">
+                Password
               </label>
 
               <div className="relative">
-                <VscLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xl" />
+                <VscLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+
                 <input
                   type={showPassword ? "text" : "password"}
                   name="password"
-                  placeholder="Enter your password"
                   value={formData.password}
                   onChange={handleChange}
                   disabled={isLoading}
                   required
-                  className="w-full px-10 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 transition"
+                  placeholder="Enter password"
+                  className="w-full pl-10 pr-10 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:ring-2 focus:ring-purple-500 outline-none transition"
                 />
 
                 <button
@@ -119,43 +128,39 @@ const Login = () => {
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
-                    <AiOutlineEyeInvisible className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xl cursor-pointer" />
+                    <AiOutlineEyeInvisible className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer" />
                   ) : (
-                    <AiOutlineEye className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xl cursor-pointer" />
+                    <AiOutlineEye className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer" />
                   )}
                 </button>
               </div>
             </div>
 
             {/* Login Button */}
-
             <button
               type="submit"
-              className="flex items-center justify-center cursor-pointer gap-2 bg-(--color-secondary) text-white font-bold py-3 px-6 rounded-lg hover:bg-(--color-secondary-hover) transition duration-300 transform hover:scale-105 shadow-lg w-full"
+              disabled={isLoading}
+              className="w-full flex items-center justify-center gap-2 bg-linear-to-r from-purple-500 to-blue-500 py-3 rounded-xl font-semibold hover:scale-105 transition shadow-lg cursor-pointer"
             >
               <FiLogIn />
-              Sign In
+              {isLoading ? "Signing in..." : "Sign In"}
             </button>
 
             {/* Forgot Password */}
-
-            <div className="border-b-2 border-gray-200 text-end py-2">
+            <div className="text-right border-b border-white/10 pb-4">
               <Link
                 to="/forgot-password"
-                className="text-sm text-(--color-text) hover:text-blue-700 hover:underline"
+                className="text-sm text-gray-400 hover:text-purple-400"
               >
-                Forgotten Password?
+                Forgot Password?
               </Link>
             </div>
 
-            {/* Sign Up */}
+            {/* Signup */}
+            <div className="flex justify-between text-sm text-gray-400">
+              <span>Don’t have an account?</span>
 
-            <div className="flex justify-between items-center pt-3">
-              <div className="text-gray-600">Didn't have account?</div>
-              <Link
-                to="/signup"
-                className=" text-(--color-primary)/70 font-bold hover:underline hover:text-(--color-primary)"
-              >
+              <Link to="/signup" className="text-purple-400 hover:underline">
                 Sign Up
               </Link>
             </div>
@@ -163,10 +168,9 @@ const Login = () => {
         </div>
 
         {/* Footer */}
-
-        <div className="text-xs pt-5 text-center text-gray-600">
-          By signing in you agree to the terms & conditions.
-        </div>
+        <p className="text-center text-xs text-gray-500 mt-6">
+          By signing in you agree to our terms & privacy policy.
+        </p>
       </div>
     </div>
   );

@@ -1,9 +1,9 @@
 import bcrypt from "bcrypt";
 import User from "../models/userModel.js";
+// import { genToken } from "../utils/authToken.js";
 
 export const UserRegister = async (req, res, next) => {
   try {
-    console.log(req.body);
     //accept data from fronted
     const { fullName, mobileNumber, email, password } = req.body;
 
@@ -30,10 +30,8 @@ export const UserRegister = async (req, res, next) => {
     const salt = await bcrypt.genSalt(10);
     const hashPassword = await bcrypt.hash(password, salt);
 
-    console.log("Password hashing Done, HashPassword = ", hashPassword);
-
     //save data to database
-    const newUser = await UserRegister.create({
+    const newUser = await User.create({
       fullName,
       email: email.toLowerCase(),
       mobileNumber,
@@ -76,7 +74,7 @@ export const UserLogin = async (req, res, next) => {
     }
 
     //Token Genration will be done here
-    genToken(existingUser, res);
+    // genToken(existingUser, res);
 
     //send message to fronted
     res.status(200).json({ message: "Login Successfull", data: existingUser });
