@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { HiOutlineMenu, HiOutlineX } from "react-icons/hi";
-import { FaUserCircle, FaUser } from "react-icons/fa";
+import { FaRegUserCircle } from "react-icons/fa";
+import { IoMdNotificationsOutline } from "react-icons/io";
 import { useAuth } from "../context/AuthContext";
-import { GiProgression } from "react-icons/gi";
-import { IoMdSettings } from "react-icons/io";
-import { FiLogOut } from "react-icons/fi";
 import toast from "react-hot-toast";
+import api from "../config/Api";
 
 const Header = () => {
   const { user, isLogin, setUser, setIsLogin } = useAuth();
@@ -15,36 +14,39 @@ const Header = () => {
   const [profileOpen, setProfileOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  const logout = () => {
-    sessionStorage.removeItem("HealthUP"); // clear storage
-    setUser(null); // reset user
-    setIsLogin(false); // update login state
-    navigate("/"); // redirect home
-    toast.success("Logout Successfully !");
+  const logout = async () => {
+    const res = await api.get("/auth/logout");
+    toast.success(res.data.message);
+    sessionStorage.removeItem("HealthUP");
+    setUser("");
+    setIsLogin(false);
+    navigate("/");
   };
 
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setProfileOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
+  const handleProfileClick = () => {
+    navigate("/user-dashboard");
+  };
+
+  // useEffect(() => {
+  //   function handleClickOutside(event) {
+  //     if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+  //       setProfileOpen(false);
+  //     }
+  //   }
+  //   document.addEventListener("mousedown", handleClickOutside);
+  //   return () => {
+  //     document.removeEventListener("mousedown", handleClickOutside);
+  //   };
+  // }, []);
 
   return (
     <>
-      {/* HEADER */}
-
-      <header className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-full px-6">
+      <header className="fixed top-0 left-1/2 -translate-x-1/2 z-50 w-full">
         <div
-          className="max-w-5xl mx-auto flex items-center justify-between 
-                  px-8 py-3 rounded-full 
-                  bg-[#0f172a]/80 backdrop-blur-xl 
-                  border border-white/10 shadow-xl"
+          className="mx-auto flex items-center justify-between 
+          px-24 py-4 
+          bg-[#0f172a]/80 backdrop-blur-xl 
+          border border-white/10 shadow-xl"
         >
           {/* Logo */}
           <Link
@@ -59,13 +61,11 @@ const Header = () => {
             <Link className="hover:text-purple-400 transition" to="/">
               Home
             </Link>
-
             <Link className="hover:text-purple-400 transition" to="/about">
-              About
+              About HealthUP
             </Link>
-
             <Link className="hover:text-purple-400 transition" to="/contact">
-              Contact
+              Contact Us
             </Link>
           </nav>
 
@@ -76,8 +76,8 @@ const Header = () => {
                 <button
                   onClick={() => navigate("/login")}
                   className="px-5 py-1.5 rounded-full border border-purple-400 
-                       hover:bg-linear-to-r from-purple-500 to-blue-500 
-                       transition text-white cursor-pointer"
+                  hover:bg-linear-to-r from-purple-500 to-blue-500 
+                  transition text-white"
                 >
                   Login
                 </button>
@@ -85,111 +85,45 @@ const Header = () => {
                 <button
                   onClick={() => navigate("/signup")}
                   className="px-5 py-1.5 rounded-full 
-                       bg-linear-to-r from-purple-500 to-blue-500 
-                       transition text-white cursor-pointer"
+                  bg-linear-to-r from-purple-500 to-blue-500 
+                  transition text-white"
                 >
                   Sign Up
                 </button>
               </div>
             ) : (
-              <div className="relative ml-4" ref={dropdownRef}>
+              <div
+                className="relative ml-4 flex items-center gap-5"
+
+                // ref={dropdownRef}
+              >
+                {/* Notification */}
+                <button className="relative cursor-pointer">
+                  <IoMdNotificationsOutline className="text-xl text-white" />
+                  <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                </button>
+
+                {/* Username + Notification */}
                 <div
-                  onClick={() => setProfileOpen(!profileOpen)}
-                  className="cursor-pointer flex items-center gap-2"
+                  onClick={() => {
+                    setProfileOpen(!profileOpen);
+                    handleProfileClick();
+                  }}
+                  className="cursor-pointer flex items-center gap-4 
+                  px-4 py-2 rounded-xl 
+                  bg-white/5 hover:bg-white/10 
+                  border border-white/10 backdrop-blur-md transition"
                 >
-                  {user?.photo?.url ? (
-                    <img
-                      src={user.photo.url}
-                      className="w-9 h-9 rounded-full object-cover border border-white/20"
-                    />
-                  ) : (
-                    <FaUserCircle className="w-8 h-8 text-purple-400" />
-                  )}
+                  <span className="w-6 h-6 rounded-full ">
+                    {user?.image?.url || (
+                      <FaRegUserCircle className="w-6 h-6 rounded-full " />
+                    )}
+                  </span>
+                  {/* Username */}
+                  <span className="font-medium text-white">
+                    {user?.fullName || "User"}
+                  </span>
                 </div>
-
-                {profileOpen && (
-                  <div
-                    className="absolute right-0 mt-4 w-72 rounded-2xl 
-  bg-white text-gray-800
-  shadow-2xl overflow-hidden
-  border border-gray-200"
-                  >
-                    {/* Gradient Top Banner */}
-                    <div className="bg-linear-to-r from-purple-500 to-blue-500 p-5 text-white">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="w-12 h-12 rounded-full 
-        flex items-center justify-center font-bold"
-                        >
-                          {user?.photo?.url ? (
-                            <img
-                              src={user.photo.url}
-                              className="w-9 h-9 rounded-full object-cover border border-white/20"
-                            />
-                          ) : (
-                            <FaUserCircle className="w-12 h-12 text-purple-400" />
-                          )}
-                        </div>
-
-                        <div>
-                          <p className="font-semibold">{user?.fullName}</p>
-                          <p className="text-xs text-white/80">
-                            HealthUP Member
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Menu Items */}
-                    <div className="p-2">
-                      <button
-                        className="w-full text-left px-4 py-2 rounded-lg 
-       transition font-medium flex items-center gap-4 hover:bg-purple-50 cursor-pointer"
-                        onClick={() => {
-                          navigate("/user-dashboard");
-                          setProfileOpen(!profileOpen);
-                          ref = { dropdownRef };
-                        }}
-                      >
-                        <FaUser className="text-xl" /> Profile
-                      </button>
-
-                      <button
-                        className="w-full text-left px-4 py-2 rounded-lg 
-      hover:bg-blue-50 transition font-medium flex items-center gap-4 cursor-pointer"
-                        onClick={() => {
-                          navigate("/user-dashboard");
-                          setProfileOpen(!profileOpen);
-                          ref = { dropdownRef };
-                        }}
-                      >
-                        <GiProgression className="text-xl" /> My Progress
-                      </button>
-
-                      <button
-                        className="w-full text-left px-4 py-2 rounded-lg 
-      hover:bg-indigo-50 transition font-medium flex items-center gap-4 cursor-pointer"
-                        onClick={() => {
-                          navigate("/user-dashboard");
-                          setProfileOpen(!profileOpen);
-                          ref = { dropdownRef };
-                        }}
-                      >
-                        <IoMdSettings className="text-xl " /> Settings
-                      </button>
-
-                      <div className="border-t my-2"></div>
-
-                      <button
-                        className="w-full text-left px-4 py-2 rounded-lg 
-      hover:bg-red-50 transition text-red-500 font-semibold flex items-center gap-4 cursor-pointer"
-                       onClick={logout}
-                      >
-                        <FiLogOut className="text-xl " /> Logout
-                      </button>
-                    </div>
-                  </div>
-                )}
               </div>
             )}
           </div>
@@ -228,11 +162,9 @@ const Header = () => {
           <Link to="/" onClick={() => setMenuOpen(false)}>
             Home
           </Link>
-
           <Link to="/about" onClick={() => setMenuOpen(false)}>
             About
           </Link>
-
           <Link to="/contact" onClick={() => setMenuOpen(false)}>
             Contact
           </Link>
@@ -240,15 +172,13 @@ const Header = () => {
           <div className="border-t border-white pt-6 mt-4">
             {!isLogin ? (
               <>
-                <div className="flex flex-col">
-                  <Link to="/login" onClick={() => setMenuOpen(false)}>
-                    Login
-                  </Link>
-                  <br />
-                  <Link to="/signup" onClick={() => setMenuOpen(false)}>
-                    Sign Up
-                  </Link>
-                </div>
+                <Link to="/login" onClick={() => setMenuOpen(false)}>
+                  Login
+                </Link>
+                <br />
+                <Link to="/signup" onClick={() => setMenuOpen(false)}>
+                  Sign Up
+                </Link>
               </>
             ) : (
               <>

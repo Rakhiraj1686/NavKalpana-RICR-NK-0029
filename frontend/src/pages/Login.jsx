@@ -15,7 +15,7 @@ import { useAuth } from "../context/AuthContext";
 const Login = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    email: "",
+    identifier: "",
     password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
@@ -24,7 +24,7 @@ const Login = () => {
 
   const handleClear = () => {
     setFormData({
-      email: "",
+      identifier: "",
       password: "",
     });
   };
@@ -84,20 +84,20 @@ const Login = () => {
             {/* Email */}
             <div>
               <label className="text-gray-300 text-sm mb-2 block">
-                Email Address
+                Email Address/Mobile Number
               </label>
 
               <div className="relative">
                 <LuUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
 
                 <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
+                  type="text"
+                  name="identifier"
+                  value={formData.identifier}
                   onChange={handleChange}
                   disabled={isLoading}
                   required
-                  placeholder="Enter your email"
+                  placeholder="Enter your email or phone"
                   className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:ring-2 focus:ring-purple-500 outline-none transition"
                 />
               </div>
