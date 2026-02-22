@@ -5,6 +5,7 @@ import { useAuth } from "../../context/AuthContext";
 import UserImage from "../../assets/userImage.jpg";
 import { FaCamera, FaPhoneAlt } from "react-icons/fa";
 import { MdOutlineEmail } from "react-icons/md";
+import ResetPasswordModal from "./modals/ResetPasswordModal";
 
 const UserProfile = () => {
   const { user } = useAuth();
@@ -102,7 +103,7 @@ const UserProfile = () => {
                   </button>
 
                   <button
-                    onClick={() => setIsResetPasswordModalOpen(true)}
+                    onClick={() => setIsResetPasswordModalOpen(true) }
                     className="bg-gray-600 py-2 rounded-xl hover:bg-gray-700 transition"
                   >
                     Reset Password
@@ -123,15 +124,15 @@ const UserProfile = () => {
           </div>
         </div>
       </div>
-      {/* 
-      {isEditProfileModalOpen && (
+      
+      {/* {isEditProfileModalOpen && (
         <EditProfileModal onClose={() => setIsEditProfileModalOpen(false)} />
-      )}
+      )} */}
       {isResetPasswordModalOpen && (
         <ResetPasswordModal
           onClose={() => setIsResetPasswordModalOpen(false)}
         />
-      )} */}
+      )}
     </div>
   );
 };
