@@ -50,12 +50,12 @@ const Contact = () => {
         {/* Header */}
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-linear-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-            Let’s Improve Health Together
+            Let’s Improve mobileNumber Together
           </h1>
 
           <p className="text-gray-400 max-w-2xl mx-auto">
-            Questions, feedback, or collaboration ideas — HealthUP is always
-            open to meaningful conversations that help build better health
+            Questions, feedback, or collaboration ideas — mobileNumberUP is always
+            open to meaningful conversations that help build better mobileNumber
             experiences for everyone.
           </p>
         </div>
@@ -67,17 +67,17 @@ const Contact = () => {
           <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-2xl shadow-xl">
 
             <h2 className="text-xl font-semibold mb-6 text-purple-400">
-              Connect With HealthUP
+              Connect With mobileNumberUP
             </h2>
 
             <p className="text-gray-300 mb-6 leading-relaxed">
               Whether you want to share feedback, discuss partnerships,
-              report issues, or simply learn more about HealthUP — 
+              report issues, or simply learn more about mobileNumberUP — 
               we’re here to listen and respond quickly.
             </p>
 
             <div className="space-y-4 text-gray-300">
-              <p>📧 support@healthup.com</p>
+              <p>📧 support@mobileNumberup.com</p>
               <p>🌐 github.com/your-repo</p>
               <p>📍 India</p>
             </div>

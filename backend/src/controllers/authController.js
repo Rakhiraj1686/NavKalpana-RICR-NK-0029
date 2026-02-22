@@ -39,7 +39,7 @@ export const UserRegister = async (req, res, next) => {
     });
 
     console.log(newUser);
-    res.status(201).json({ message: "Registration Successfull" });
+    res.status(201).json({ message: "Registration Successfull !" });
   } catch (error) {
     next(error);
   }
@@ -48,19 +48,23 @@ export const UserRegister = async (req, res, next) => {
 export const UserLogin = async (req, res, next) => {
   try {
     //fetch data from fronted
-    const { email, password } = req.body;
+    const { identifier, password } = req.body;
+
+    console.log(req.body);
 
     //verify that all data exist
-    if (!email || !password) {
+    if (!identifier || !password) {
       const error = new Error("All Field Required");
       error.statusCode = 400;
       return next(error);
     }
 
     //check for if user is registered or not
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({
+      $or: [{ email: identifier }, { mobileNumber: identifier }],
+    });
     if (!existingUser) {
-      const error = new Error("Email not registered");
+      const error = new Error("User not registered");
       error.statusCode = 401;
       return next(error);
     }
@@ -77,7 +81,20 @@ export const UserLogin = async (req, res, next) => {
     // genToken(existingUser, res);
 
     //send message to fronted
-    res.status(200).json({ message: "Login Successfull", data: existingUser });
+    res
+      .status(200)
+      .json({ message: "Login Successfull !", data: existingUser });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const UserLogout = async (req, res, next) => {
+  try {
+    // send mesage to frontend
+    res.clearCookie("parle");
+
+    res.status(200).json({ message: "Logout Successfull" });
   } catch (error) {
     next(error);
   }

@@ -1,89 +1,76 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import UserSidebar from "../../components/userdashboard/UserSidebar";
+import UserOverview from "../../components/userdashboard/UserOverview";
 
-const UserDashBoard = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import UserWorkout from "../../components/userdashboard/UserWorkout";
+import UserDiet from "../../components/userdashboard/UserDiet";
+import UserProgress from "../../components/userdashboard/UserProgress";
+import UserProfile from "../../components/userdashboard/UserProfile";
+import UserSupport from "../../components/userdashboard/UserSupport";
+
+const UserDashboard = () => {
+  const { role, isLogin } = useAuth();
+  const navigate = useNavigate();
+
+  const [active, setActive] = useState("overview");
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isLogin) navigate("/login");
+  }, [isLogin, navigate]);
 
   return (
-    <div className="min-h-screen flex bg-linear-to-br from-[#020617] to-[#0f172a] text-white py-28">
-
-      {/* MOBILE OVERLAY */}
-      {sidebarOpen && (
+    <div className="fixed top-15 h-screen w-full flex overflow-hidden bg-linear-to-br from-[#020617] to-[#0f172a] text-white">
+      {/* Mobile overlay */}
+      {mobileOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 md:hidden"
-          onClick={() => setSidebarOpen(false)}
+          className="fixed inset-0 bg-black/50 md:hidden z-40"
+          onClick={() => setMobileOpen(false)}
         />
       )}
 
-      {/* MAIN CONTENT */}
-      <main className="flex-1 overflow-y-auto">
+      {/* Sidebar */}
+      <aside
+        className={`
+          fixed md:static z-50 h-full
+          bg-[#020617] border-r border-white/10
+          transition-all duration-300
+          ${mobileOpen ? "left-0" : "-left-full"}
+          md:left-0
+          ${isCollapsed ? "w-4/60" : "w-10/60"}
+        `}
+      >
+        <UserSidebar
+          active={active}
+          setActive={setActive}
+          isCollapsed={isCollapsed}
+          setIsCollapsed={setIsCollapsed}
+          setMobileOpen={setMobileOpen}
+        />
+      </aside>
 
-        {/* TOPBAR */}
+      {/* Main Content */}
+      <main className="flex-1 overflow-y-auto">
+        {/* Mobile Topbar */}
         <div className="md:hidden p-4 border-b border-white/10 flex justify-between">
-          <button onClick={() => setSidebarOpen(true)}>☰</button>
-          <span>Dashboard</span>
+          <button onClick={() => setMobileOpen(true)}>☰</button>
+          <span>User Dashboard</span>
         </div>
 
-        <div className="max-w-6xl mx-auto p-6">
-
-          {/* GREETING */}
-          <h1 className="text-3xl font-bold mb-8">
-            Welcome Back 👋
-          </h1>
-
-          {/* STATS CARDS */}
-          <div className="grid md:grid-cols-4 gap-6 mb-10">
-
-            <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-6 rounded-xl">
-              <h3 className="text-gray-400">Workout Streak</h3>
-              <p className="text-2xl font-bold text-purple-400">12 Days</p>
-            </div>
-
-            <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-6 rounded-xl">
-              <h3 className="text-gray-400">Calories Today</h3>
-              <p className="text-2xl font-bold text-blue-400">1850 kcal</p>
-            </div>
-
-            <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-6 rounded-xl">
-              <h3 className="text-gray-400">Weight Progress</h3>
-              <p className="text-2xl font-bold text-purple-400">-3.2 kg</p>
-            </div>
-
-            <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-6 rounded-xl">
-              <h3 className="text-gray-400">Habit Score</h3>
-              <p className="text-2xl font-bold text-blue-400">82%</p>
-            </div>
-
-          </div>
-
-          {/* MAIN PANELS */}
-          <div className="grid md:grid-cols-2 gap-8">
-
-            <div className="bg-white/5 border border-white/10 p-6 rounded-xl">
-              <h2 className="text-xl font-semibold mb-4">
-                Today's Workout
-              </h2>
-              <p className="text-gray-400">
-                Chest & Triceps session planned.
-                Complete your sets to maintain streak.
-              </p>
-            </div>
-
-            <div className="bg-white/5 border border-white/10 p-6 rounded-xl">
-              <h2 className="text-xl font-semibold mb-4">
-                Nutrition Summary
-              </h2>
-              <p className="text-gray-400">
-                Protein intake slightly low today.
-                Consider adding a protein-rich meal.
-              </p>
-            </div>
-
-          </div>
-
+        <div className={`mx-auto p-6 ${isCollapsed ? "w-56/60" : "w-50/60"}`}>
+          {active === "overview" && <UserOverview />}
+          {active === "workout" && <UserWorkout />}
+          {active === "diet" && <UserDiet />}
+          {active === "progress" && <UserProgress />}
+          {active === "profile" && <UserProfile />}
+          {active === "support" && <UserSupport />}
         </div>
       </main>
     </div>
   );
 };
 
-export default UserDashBoard;
+export default UserDashboard;

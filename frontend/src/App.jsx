@@ -9,6 +9,7 @@ import Home from "./pages/Home";
 import Footer from "./components/Footer";
 import UserDashboard from "./pages/dashboard/Userdashhboard";
 import { Toaster } from "react-hot-toast";
+import ProfileSetup from "./pages/ProfileSetup";
 
 const App = () => {
   return (
@@ -23,8 +24,9 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/user-dashboard" element={<UserDashboard />} />
+          <Route path="/profile-Setup" element={<ProfileSetup />} />
         </Routes>
-        <Footer />
+        {/* <Footer /> */}
       </BrowserRouter>
     </>
   );
