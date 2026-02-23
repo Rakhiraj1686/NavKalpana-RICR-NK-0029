@@ -12,9 +12,7 @@ const UserGoal = () => {
     goalWeight: "",
   });
 
-  const [goalCompleted, setGoalCompleted] = useState(false);
-
-  /* Prefill if user already has goal */
+  /* Prefill existing goal */
   useEffect(() => {
     if (user?.primaryGoal) {
       setFormData({
@@ -30,29 +28,60 @@ const UserGoal = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  /* Submit goal */
+  /* Set New Goal */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (user?.goalStatus === "ongoing") {
+      return toast.error("Complete your current goal first.");
+    }
+
     try {
-      const res = await api.put("/user/setGoal", formData);
+      const res = await api.put("/user/setGoal", {
+        ...formData,
+        goalStatus: "ongoing",
+      });
+
       toast.success(res.data.message);
       setUser(res.data.data);
-      setGoalCompleted(false);
     } catch (err) {
       toast.error(err?.response?.data?.message || "Goal update failed");
     }
   };
 
+  /* Mark Goal Completed */
+  const handleCompleteGoal = async () => {
+    try {
+      const res = await api.put("/user/completeGoal");
+      toast.success("Goal marked as completed 🎉");
+      setUser(res.data.data);
+    } catch (err) {
+      toast.error("Failed to complete goal");
+    }
+  };
+
+  useEffect(() => {
+    const fetchGoal = async () => {
+      try {
+        const res = await api.get("/user/goal");
+         console.log("Goal response:", res.data); 
+        setUser((prev) => ({ ...prev, ...res.data.data }));
+      } catch (err) {
+        console.log("Failed to fetch goal");
+      }
+    };
+
+    fetchGoal();
+  }, []);
+
   return (
     <div className="min-h-screen p-6">
       <div className="max-w-3xl mx-auto">
-
-        {/* CURRENT GOAL */}
-        {user?.primaryGoal && !goalCompleted && (
+        {/* ONGOING GOAL */}
+        {user?.primaryGoal && user?.goalStatus === "ongoing" && (
           <div className="mb-8 bg-white/5 border border-white/10 rounded-2xl p-6">
             <h3 className="text-lg font-semibold text-purple-400 mb-3">
-              Current Goal
+              Ongoing Goal
             </h3>
 
             <p>Goal: {user.primaryGoal}</p>
@@ -62,7 +91,7 @@ const UserGoal = () => {
             )}
 
             <button
-              onClick={() => setGoalCompleted(true)}
+              onClick={handleCompleteGoal}
               className="mt-4 px-4 py-2 bg-green-600 rounded-lg hover:bg-green-700 transition"
             >
               Mark Goal Completed
@@ -70,14 +99,22 @@ const UserGoal = () => {
           </div>
         )}
 
-        {/* SET NEW GOAL */}
-        {(goalCompleted || !user?.primaryGoal) && (
+        {/* COMPLETED GOAL MESSAGE */}
+        {user?.goalStatus === "completed" && (
+          <div className="mb-6 bg-green-500/10 border border-green-500/30 rounded-xl p-4 text-green-400">
+            🎉 Your previous goal is completed!
+            <br />
+            You can now set a fresh new goal.
+          </div>
+        )}
+        {/* SET NEW GOAL FORM */}
+        {(!user?.primaryGoal || user?.goalStatus === "completed") && (
           <form
             onSubmit={handleSubmit}
             className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-xl"
           >
             <h2 className="text-2xl font-bold mb-6 text-center bg-linear-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-              Set Fitness Goal
+              Set New Fitness Goal
             </h2>
 
             {/* PRIMARY GOAL */}
@@ -95,23 +132,18 @@ const UserGoal = () => {
                 <option value="" className="text-gray-800">
                   Select Goal
                 </option>
-
                 <option value="weight loss" className="text-gray-800">
                   Weight Loss
                 </option>
-
                 <option value="muscle gain" className="text-gray-800">
                   Muscle Gain
                 </option>
-
                 <option value="body recomposition" className="text-gray-800">
                   Body Recomposition
                 </option>
-
                 <option value="maintain" className="text-gray-800">
                   Maintain
                 </option>
-
                 <option value="improve endurance" className="text-gray-800">
                   Improve Endurance
                 </option>
@@ -123,14 +155,12 @@ const UserGoal = () => {
               <label className="text-gray-300 text-sm mb-2 block">
                 Goal Weight (kg)
               </label>
-
               <input
                 type="number"
                 name="goalWeight"
                 value={formData.goalWeight}
                 onChange={handleInputChange}
-                placeholder="Enter goal weight"
-                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:ring-2 focus:ring-purple-500 outline-none"
+                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white"
               />
             </div>
 
@@ -139,19 +169,17 @@ const UserGoal = () => {
               <label className="text-gray-300 text-sm mb-2 block">
                 Daily Calorie Target
               </label>
-
               <input
                 type="number"
                 name="calorieTarget"
                 value={formData.calorieTarget}
                 onChange={handleInputChange}
-                placeholder="Enter calorie target"
-                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:ring-2 focus:ring-purple-500 outline-none"
+                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white"
               />
             </div>
 
             <button className="w-full py-3 rounded-xl bg-linear-to-r from-purple-500 to-blue-500 font-semibold hover:scale-105 transition shadow-lg">
-              Save Goal
+              Set Goal
             </button>
           </form>
         )}

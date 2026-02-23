@@ -8,6 +8,7 @@ import {
   FiChevronRight,
   FiLogOut,
 } from "react-icons/fi";
+import { MdOutlineContactSupport } from "react-icons/md";
 import { GoGoal } from "react-icons/go";
 import { GiProgression } from "react-icons/gi";
 import { useAuth } from "../../context/AuthContext";
@@ -22,6 +23,7 @@ const menuItems = [
   { id: "diet", label: "Diet Plan", icon: <FiBarChart2 /> },
   { id: "progress", label: "Progress", icon: <GiProgression /> },
   { id: "profile", label: "Profile", icon: <FiUser /> },
+  {id: "support", label:"Support", icon: <MdOutlineContactSupport/>}
 ];
 
 const UserSidebar = ({
