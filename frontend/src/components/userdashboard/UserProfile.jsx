@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
-// import EditProfileModal from "./modals/EditProfileModals";
-// import ResetPasswordModal from "./modals/ResetPasswordModal";
+// import EditProfileSetupModal from "./modals/EditProfileModal";
 import UserImage from "../../assets/userImage.jpg";
 import { FaCamera, FaPhoneAlt } from "react-icons/fa";
 import { MdOutlineEmail } from "react-icons/md";
@@ -126,7 +125,7 @@ const UserProfile = () => {
       </div>
       
       {/* {isEditProfileModalOpen && (
-        <EditProfileModal onClose={() => setIsEditProfileModalOpen(false)} />
+        <EditProfileSetupModal onClose={() => setIsEditProfileModalOpen(false)} />
       )} */}
       {isResetPasswordModalOpen && (
         <ResetPasswordModal

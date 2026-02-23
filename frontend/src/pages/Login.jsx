@@ -9,8 +9,9 @@ import {
   AiOutlineSafety,
 } from "react-icons/ai";
 import toast from "react-hot-toast";
-import api from "../config/Api";
+import api from "../Config/Api";
 import { useAuth } from "../context/AuthContext";
+import ForgetPasswordModal from "../components/publicModals/ForgetPasswordModal";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -19,6 +20,7 @@ const Login = () => {
     password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [isForgetPasswordModal, setIsForgetPasswordModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { setUser, setIsLogin } = useAuth();
 
@@ -148,12 +150,16 @@ const Login = () => {
 
             {/* Forgot Password */}
             <div className="text-right border-b border-white/10 pb-4">
-              <Link
-                to="/forgot-password"
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setIsForgetPasswordModal(true);
+                }}
                 className="text-sm text-gray-400 hover:text-purple-400"
               >
                 Forgot Password?
-              </Link>
+              </button>
             </div>
 
             {/* Signup */}
@@ -172,6 +178,9 @@ const Login = () => {
           By signing in you agree to our terms & privacy policy.
         </p>
       </div>
+      {isForgetPasswordModal && (
+        <ForgetPasswordModal onClose={() => setIsForgetPasswordModal(false)} />
+      )}
     </div>
   );
 };
