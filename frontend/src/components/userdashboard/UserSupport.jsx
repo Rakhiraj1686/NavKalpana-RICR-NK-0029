@@ -1,27 +1,85 @@
 import React, { useState } from "react";
+import HelpSection from "../help/HelpSection";
 
 export default function Support() {
   const [openFAQ, setOpenFAQ] = useState(null);
   const [messages, setMessages] = useState([]);
+  const [ticketType, setTicketType] = useState("Workout Issue");
+  const [ticketDescription, setTicketDescription] = useState("");
+  const [ticketSuccess, setTicketSuccess] = useState(false);
+
+  const handleTicketSubmit = () => {
+    if (!ticketDescription.trim()) {
+      alert("Please describe your issue.");
+      return;
+    }
+
+    // Demo submission
+    console.log("Ticket Submitted:", {
+      type: ticketType,
+      description: ticketDescription,
+    });
+
+    setTicketSuccess(true);
+    setTicketDescription("");
+
+    setTimeout(() => {
+      setTicketSuccess(false);
+    }, 3000);
+  };
 
   const faqs = [
     {
       question: "Why did my calories change?",
       answer:
-        "Your calorie target adjusts based on your weight trend and adherence patterns.",
+        "Your calorie target adjusts dynamically based on weight trends, adherence levels, metabolic adaptation, and goal progress. HealthUP AI recalibrates weekly to ensure safe, sustainable transformation.",
     },
     {
       question: "Why is my workout lighter this week?",
       answer:
-        "High fatigue or low workout completion triggered recovery adjustment.",
+        "Recent fatigue logs, low completion rate, or recovery indicators triggered an adaptive deload phase. HealthUP AI prioritizes long-term progression over short-term intensity.",
     },
     {
       question: "What is Habit Score?",
       answer:
-        "Habit Score is calculated using Workout (60%) and Diet adherence (40%).",
+        "Habit Score measures weekly behavioral consistency using Workout Adherence (60%) and Diet Adherence (40%). It predicts discipline patterns and potential drop-off risk.",
+    },
+    {
+      question: "How does HealthUP AI prevent overtraining?",
+      answer:
+        "The system monitors fatigue frequency, completion rate, and progressive overload patterns. If recovery signals are detected, volume is reduced or structured recovery sessions are scheduled automatically.",
+    },
+    {
+      question: "How is my goal timeline calculated?",
+      answer:
+        "Your projected timeline is based on realistic weekly fat loss or muscle gain rates. It updates dynamically using actual progress data rather than static estimates.",
+    },
+    {
+      question: "Can I manually adjust my plan?",
+      answer:
+        "Yes. You can request modifications. However, HealthUP AI recommendations are data-driven and optimized for long-term sustainability and metabolic safety.",
+    },
+    {
+      question: "Why is my protein intake higher than expected?",
+      answer:
+        "Protein is optimized to preserve lean muscle mass, enhance recovery, improve satiety, and maintain metabolic rate — especially during calorie deficits.",
+    },
+    {
+      question: "What happens if I stop logging progress?",
+      answer:
+        "If no data is logged, the system detects inactivity risk. It may simplify your plan, reduce intensity, or send habit continuity reminders.",
+    },
+    {
+      question: "How does HealthUP AI handle plateaus?",
+      answer:
+        "If weight or performance stagnates for multiple weeks, the system analyzes adherence, recovery, and calorie intake before adjusting macros, training load, or activity volume.",
+    },
+    {
+      question: "Is my data secure?",
+      answer:
+        "Yes. HealthUP AI uses encrypted authentication, secure token-based sessions, and protected database architecture to ensure user data privacy and integrity.",
     },
   ];
-
   const handleSend = () => {
     if (!input.trim()) return;
     const newMessages = [
@@ -39,7 +97,7 @@ export default function Support() {
   const [input, setInput] = useState("");
 
   return (
-    <div className="bg-[#0B1120] min-h-screen text-white p-8">
+    <div className=" min-h-screen text-white p-8">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Support & Help Center</h1>
@@ -50,7 +108,7 @@ export default function Support() {
       </div>
 
       {/* Quick Help Cards */}
-      <div className="grid md:grid-cols-2 gap-6 mb-10">
+      {/* <div className="grid md:grid-cols-2 gap-6 mb-10">
         {[
           "Habit Score Help",
           "Diet Plan Questions",
@@ -67,6 +125,9 @@ export default function Support() {
             </p>
           </div>
         ))}
+      </div> */}
+      <div className="mb-10">
+        <HelpSection />
       </div>
 
       {/* FAQ Section */}
@@ -78,9 +139,7 @@ export default function Support() {
           <div
             key={index}
             className="bg-[#111827] border border-gray-700 rounded-xl mb-4 p-5 cursor-pointer"
-            onClick={() =>
-              setOpenFAQ(openFAQ === index ? null : index)
-            }
+            onClick={() => setOpenFAQ(openFAQ === index ? null : index)}
           >
             <div className="flex justify-between items-center">
               <h3 className="font-medium">{faq.question}</h3>
@@ -113,9 +172,7 @@ export default function Support() {
             >
               <div
                 className={`px-4 py-2 rounded-2xl max-w-xs ${
-                  msg.type === "user"
-                    ? "bg-purple-600"
-                    : "bg-gray-700"
+                  msg.type === "user" ? "bg-purple-600" : "bg-gray-700"
                 }`}
               >
                 {msg.text}
@@ -141,7 +198,8 @@ export default function Support() {
         </div>
 
         <p className="text-xs text-gray-500 mt-3">
-          This AI provides general guidance only and does not replace medical advice.
+          This AI provides general guidance only and does not replace medical
+          advice.
         </p>
       </div>
 
@@ -149,7 +207,11 @@ export default function Support() {
       <div className="bg-[#111827] border border-gray-700 rounded-2xl p-6 mb-10">
         <h2 className="text-xl font-semibold mb-4">Raise a Support Ticket</h2>
 
-        <select className="w-full bg-[#0F172A] border border-gray-600 rounded-xl px-4 py-2 mb-4">
+        <select
+          value={ticketType}
+          onChange={(e) => setTicketType(e.target.value)}
+          className="w-full bg-[#0F172A] border border-gray-600 rounded-xl px-4 py-2 mb-4"
+        >
           <option>Workout Issue</option>
           <option>Diet Issue</option>
           <option>Technical Bug</option>
@@ -157,15 +219,25 @@ export default function Support() {
         </select>
 
         <textarea
+          value={ticketDescription}
+          onChange={(e) => setTicketDescription(e.target.value)}
           placeholder="Describe your issue..."
           className="w-full bg-[#0F172A] border border-gray-600 rounded-xl px-4 py-2 mb-4 h-28"
         ></textarea>
 
-        <button className="w-full bg-linear-to-r from-purple-600 to-purple-800 py-2 rounded-xl hover:opacity-90 transition">
+        <button
+          onClick={handleTicketSubmit}
+          className="w-full bg-linear-to-r from-purple-600 to-purple-800 py-2 rounded-xl hover:opacity-90 transition"
+        >
           Submit Ticket
         </button>
-      </div>
 
+        {ticketSuccess && (
+          <p className="text-green-400 mt-3 text-sm">
+            ✅ Your support ticket has been submitted successfully!
+          </p>
+        )}
+      </div>
       {/* Disclaimer */}
       <div className="border border-red-600 bg-red-900/20 rounded-xl p-4 text-sm text-red-300">
         ⚠ This platform provides general fitness guidance and does not replace

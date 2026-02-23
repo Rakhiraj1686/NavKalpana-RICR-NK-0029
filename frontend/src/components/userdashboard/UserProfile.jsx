@@ -48,6 +48,29 @@ const UserProfile = () => {
 
   const profileCompletion = user?.profileCompleted ? 100 : 60;
 
+  const handleRegenerate = async () => {
+    try {
+      const res = await api.post("/user/regenerate-plan");
+
+      toast.success(res.data.message);
+
+      setUser({
+        ...user,
+        aiPlan: res.data.aiPlan,
+      });
+
+      sessionStorage.setItem(
+        "HealthUP",
+        JSON.stringify({
+          ...user,
+          aiPlan: res.data.aiPlan,
+        }),
+      );
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Something went wrong");
+    }
+  };
+
   return (
     <>
       <div className="min-h-screen text-white p-4 sm:p-8">
@@ -151,10 +174,62 @@ const UserProfile = () => {
                     >
                       Reset Password
                     </button>
+
+                    <button
+                      onClick={handleRegenerate}
+                      className="mb-6 bg-purple-600 px-4 py-2 rounded-lg hover:bg-purple-700 transition"
+                    >
+                      Regenerate AI Plan
+                    </button>
                   </div>
                 </div>
               </div>
             </div>
+
+            {user?.aiPlan && (
+              <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-xl">
+                <h3 className="text-xl font-bold mb-6 bg-linear-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+                  AI Nutrition Plan
+                </h3>
+
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-6 text-sm">
+                  <div className="bg-white/5 p-4 rounded-xl text-center">
+                    <p className="text-gray-400">Calories</p>
+                    <p className="text-lg font-semibold text-white">
+                      {user?.aiPlan?.calories}
+                    </p>
+                  </div>
+
+                  <div className="bg-white/5 p-4 rounded-xl text-center">
+                    <p className="text-gray-400">Protein</p>
+                    <p className="text-lg font-semibold text-white">
+                      {user?.aiPlan?.macros?.protein}g
+                    </p>
+                  </div>
+
+                  <div className="bg-white/5 p-4 rounded-xl text-center">
+                    <p className="text-gray-400">Carbs</p>
+                    <p className="text-lg font-semibold text-white">
+                      {user?.aiPlan?.macros?.carbs}g
+                    </p>
+                  </div>
+
+                  <div className="bg-white/5 p-4 rounded-xl text-center">
+                    <p className="text-gray-400">Fats</p>
+                    <p className="text-lg font-semibold text-white">
+                      {user?.aiPlan?.macros?.fats}g
+                    </p>
+                  </div>
+
+                  <div className="bg-white/5 p-4 rounded-xl text-center col-span-2 md:col-span-1">
+                    <p className="text-gray-400">Workout Level</p>
+                    <p className="text-lg font-semibold text-white capitalize">
+                      {user?.aiPlan?.workoutLevel}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-xl">
               <h2 className="text-xl font-bold mb-4 bg-linear-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
