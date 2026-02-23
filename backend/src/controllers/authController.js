@@ -3,6 +3,7 @@ import User from "../models/userProfileModel.js";
 import { genToken ,genOtpToken} from "../utils/authToken.js";
 import OTP from "../models/otpModal.js";
 import { sendOTPEmail } from "../utils/emailService.js";
+import Ticket from "../models/ticketModel.js";
 
 export const UserRegister = async (req, res, next) => {
   try {
@@ -226,6 +227,29 @@ export const UserForgetPassword = async (req, res, next) => {
 
     res.status(200).clearCookie("otpToken").json({
       message: "OTP Verified. Create new password now",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+export const createTicket = async (req, res, next) => {
+  try {
+    const { type, description } = req.body;
+
+    if (!type || !description) {
+      return res.status(400).json({ message: "All fields required" });
+    }
+
+    const ticket = await Ticket.create({
+      type,
+      description
+    });
+
+    res.status(201).json({
+      message: "Ticket created successfully",
+      ticket
     });
   } catch (error) {
     next(error);
