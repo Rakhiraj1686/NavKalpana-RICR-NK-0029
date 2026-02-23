@@ -4,11 +4,12 @@ import {
   FiActivity,
   FiUser,
   FiBarChart2,
-  FiHelpCircle,
   FiChevronLeft,
   FiChevronRight,
   FiLogOut,
 } from "react-icons/fi";
+import { GoGoal } from "react-icons/go";
+import { GiProgression } from "react-icons/gi";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -16,11 +17,11 @@ import api from "../../config/Api";
 
 const menuItems = [
   { id: "overview", label: "Overview", icon: <FiHome /> },
+  { id: "goal", label: "Goal", icon: <GoGoal /> },
   { id: "workout", label: "Workout Plan", icon: <FiActivity /> },
   { id: "diet", label: "Diet Plan", icon: <FiBarChart2 /> },
-  { id: "progress", label: "Progress", icon: <FiBarChart2 /> },
+  { id: "progress", label: "Progress", icon: <GiProgression /> },
   { id: "profile", label: "Profile", icon: <FiUser /> },
-  { id: "support", label: "Support", icon: <FiHelpCircle /> },
 ];
 
 const UserSidebar = ({

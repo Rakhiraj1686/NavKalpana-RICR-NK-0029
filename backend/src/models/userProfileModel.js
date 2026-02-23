@@ -45,16 +45,21 @@ const userSchema = new mongoose.Schema(
         default: "",
       },
     },
-    
-    age: Number,
+
+    foodPreference: {
+      type: String,
+      enum: ["vegetarian", "vegan", "nonvegetarian"],
+    },  
+
+    age: String,
 
     biologicalSex: {
       type: String,
       enum: ["male", "female", "other"],
     },
 
-    height: Number, // cm
-    weight: Number, // kg
+    height: String, // cm
+    weight: String, // kg
 
     activityLevel: {
       type: String,
@@ -66,23 +71,11 @@ const userSchema = new mongoose.Schema(
       enum: ["beginner", "intermediate", "advanced"],
     },
 
-    primaryGoal: {
-      type: String,
-      enum: [
-        "weight loss",
-        "muscle gain",
-        "body recomposition",
-        "maintain",
-        "improve endurance",
-      ],
-    },
-
     bmi: Number,
+    bmr: Number,
     maintenanceCalories: Number,
-    calorieTarget: Number,
-    goalWeight: Number,
 
-    // ⭐ Useful flag
+    // Useful flag
     profileCompleted: {
       type: Boolean,
       default: false,

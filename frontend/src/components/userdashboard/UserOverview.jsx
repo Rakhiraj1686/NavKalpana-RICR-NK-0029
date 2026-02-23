@@ -4,11 +4,12 @@ import { useAuth } from "../../context/AuthContext";
 const UserOverview = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user } = useAuth();
+  console.log(user?.profileCompleted);
 
   return (
     <div className="min-h-screen text-white py-8 px-6">
       {/* PROFILE INCOMPLETE MESSAGE */}
-      {user.profileCompleted ? (
+      {user?.profileCompleted ? (
         <main className="max-w-7xl mx-auto">
           {/* GREETING */}
           <h1 className="text-3xl font-bold mb-8">Welcome Back 👋</h1>
