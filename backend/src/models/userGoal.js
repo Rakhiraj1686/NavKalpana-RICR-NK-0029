@@ -16,7 +16,11 @@ const userGoalLogSchema = new mongoose.Schema(
     },
     calorieTarget: Number,
     goalWeight: Number,
-
+    goalStatus: {
+      type: String,
+      enum: ["ongoing", "completed"],
+      default: "ongoing",
+    },
   },
   { timestamps: true },
 );

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import UserSidebar from "../../components/userdashboard/UserSidebar";
 import UserOverview from "../../components/userdashboard/UserOverview";
-
+import UserSupport from"../../components/userdashboard/UserSupport"
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import UserWorkout from "../../components/userdashboard/UserWorkout";
@@ -9,6 +9,7 @@ import UserDiet from "../../components/userdashboard/UserDiet";
 import UserProgress from "../../components/userdashboard/UserProgress";
 import UserProfile from "../../components/userdashboard/UserProfile";
 import UserGoal from "../../components/userdashboard/UserGoal";
+import { User } from "lucide-react";
 
 const UserDashboard = () => {
   const { role, isLogin } = useAuth();
@@ -67,6 +68,7 @@ const UserDashboard = () => {
           {active === "progress" && <UserProgress />}
           {active === "profile" && <UserProfile />}
           {active === "goal" && <UserGoal />}
+          {active === "support" && <UserSupport/>}
         </div>
       </main>
     </div>

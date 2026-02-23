@@ -111,13 +111,11 @@ export const UserUpdateProfile = async (req, res, next) => {
     currentUser.maintenanceCalories = maintenanceCalories;
 
     console.log("OldData: ", req.user);
-    await currentUser.save();
     const freshUser = await User.findById(currentUser._id);
 
     freshUser.profileCompleted = true;
 
     await freshUser.save();
-
     res
       .status(200)
       .json({ message: "Profile updated successful.", data: currentUser });
@@ -166,8 +164,7 @@ export const UserChangePhoto = async (req, res, next) => {
 
 export const UserSetGoal = async (req, res, next) => {
   try {
-    const { primaryGoal, energyLevel, workoutCompletion, dietAdherence } =
-      req.body;
+    const { primaryGoal, calorieTarget, goalWeight, goalStatus } = req.body;
     const currentUser = req.user;
 
     if (!primaryGoal) {
@@ -177,15 +174,38 @@ export const UserSetGoal = async (req, res, next) => {
     }
 
     currentUser.primaryGoal = primaryGoal;
-    if (energyLevel) currentUser.energyLevel = energyLevel;
-    if (workoutCompletion) currentUser.workoutCompletion = workoutCompletion;
-    if (dietAdherence) currentUser.dietAdherence = dietAdherence;
+    if (calorieTarget) currentUser.calorieTarget = calorieTarget;
+    if (goalWeight) currentUser.goalWeight = goalWeight;
+    if (goalStatus) currentUser.goalStatus = goalStatus;
 
     await currentUser.save();
 
     res
       .status(200)
       .json({ message: "Goal updated successfully.", data: currentUser });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const UserCompleteGoal = async (req, res, next) => {};
+
+export const GetUserGoal = async (req, res, next) => {
+  try {
+    const currentUser = req.user;
+    const user = await User.findById(currentUser._id).select(
+      "primaryGoal calorieTarget goalWeight goalStatus",
+    );
+
+    res.status(200).json({
+      success: true,
+      data: {
+        primaryGoal: user.primaryGoal,
+        calorieTarget: user.calorieTarget,
+        goalWeight: user.goalWeight,
+        goalStatus: user.goalStatus,
+      },
+    });
   } catch (error) {
     next(error);
   }
