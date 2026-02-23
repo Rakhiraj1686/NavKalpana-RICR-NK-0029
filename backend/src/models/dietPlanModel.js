@@ -2,7 +2,6 @@ const dietPlanSchema = new mongoose.Schema(
   {
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     
-    calorieTarget: Number,
     macroSplit: {
       protein: Number,
       carbs: Number,

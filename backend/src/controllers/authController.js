@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
-import User from "../models/userModel.js";
-// import { genToken } from "../utils/authToken.js";
+import User from "../models/userProfileModel.js";
+import { genToken } from "../utils/authToken.js";
 
 export const UserRegister = async (req, res, next) => {
   try {
@@ -30,12 +30,19 @@ export const UserRegister = async (req, res, next) => {
     const salt = await bcrypt.genSalt(10);
     const hashPassword = await bcrypt.hash(password, salt);
 
+    //use placeholder image for profile photo
+    const photoURL = `https://placehold.co/600x400?text=${fullName.charAt(0).toUpperCase()}`;
+    const photo = {
+      url: photoURL,
+    };
+
     //save data to database
     const newUser = await User.create({
       fullName,
       email: email.toLowerCase(),
       mobileNumber,
       password: hashPassword,
+      photo,
     });
 
     console.log(newUser);
@@ -78,7 +85,7 @@ export const UserLogin = async (req, res, next) => {
     }
 
     //Token Genration will be done here
-    // genToken(existingUser, res);
+    genToken(existingUser, res);
 
     //send message to fronted
     res

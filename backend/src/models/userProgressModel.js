@@ -15,15 +15,17 @@ const progressLogSchema = new mongoose.Schema(
       type: String,
       enum: ["energized", "normal", "slightly fatigued", "very tired"],
     },
-    workoutCompletion: {
-      type: String,
-      enum: ["completed", "partial", "skipped"],
-    },
 
     dietAdherence: {
       type: String,
       enum: ["followed", "mostly", "deviated"],
     },
+    
+    workoutCompletion: {
+      type: String,
+      enum: ["completed", "partial", "skipped"],
+    },
+
     days: [
       {
         dayName: String,

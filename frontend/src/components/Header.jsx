@@ -77,7 +77,7 @@ const Header = () => {
                   onClick={() => navigate("/login")}
                   className="px-5 py-1.5 rounded-full border border-purple-400 
                   hover:bg-linear-to-r from-purple-500 to-blue-500 
-                  transition text-white"
+                  transition text-white cursor-pointer"
                 >
                   Login
                 </button>
@@ -86,7 +86,7 @@ const Header = () => {
                   onClick={() => navigate("/signup")}
                   className="px-5 py-1.5 rounded-full 
                   bg-linear-to-r from-purple-500 to-blue-500 
-                  transition text-white"
+                  transition text-white cursor-pointer"
                 >
                   Sign Up
                 </button>
