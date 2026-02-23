@@ -8,7 +8,7 @@ import UserWorkout from "../../components/userdashboard/UserWorkout";
 import UserDiet from "../../components/userdashboard/UserDiet";
 import UserProgress from "../../components/userdashboard/UserProgress";
 import UserProfile from "../../components/userdashboard/UserProfile";
-import UserSupport from "../../components/userdashboard/UserSupport";
+import UserGoal from "../../components/userdashboard/UserGoal";
 
 const UserDashboard = () => {
   const { role, isLogin } = useAuth();
@@ -66,7 +66,7 @@ const UserDashboard = () => {
           {active === "diet" && <UserDiet />}
           {active === "progress" && <UserProgress />}
           {active === "profile" && <UserProfile />}
-          {active === "support" && <UserSupport />}
+          {active === "goal" && <UserGoal />}
         </div>
       </main>
     </div>

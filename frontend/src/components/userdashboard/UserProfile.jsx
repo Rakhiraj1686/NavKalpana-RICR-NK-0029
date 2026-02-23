@@ -1,138 +1,186 @@
 import React, { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
-// import EditProfileSetupModal from "./modals/EditProfileModal";
 import UserImage from "../../assets/userImage.jpg";
 import { FaCamera, FaPhoneAlt } from "react-icons/fa";
 import { MdOutlineEmail } from "react-icons/md";
 import ResetPasswordModal from "./modals/ResetPasswordModal";
+import UpdateProfileModal from "./modals/UpdateProfileModal";
+import toast from "react-hot-toast";
+import api from "../../config/Api";
 
 const UserProfile = () => {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
 
-  const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
+  const [isUpdateProfileModalOpen, setIsUpdateProfileModalOpen] =
+    useState(false);
   const [isResetPasswordModalOpen, setIsResetPasswordModalOpen] =
     useState(false);
+
   const [preview, setPreview] = useState("");
+
+  const changePhoto = async (photo) => {
+    const form_Data = new FormData();
+    form_Data.append("image", photo);
+
+    console.log(form_Data);
+
+    try {
+      const res = await api.patch("/user/changePhoto", form_Data);
+      toast.success(res.data.message);
+      setUser(res.data.data);
+      sessionStorage.setItem("HealthUP", JSON.stringify(res.data.data));
+      setPreview("");
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Unknown Error");
+    }
+  };
+
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const newPhotoURL = URL.createObjectURL(file);
+      setPreview(newPhotoURL);
+      setTimeout(() => {
+        changePhoto(file);
+      }, 1000);
+    }
+  };
 
   const profileCompletion = user?.profileCompleted ? 100 : 60;
 
   return (
-    <div className="min-h-screen text-white p-4 sm:p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* Top Section */}
-        <div className="grid lg:grid-cols-1 gap-8">
-          {/* LEFT: Profile Card */}
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-xl">
-            <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
-              {/* LEFT → Profile Image */}
-              <div className="relative flex flex-col items-center">
-                <div className="w-36 h-36 rounded-full overflow-hidden border-4 border-purple-500">
-                  <img
-                    src={preview || user?.photo?.url || UserImage}
-                    alt="Profile"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
+    <>
+      <div className="min-h-screen text-white p-4 sm:p-8">
+        <div className="max-w-7xl mx-auto space-y-8">
+          {/* Top Section */}
+          <div className="grid lg:grid-cols-1 gap-8">
+            {/* LEFT: Profile Card */}
+            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-xl">
+              <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
+                {/* LEFT → Profile Image */}
+                <div className="flex flex-col items-center">
+                  <div className="relative flex flex-col items-center">
+                    <div className="w-36 h-36 rounded-full overflow-hidden border-4 border-purple-500">
+                      <img
+                        src={preview || user?.photo?.url || UserImage}
+                        alt="Profile"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
 
-                <label
-                  htmlFor="imageUpload"
-                  className="absolute bottom-2 right-2 bg-linear-to-r from-purple-500 to-blue-500 p-3 rounded-full cursor-pointer hover:scale-110 transition"
-                >
-                  <FaCamera size={16} />
-                </label>
-                <input type="file" id="imageUpload" className="hidden" />
-              </div>
-
-              {/* CENTER → User Details */}
-              <div className="flex-1 text-center md:text-left">
-                <h1 className="text-2xl font-bold">{user?.fullName}</h1>
-
-                <div className="flex gap-4 items-center">
-                  <span className="inline-block mt-2 px-4 py-1 rounded-full text-sm bg-linear-to-r from-purple-500 to-blue-500 text-white">
-                    {user?.role}
-                  </span>
-
-                  <span
-                    className={`mt-2 px-4 py-1  rounded-full text-sm font-semibold ${
-                      user?.isActive
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-700"
-                    }`}
-                  >
-                    {user?.isActive ? "Active" : "Inactive"}
-                  </span>
-                </div>
-
-                <div className="mt-6 space-y-2 text-sm text-gray-300">
-                  <p className="flex items-center gap-2">
-                    <strong>
-                      <MdOutlineEmail />
-                    </strong>
-                    {user?.email}
-                  </p>
-                  <p className="flex items-center gap-2">
-                    <strong>
-                      <FaPhoneAlt className="text-xs" />
-                    </strong>
-                    {user?.mobileNumber}
+                    <label
+                      htmlFor="imageUpload"
+                      className="absolute bottom-2 right-2 bg-linear-to-r from-purple-500 to-blue-500 p-3 rounded-full cursor-pointer hover:scale-110 transition"
+                    >
+                      <FaCamera size={16} />
+                    </label>
+                    <input
+                      type="file"
+                      id="imageUpload"
+                      className="hidden"
+                      accept="image/*"
+                      onChange={handlePhotoChange}
+                    />
+                  </div>
+                  <p className="text-gray-500 text-xs mt-2">
+                    Click camera to change photo
                   </p>
                 </div>
-              </div>
 
-              {/* RIGHT → Progress + Actions */}
-              <div className="w-full md:w-72">
-                <div className="flex justify-between text-sm mb-2">
-                  <span>Profile Completion</span>
-                  <span>{profileCompletion}%</span>
+                {/* CENTER → User Details */}
+                <div className="flex-1 text-center md:text-left">
+                  <h1 className="text-2xl font-bold">{user?.fullName}</h1>
+
+                  <div className="flex gap-4 items-center">
+                    <span className="inline-block mt-2 px-4 py-1 rounded-full text-sm bg-linear-to-r from-purple-500 to-blue-500 text-white">
+                      {user?.role}
+                    </span>
+
+                    <span
+                      className={`mt-2 px-4 py-1  rounded-full text-sm font-semibold ${
+                        user?.isActive
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
+                      }`}
+                    >
+                      {user?.isActive ? "Active" : "Inactive"}
+                    </span>
+                  </div>
+
+                  <div className="mt-6 space-y-2 text-sm text-gray-300">
+                    <p className="flex items-center gap-2">
+                      <strong>
+                        <MdOutlineEmail />
+                      </strong>
+                      {user?.email}
+                    </p>
+                    <p className="flex items-center gap-2">
+                      <strong>
+                        <FaPhoneAlt className="text-xs" />
+                      </strong>
+                      {user?.mobileNumber}
+                    </p>
+                  </div>
                 </div>
 
-                <div className="w-full bg-white/10 rounded-full h-2">
-                  <div
-                    className="bg-linear-to-r from-purple-500 to-blue-500 h-2 rounded-full"
-                    style={{ width: `${profileCompletion}%` }}
-                  />
-                </div>
+                {/* RIGHT → Progress + Actions */}
+                <div className="w-full md:w-72">
+                  <div className="flex justify-between text-sm mb-2">
+                    <span>Profile Completion</span>
+                    <span>{profileCompletion}%</span>
+                  </div>
 
-                <div className="flex flex-col gap-3 mt-6">
-                  <button
-                    onClick={() => setIsEditProfileModalOpen(true)}
-                    className="bg-linear-to-r from-purple-500 to-blue-500 py-2 rounded-xl hover:scale-105 transition"
-                  >
-                    Edit Profile
-                  </button>
+                  <div className="w-full bg-white/10 rounded-full h-2">
+                    <div
+                      className="bg-linear-to-r from-purple-500 to-blue-500 h-2 rounded-full"
+                      style={{ width: `${profileCompletion}%` }}
+                    />
+                  </div>
 
-                  <button
-                    onClick={() => setIsResetPasswordModalOpen(true) }
-                    className="bg-gray-600 py-2 rounded-xl hover:bg-gray-700 transition"
-                  >
-                    Reset Password
-                  </button>
+                  <div className="flex flex-col gap-3 mt-6">
+                    <button
+                      onClick={() => setIsUpdateProfileModalOpen(true)}
+                      className="bg-linear-to-r from-purple-500 to-blue-500 py-2 rounded-xl hover:scale-105 transition cursor-pointer"
+                    >
+                      Edit Profile
+                    </button>
+
+                    <button
+                      onClick={() => setIsResetPasswordModalOpen(true)}
+                      className="bg-gray-600 py-2 rounded-xl hover:bg-gray-700 transition cursor-pointer"
+                    >
+                      Reset Password
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-xl">
-            <h2 className="text-xl font-bold mb-4 bg-linear-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-              AI Fitness Status
-            </h2>
-            <p className="text-gray-300 text-sm">
-              {!user.profileCompleted &&
-                "Complete your fitness profile to unlock adaptive AI workout and diet plans."}
-            </p>
+            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-xl">
+              <h2 className="text-xl font-bold mb-4 bg-linear-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+                AI Fitness Status
+              </h2>
+              <p className="text-gray-300 text-sm">
+                {user?.profileCompleted
+                  ? "Your profile is ready. AI plans and insights are fully enabled."
+                  : "Complete your health details to unlock adaptive AI workout and diet plans."}
+              </p>
+            </div>
           </div>
         </div>
+
+        {isUpdateProfileModalOpen && (
+          <UpdateProfileModal
+            onClose={() => setIsUpdateProfileModalOpen(false)}
+          />
+        )}
+        {isResetPasswordModalOpen && (
+          <ResetPasswordModal
+            onClose={() => setIsResetPasswordModalOpen(false)}
+          />
+        )}
       </div>
-      
-      {/* {isEditProfileModalOpen && (
-        <EditProfileSetupModal onClose={() => setIsEditProfileModalOpen(false)} />
-      )} */}
-      {isResetPasswordModalOpen && (
-        <ResetPasswordModal
-          onClose={() => setIsResetPasswordModalOpen(false)}
-        />
-      )}
-    </div>
+    </>
   );
 };
 
