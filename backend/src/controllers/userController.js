@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import User from "../models/userProfileModel.js";
 import cloudinary from "../config/cloudinary.js";
+import { generateAIPlan } from "../services/aiPlanService.js";
 
 export const UserResetPassword = async (req, res, next) => {
   try {
@@ -111,11 +112,15 @@ export const UserUpdateProfile = async (req, res, next) => {
     currentUser.maintenanceCalories = maintenanceCalories;
 
     console.log("OldData: ", req.user);
-    const freshUser = await User.findById(currentUser._id);
+    // const freshUser = await User.findById(currentUser._id);
 
-    freshUser.profileCompleted = true;
+    currentUser.profileCompleted = true;
 
-    await freshUser.save();
+    const plan = generateAIPlan(currentUser);
+
+    currentUser.aiPlan = plan;
+
+    await currentUser.save();
     res
       .status(200)
       .json({ message: "Profile updated successful.", data: currentUser });
@@ -239,8 +244,25 @@ export const UserChatWithAI = async (req, res, next) => {
     res.status(200).json({
       success: true,
       reply,
+export const regeneratePlan = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const newPlan = generateAIPlan(user);
+
+    user.aiPlan = newPlan;
+    await user.save();
+
+    res.status(200).json({
+      message: "AI Plan regenerated successfully",
+      aiPlan: newPlan,
     });
   } catch (error) {
     next(error);
   }
+};
 };
