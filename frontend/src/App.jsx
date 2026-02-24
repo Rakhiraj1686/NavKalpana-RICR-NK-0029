@@ -11,6 +11,10 @@ import Home from "./pages/Home";
 import UserDashboard from "./pages/dashboard/Userdashhboard";
 import { Toaster } from "react-hot-toast";
 import AiChatWidget from "./components/AiChatWidget";
+import WorkoutPlan from "./pages/WorkoutPlan";
+
+<Route path="/workout" element={<WorkoutPlan />} />
+
 
 const App = () => {
   const [chatOpen, setChatOpen] = useState(false);

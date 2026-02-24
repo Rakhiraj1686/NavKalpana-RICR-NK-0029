@@ -1,7 +1,5 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { FaGithub, FaLinkedin, FaInstagram } from "react-icons/fa";
 
 
 export default function Home() {
@@ -25,16 +23,13 @@ export default function Home() {
 function Hero() {
   return (
     <section className="min-h-screen flex flex-col justify-center items-center text-center px-6">
-      <motion.h1
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
+      <h1
         className="text-5xl md:text-7xl font-bold mb-6 leading-tight"
       >
         <span className="bg-linear-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
           Adaptive Fitness Intelligence
         </span>
-      </motion.h1>
+      </h1>
 
       <p className="max-w-2xl text-gray-400 text-lg mb-8">
         AI-powered workout and nutrition plans that adapt to your habits,
@@ -78,13 +73,12 @@ function HowItWorks() {
 
       <div className="grid md:grid-cols-6 gap-6">
         {steps.map((step, i) => (
-          <motion.div
+          <div
             key={i}
-            whileHover={{ scale: 1.05 }}
             className="bg-white/5 backdrop-blur-xl border border-white/10 p-6 rounded-2xl shadow-xl"
           >
             {step}
-          </motion.div>
+          </div>
         ))}
       </div>
     </section>
@@ -109,16 +103,15 @@ function Features() {
 
       <div className="grid md:grid-cols-3 gap-10">
         {features.map(([title, desc], i) => (
-          <motion.div
+          <div
             key={i}
-            whileHover={{ y: -8 }}
             className="bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-2xl shadow-xl"
           >
             <h3 className="text-xl font-semibold mb-3 text-purple-400">
               {title}
             </h3>
             <p className="text-gray-400">{desc}</p>
-          </motion.div>
+          </div>
         ))}
       </div>
     </section>

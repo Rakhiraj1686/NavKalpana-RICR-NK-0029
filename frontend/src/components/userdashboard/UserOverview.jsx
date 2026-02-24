@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import { useAuth } from "../../context/AuthContext";
 
 const UserOverview = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user } = useAuth();
   console.log(user?.profileCompleted);
 

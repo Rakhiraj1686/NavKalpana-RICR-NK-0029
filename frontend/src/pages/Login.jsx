@@ -9,7 +9,7 @@ import {
   AiOutlineSafety,
 } from "react-icons/ai";
 import toast from "react-hot-toast";
-import api from "../Config/Api";
+import api from "../config/Api";
 import { useAuth } from "../context/AuthContext";
 import ForgetPasswordModal from "../components/publicModals/ForgetPasswordModal";
 
@@ -22,7 +22,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isForgetPasswordModal, setIsForgetPasswordModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { setUser, setIsLogin } = useAuth();
+  const { setUser } = useAuth();
 
   const handleClear = () => {
     setFormData({
@@ -44,7 +44,6 @@ const Login = () => {
       console.log("Login Data", formData);
       toast.success(res.data.message);
       setUser(res.data.data);
-      setIsLogin(true);
       sessionStorage.setItem("HealthUP", JSON.stringify(res.data.data));
       navigate("/user-dashboard");
       handleClear();

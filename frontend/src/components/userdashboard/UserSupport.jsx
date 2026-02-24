@@ -3,7 +3,6 @@ import HelpSection from "../help/HelpSection";
 
 export default function Support() {
   const [openFAQ, setOpenFAQ] = useState(null);
-  const [messages, setMessages] = useState([]);
   const [ticketType, setTicketType] = useState("Workout Issue");
   const [ticketDescription, setTicketDescription] = useState("");
   const [ticketSuccess, setTicketSuccess] = useState(false);
@@ -93,8 +92,6 @@ export default function Support() {
   //   setMessages(newMessages);
   //   setInput("");
   // };
-
-  const [input, setInput] = useState("");
 
   return (
     <div className="overflow-y-auto no-scrollbar text-white p-8">
