@@ -11,7 +11,6 @@ import { Toaster } from "react-hot-toast";
 import AiChatWidget from "./components/AiChatWidget";
 import WorkoutPlan from "./pages/WorkoutPlan";
 
-<Route path="/workout" element={<WorkoutPlan />} />
 
 
 const App = () => {
@@ -29,6 +28,8 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/user-dashboard" element={<UserDashboard />} />
+          <Route path="/workout" element={<WorkoutPlan />} />
+
         </Routes>
       </BrowserRouter>
     </>
