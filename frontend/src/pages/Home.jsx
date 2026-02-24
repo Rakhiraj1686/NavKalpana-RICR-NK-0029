@@ -1,6 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { FaGithub, FaLinkedin, FaInstagram } from "react-icons/fa";
+
 
 export default function Home() {
   return (
@@ -14,7 +16,7 @@ export default function Home() {
         <HowItWorks />
         <Features />
         <AICoach />
-        <CTA />
+        <Footer />
       </div>
     </div>
   );
@@ -145,19 +147,31 @@ function AICoach() {
   );
 }
 
-function CTA() {
-  return (
-    <section className="py-28 text-center">
-      <h2 className="text-5xl font-bold mb-8">
-        Ready to Transform Your Fitness?
-      </h2>
+// function CTA() {
+//   return (
+//     <section className="py-28 text-center">
+//       <h2 className="text-5xl font-bold mb-8">
+//         Ready to Transform Your Fitness?
+//       </h2>
 
-      <Link
-        to="/signup"
-        className="bg-linear-to-r from-purple-500 to-blue-500 px-12 py-5 rounded-2xl text-xl font-semibold hover:scale-105 transition shadow-2xl"
-      >
-        Join FitAI Today
-      </Link>
-    </section>
+//       <Link
+//         to="/signup"
+//         className="bg-linear-to-r from-purple-500 to-blue-500 px-12 py-5 rounded-2xl text-xl font-semibold hover:scale-105 transition shadow-2xl"
+//       >
+//         Join FitAI Today
+//       </Link>
+//     </section>
+//   );
+// }
+
+function Footer() {
+  return (
+    <footer className="bg-[#020617] text-white border-t border-white/10">
+      {/* Footer */}
+      <div className="border-t border-white/10 text-center py-6 text-gray-500 text-md">
+        © {new Date().getFullYear()} HealthUP - Built with ❤️ for smarter
+        fitness.
+      </div>
+    </footer>
   );
 }

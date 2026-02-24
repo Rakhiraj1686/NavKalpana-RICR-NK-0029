@@ -7,9 +7,11 @@ import {
   UserSetGoal,
   UserCompleteGoal,
   GetUserGoal,
+  UserChatWithAI,
   regeneratePlan,
 } from "../controllers/userController.js";
 import { Protect } from "../middlewares/authMiddleware.js";
+import { checkUserChatLimit } from "../middlewares/chatUseLimit.js";
 
 const router = express.Router();
 const upload = multer();
@@ -20,6 +22,8 @@ router.patch("/changePhoto", Protect, upload.single("image"), UserChangePhoto);
 router.put("/setGoal", Protect, UserSetGoal);
 router.put("/completeGoal", Protect, UserCompleteGoal);
 router.put("/completeGoal", Protect, UserCompleteGoal);
+router.get("/goal", Protect, GetUserGoal);
+router.post("/chat", Protect, checkUserChatLimit, UserChatWithAI);
 router.get("/goal",Protect, GetUserGoal);
 router.post("/regenerate-plan", Protect, regeneratePlan);
 
