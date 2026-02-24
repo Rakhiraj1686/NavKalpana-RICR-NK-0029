@@ -8,7 +8,7 @@ import {
   UserCompleteGoal,
   GetUserGoal,
   UserChatWithAI,
-  regeneratePlan,
+  RegeneratePlan,
 } from "../controllers/userController.js";
 import { Protect } from "../middlewares/authMiddleware.js";
 import { checkUserChatLimit } from "../middlewares/chatUseLimit.js";
@@ -25,6 +25,6 @@ router.put("/completeGoal", Protect, UserCompleteGoal);
 router.get("/goal", Protect, GetUserGoal);
 router.post("/chat", Protect, checkUserChatLimit, UserChatWithAI);
 router.get("/goal",Protect, GetUserGoal);
-router.post("/regenerate-plan", Protect, regeneratePlan);
+router.post("/regenerate-plan", Protect, RegeneratePlan);
 
 export default router;

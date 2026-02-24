@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import User from "../models/userProfileModel.js";
 import cloudinary from "../config/cloudinary.js";
-import { generateAIPlan } from "../services/aiPlanService.js";
+import chatHistory from "../models/chatHistory.js";
 
 export const UserResetPassword = async (req, res, next) => {
   try {
@@ -112,15 +112,11 @@ export const UserUpdateProfile = async (req, res, next) => {
     currentUser.maintenanceCalories = maintenanceCalories;
 
     console.log("OldData: ", req.user);
-    // const freshUser = await User.findById(currentUser._id);
+    const freshUser = await User.findById(currentUser._id);
 
-    currentUser.profileCompleted = true;
+    freshUser.profileCompleted = true;
 
-    const plan = generateAIPlan(currentUser);
-
-    currentUser.aiPlan = plan;
-
-    await currentUser.save();
+    await freshUser.save();
     res
       .status(200)
       .json({ message: "Profile updated successful.", data: currentUser });
@@ -219,14 +215,15 @@ export const GetUserGoal = async (req, res, next) => {
 export const UserChatWithAI = async (req, res, next) => {
   try {
     const { message } = req.body;
+    const currentUser = req.user;
 
+    console.log("Received message:", message);
     if (!message) {
       return res.status(400).json({
         success: false,
         message: "Message is required",
       });
     }
-
     const completion = await groq.chat.completions.create({
       model: "llama-3.1-8b-instant",
       messages: [
@@ -238,31 +235,59 @@ export const UserChatWithAI = async (req, res, next) => {
     });
 
     const reply = completion.choices[0].message.content;
-
     console.log("AI Reply:", reply);
-
+    // Save chat history
+    await ChatHistory.create({
+      user: currentUser._id,
+      question: message,
+      response: reply,
+    });
     res.status(200).json({
       success: true,
       reply,
-export const regeneratePlan = async (req, res, next) => {
+    });
+  } catch (error) {
+    console.error("AI Error:", error);
+    next(error);
+  }
+};
+
+export const GetChatHistory = async (req, res, next) => {
   try {
-    const user = await User.findById(req.user._id);
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    const newPlan = generateAIPlan(user);
-
-    user.aiPlan = newPlan;
-    await user.save();
-
+    const currentUser = req.user;
+    const history = await chatHistory
+      .find({ user: currentUser._id })
+      .select("question response createdAt");
     res.status(200).json({
-      message: "AI Plan regenerated successfully",
-      aiPlan: newPlan,
+      success: true,
+      data: history,
     });
   } catch (error) {
     next(error);
   }
 };
+
+export const RegeneratePlan = async (req, res, next) => {
+  try {
+    const currentUser = req.user;
+    // Logic to regenerate plan based on user's current data and goals
+    // This is a placeholder and should be replaced with actual implementation
+    const newPlan = {
+      meals: [
+        { name: "Breakfast", items: ["Oatmeal", "Banana", "Almonds"] },
+        { name: "Lunch", items: ["Grilled Chicken Salad", "Quinoa"] },
+        { name: "Dinner", items: ["Baked Salmon", "Steamed Vegetables"] },
+      ],
+      workouts: [
+        { name: "Cardio", exercises: ["Running", "Cycling"] },
+        { name: "Strength", exercises: ["Push-ups", "Squats"] },
+      ],
+    };
+    res.status(200).json({
+      success: true,
+      data: newPlan,
+    });
+  } catch (error) {
+    next(error);
+  }
 };

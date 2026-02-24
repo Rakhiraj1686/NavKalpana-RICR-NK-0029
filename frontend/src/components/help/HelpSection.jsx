@@ -5,9 +5,9 @@ export default function HelpSection() {
   const [activeModal, setActiveModal] = useState(null);
 
   const content = {
-  habit: {
-    title: "Habit Score Help",
-    text: `
+    habit: {
+      title: "Habit Score Help",
+      text: `
 HealthUP AI Habit Score is a structured behavioral intelligence metric designed to measure long-term consistency rather than short-term motivation.
 
 Calculation Logic:
@@ -33,12 +33,12 @@ If score declines for 2 consecutive weeks:
 • Recommend habit simplification
 
 The goal is sustainable identity-based habit formation — not temporary compliance.
-`
-  },
+`,
+    },
 
-  diet: {
-    title: "Diet Plan Intelligence",
-    text: `
+    diet: {
+      title: "Diet Plan Intelligence",
+      text: `
 HealthUP AI generates nutrition plans using a scientifically grounded metabolic framework.
 
 Step 1 – Basal Metabolic Rate:
@@ -64,12 +64,12 @@ Safety Protocols:
 • Weekly progress recalibration
 
 HealthUP AI prioritizes metabolic health, performance sustainability, and long-term adherence.
-`
-  },
+`,
+    },
 
-  workout: {
-    title: "Adaptive Workout Intelligence",
-    text: `
+    workout: {
+      title: "Adaptive Workout Intelligence",
+      text: `
 HealthUP AI operates on a Progressive Overload + Recovery Balance Model.
 
 Initial Programming Based On:
@@ -99,12 +99,12 @@ For Fat Loss:
 Cardio volume scales without compromising recovery.
 
 This prevents overtraining, burnout, and plateau formation.
-`
-  },
+`,
+    },
 
-  support: {
-    title: "Technical & System Support",
-    text: `
+    support: {
+      title: "Technical & System Support",
+      text: `
 HealthUP AI is built using a secure full-stack architecture.
 
 Security Layer:
@@ -135,9 +135,9 @@ Our system logs:
 • Stack trace (if applicable)
 
 HealthUP AI is designed for reliability, transparency, and user safety.
-`
-  }
-};
+`,
+    },
+  };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">

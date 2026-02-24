@@ -102,7 +102,7 @@ const AiChatWidget = ({ chatOpen, setChatOpen }) => {
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3">
+          <div className="flex-1 overflow-y-auto p-4 space-y-3  no-scrollbar ">
             {messages.map((msg, i) => (
               <div
                 key={i}
@@ -131,7 +131,7 @@ const AiChatWidget = ({ chatOpen, setChatOpen }) => {
 
             <button
               onClick={sendMessage}
-              className="bg-linear-to-r from-purple-500 to-blue-500 cursor-pointer px-4 rounded-full text-white"
+              className="bg-linear-to-r from-purple-500 to-purple-600 cursor-pointer px-4 rounded-full text-white"
             >
               Send
             </button>

@@ -80,52 +80,35 @@ export default function Support() {
         "Yes. HealthUP AI uses encrypted authentication, secure token-based sessions, and protected database architecture to ensure user data privacy and integrity.",
     },
   ];
-  const handleSend = () => {
-    if (!input.trim()) return;
-    const newMessages = [
-      ...messages,
-      { type: "user", text: input },
-      {
-        type: "ai",
-        text: "This is a demo AI response. Backend logic will analyze user data here.",
-      },
-    ];
-    setMessages(newMessages);
-    setInput("");
-  };
+  // const handleSend = () => {
+  //   if (!input.trim()) return;
+  //   const newMessages = [
+  //     ...messages,
+  //     { type: "user", text: input },
+  //     {
+  //       type: "ai",
+  //       text: "This is a demo AI response. Backend logic will analyze user data here.",
+  //     },
+  //   ];
+  //   setMessages(newMessages);
+  //   setInput("");
+  // };
 
   const [input, setInput] = useState("");
 
   return (
-    <div className=" min-h-screen text-white p-8">
+    <div className="overflow-y-auto no-scrollbar text-white p-8">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Support & Help Center</h1>
         <p className="text-gray-400 mt-2">
-          Need help with your fitness journey? We’re here for you.
+          Need help with your fitness journey? We're here for you.
         </p>
         <div className="h-1 w-32 bg-linear-to-r from-purple-500 to-purple-700 mt-4 rounded-full"></div>
       </div>
 
-      {/* Quick Help Cards */}
-      {/* <div className="grid md:grid-cols-2 gap-6 mb-10">
-        {[
-          "Habit Score Help",
-          "Diet Plan Questions",
-          "Workout Adjustments",
-          "Technical Support",
-        ].map((item, index) => (
-          <div
-            key={index}
-            className="bg-[#111827] border border-gray-700 rounded-2xl p-6 hover:scale-105 transition duration-300 hover:border-purple-500"
-          >
-            <h3 className="text-lg font-semibold">{item}</h3>
-            <p className="text-gray-400 text-sm mt-2">
-              Click to learn more about {item.toLowerCase()}.
-            </p>
-          </div>
-        ))}
-      </div> */}
+      {/* help section */}
+      
       <div className="mb-10">
         <HelpSection />
       </div>
@@ -143,7 +126,7 @@ export default function Support() {
           >
             <div className="flex justify-between items-center">
               <h3 className="font-medium">{faq.question}</h3>
-              <span>{openFAQ === index ? "−" : "+"}</span>
+              <span>{openFAQ === index ? "-" : "+"}</span>
             </div>
             {openFAQ === index && (
               <p className="text-gray-400 mt-3">{faq.answer}</p>
@@ -153,7 +136,7 @@ export default function Support() {
       </div>
 
       {/* AI Chat Section */}
-      <div className="bg-[#111827] border border-gray-700 rounded-2xl p-6 mb-10">
+      {/* <div className="bg-[#111827] border border-gray-700 rounded-2xl p-6 mb-10">
         <h2 className="text-xl font-semibold mb-4">Ask FitAI Support</h2>
 
         <div className="h-64 overflow-y-auto bg-[#0F172A] p-4 rounded-xl mb-4">
@@ -201,7 +184,7 @@ export default function Support() {
           This AI provides general guidance only and does not replace medical
           advice.
         </p>
-      </div>
+      </div> */}
 
       {/* Raise Ticket Section */}
       <div className="bg-[#111827] border border-gray-700 rounded-2xl p-6 mb-10">
@@ -239,7 +222,7 @@ export default function Support() {
         )}
       </div>
       {/* Disclaimer */}
-      <div className="border border-red-600 bg-red-900/20 rounded-xl p-4 text-sm text-red-300">
+      <div className="border border-red-600 bg-red-900/20 rounded-xl p-4 mb-6 text-sm text-red-300">
         ⚠ This platform provides general fitness guidance and does not replace
         professional medical advice. Always consult a healthcare professional
         before starting a new program.
