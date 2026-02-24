@@ -12,28 +12,45 @@ const AiChatWidget = ({ chatOpen, setChatOpen }) => {
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
 
-  /* Load chat history */
+  // AI chat storage
+  const storageKey =
+    user && isLogin
+      ? `healthup-ai-chat-${user._id}` // user specific
+      : "healthup-ai-chat-guest"; // guest specific
+
+  // Load chat history from storage
   useEffect(() => {
-    const saved = sessionStorage.getItem("healthup-ai-chat");
-    if (saved) setMessages(JSON.parse(saved));
-  }, []);
+    const saved = sessionStorage.getItem(storageKey);
+    if (saved) {
+      setMessages(JSON.parse(saved));
+    } else {
+      setMessages([]);
+    }
+  }, [storageKey]);
 
   /* Save chat history */
   useEffect(() => {
-    sessionStorage.setItem("healthup-ai-chat", JSON.stringify(messages));
-  }, [messages]);
+    if (messages.length > 0) {
+      sessionStorage.setItem(storageKey, JSON.stringify(messages));
+    }
+  }, [messages, storageKey]);
 
-  /* Welcome message when first opened */
+  // Welcome message when first opened
   useEffect(() => {
-    if (chatOpen && messages.length === 0) {
-      setMessages([
+    if (!chatOpen) return;
+
+    if (messages.length === 0) {
+      const welcome = [
         {
           role: "ai",
           text: "Hi, I'm FitAI. Ask me about health queries..",
         },
-      ]);
+      ];
+
+      setMessages(welcome);
+      sessionStorage.setItem(storageKey, JSON.stringify(welcome));
     }
-  }, [chatOpen, messages.length]);
+  }, [chatOpen]);
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -62,19 +79,16 @@ const AiChatWidget = ({ chatOpen, setChatOpen }) => {
           );
         } else {
           toast.error("Please login or signup to access more.");
+          setTimeout(() => navigate("/login"), 1200);
         }
-
-        setTimeout(() => navigate("/login"), 1200);
         return;
       }
-
       toast.error("Something went wrong.");
     } finally {
       setTyping(false);
     }
   };
 
-  
   useEffect(() => {
     setChatOpen(false);
   }, [location, setChatOpen]);
