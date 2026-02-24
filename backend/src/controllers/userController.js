@@ -3,6 +3,7 @@ import User from "../models/userProfileModel.js";
 import cloudinary from "../config/cloudinary.js";
 import chatHistory from "../models/chatHistory.js";
 import { generateAIPlan } from "../services/aiPlanService.js";
+import groq from "../config/groq.js";
 import Ticket from "../models/ticketModel.js";
 // import ProgressLog from "../models/ProgressLog.js";
 
@@ -224,33 +225,27 @@ export const GetUserGoal = async (req, res, next) => {
 export const UserChatWithAI = async (req, res, next) => {
   try {
     const { message } = req.body;
-    const currentUser = req.user;
 
-    console.log("Received message:", message);
     if (!message) {
       return res.status(400).json({
         success: false,
         message: "Message is required",
       });
     }
+
     const completion = await groq.chat.completions.create({
       model: "llama-3.1-8b-instant",
-      messages: [
-        {
-          role: "user",
-          content: message,
-        },
-      ],
+      messages: [{ role: "user", content: message }],
     });
 
     const reply = completion.choices[0].message.content;
-    console.log("AI Reply:", reply);
-    // Save chat history
-    await ChatHistory.create({
-      user: currentUser._id,
+
+    await chatHistory.create({
+      user: req.user._id,
       question: message,
       response: reply,
     });
+
     res.status(200).json({
       success: true,
       reply,
@@ -261,20 +256,20 @@ export const UserChatWithAI = async (req, res, next) => {
   }
 };
 
-export const GetChatHistory = async (req, res, next) => {
-  try {
-    const currentUser = req.user;
-    const history = await chatHistory
-      .find({ user: currentUser._id })
-      .select("question response createdAt");
-    res.status(200).json({
-      success: true,
-      data: history,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
+// export const GetChatHistory = async (req, res, next) => {
+//   try {
+//     const currentUser = req.user;
+//     const history = await chatHistory
+//       .find({ user: currentUser._id })
+//       .select("question response createdAt");
+//     res.status(200).json({
+//       success: true,
+//       data: history,
+//     });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
 
 export const RegeneratePlan = async (req, res, next) => {
   try {

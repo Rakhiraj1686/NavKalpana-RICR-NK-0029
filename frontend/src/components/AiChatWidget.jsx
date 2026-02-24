@@ -38,55 +38,43 @@ const AiChatWidget = ({ chatOpen, setChatOpen }) => {
   const sendMessage = async () => {
     if (!input.trim()) return;
 
-    const userMsg = { role: "user", text: input };
-    setMessages((prev) => [...prev, userMsg]);
+    const messageText = input;
+
+    setMessages((prev) => [...prev, { role: "user", text: messageText }]);
     setInput("");
     setTyping(true);
 
     try {
-      if (user && isLogin) {
-        const res = await api.post("/user/chat", {
-          message: input,
-        });
-        setMessages((prev) => [...prev, { role: "ai", text: res.data.reply }]);
-      } else {
-        const res = await api.post("/public/chat", {
-          message: input,
-        });
-        setMessages((prev) => [...prev, { role: "ai", text: res.data.reply }]);
-      }
+      const endpoint = user && isLogin ? "/user/chat" : "/public/chat";
+
+      const res = await api.post(endpoint, {
+        message: messageText,
+      });
+
+      setMessages((prev) => [...prev, { role: "ai", text: res.data.reply }]);
     } catch (error) {
-      if (user && isLogin) {
-        if (error?.response?.status === 403) {
+      const status = error?.response?.status;
+
+      if (status === 403) {
+        if (user && isLogin) {
           toast.error(
-            "Your free AI service for Today is completed. \n Please Upgrade to access more.",
+            "Your free AI service for today is completed. Please upgrade.",
           );
-
-          setTimeout(() => {
-            navigate("/login");
-          }, 1200);
-
-          return;
+        } else {
+          toast.error("Please login or signup to access more.");
         }
-        toast.error("Something went wrong.");
-      } else {
-        if (error?.response?.status === 403) {
-          toast.error("Please Login or SignUp to access more about HealthUP.");
 
-          setTimeout(() => {
-            navigate("/login");
-          }, 1200);
-
-          return;
-        }
-        toast.error("Something went wrong.");
+        setTimeout(() => navigate("/login"), 1200);
+        return;
       }
+
+      toast.error("Something went wrong.");
     } finally {
-      setInput("");
       setTyping(false);
     }
   };
 
+  
   useEffect(() => {
     setChatOpen(false);
   }, [location, setChatOpen]);
@@ -97,7 +85,7 @@ const AiChatWidget = ({ chatOpen, setChatOpen }) => {
       <button
         onClick={() => setChatOpen(!chatOpen)}
         disabled={chatOpen}
-        className={`fixed bottom-4 right-8 z-50 bg-[#0f172a]/90 backdrop-blur-xl border border-white/10 text-white px-3 py-2 rounded-full shadow-2xl hover:bg-[#1e293b] transition-all duration-300  ${chatOpen ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+        className={`fixed bottom-4 right-8 z-50 bg-linear-to-r from-blue-500 to-blue-400 backdrop-blur-xl border border-white/10 text-white px-3 py-2 rounded-full shadow-2xltransition-all duration-300  ${chatOpen ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
       >
         Ask FitAI
       </button>

@@ -1,4 +1,4 @@
-import User from "../models/chatHistory.js";
+import chatHistory from "../models/chatHistory.js";
 import Guest from "../models/guestModel.js";
 import { v4 as uuid } from "uuid";
 
@@ -6,21 +6,28 @@ import { v4 as uuid } from "uuid";
 export const checkUserChatLimit = async (req, res, next) => {
   try {
     const currentUser = req.user;
-    if (currentUser) {
-      const error = new Error("User not registered");
-      error.statusCode = 401;
-      return next(error);
-    }
-    const user = await User.findById(currentUser._id);
 
-    if (user && user.aiUsage.messagesUsed >= 50) {
+    if (!currentUser) {
+      return res.status(401).json({
+        msg: "Unauthorized user",
+      });
+    }
+
+    // Start of today
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const messagesToday = await chatHistory.countDocuments({
+      user: currentUser._id,
+      createdAt: { $gte: startOfDay },
+    });
+
+    if (messagesToday >= 50) {
       return res.status(403).json({
         msg: "Daily AI limit reached",
       });
     }
 
-    user.aiUsage.messagesUsed++;
-    await user.save();
     next();
   } catch (error) {
     next(error);

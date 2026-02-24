@@ -57,3 +57,13 @@
 // };
 
 // export default DietForm;
+
+import React from 'react'
+
+const DietForm = () => {
+  return (
+    <div>DietForm</div>
+  )
+}
+
+export default DietForm

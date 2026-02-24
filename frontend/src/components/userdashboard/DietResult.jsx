@@ -68,7 +68,7 @@ const UserDiet = () => {
 
         {/* Add Diet Card */}
         <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-xl">
-          <h2 className="text-2xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+          <h2 className="text-2xl font-bold mb-6 bg-linear-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
             Add Diet Plan
           </h2>
 
@@ -137,7 +137,7 @@ const UserDiet = () => {
 
             <button
               type="submit"
-              className="md:col-span-2 bg-gradient-to-r from-purple-500 to-blue-500 py-3 rounded-xl hover:scale-105 transition cursor-pointer"
+              className="md:col-span-2 bg-linear-to-r from-purple-500 to-blue-500 py-3 rounded-xl hover:scale-105 transition cursor-pointer"
             >
               Add Diet
             </button>
@@ -153,7 +153,7 @@ const UserDiet = () => {
 
         {/* Diet List */}
         <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-xl">
-          <h3 className="text-xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+          <h3 className="text-xl font-bold mb-6 bg-linear-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
             Diet Plans
           </h3>
 

@@ -32,6 +32,7 @@ app.use("/public", PublicRouter);
 app.use("/auth", AuthRouter);
 app.use("/user", UserRouter);
 app.use("/api/ticket", ticketRouter);
+// app.use("/api/diet", require("./routers/dietRoutes"));
 // app.use("/api/ai", aiRoutes);
 
 app.get("/", (req, res) => {
