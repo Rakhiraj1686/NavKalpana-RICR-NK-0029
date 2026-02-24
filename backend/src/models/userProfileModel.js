@@ -1,0 +1,88 @@
+import mongoose from "mongoose";
+
+const userSchema = new mongoose.Schema(
+  {
+    // ===== AUTH FIELDS =====
+    fullName: {
+      type: String,
+      required: true,
+    },
+
+    mobileNumber: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+    },
+
+    password: {
+      type: String,
+      required: true,
+    },
+
+    role: {
+      type: String,
+      enum: ["user", "admin"],
+      default: "user",
+    },
+
+    isActive: { type: Boolean, default: true },
+
+    // ===== HEALTH PROFILE (OPTIONAL INITIALLY) =====
+    photo: {
+      url: {
+        type: String,
+        default: "",
+      },
+      public_id: {
+        type: String,
+        default: "",
+      },
+    },
+
+    foodPreference: {
+      type: String,
+      enum: ["vegetarian", "vegan", "nonvegetarian"],
+    },
+
+    age: String,
+
+    biologicalSex: {
+      type: String,
+      enum: ["male", "female", "other"],
+    },
+
+    height: String, // cm
+    weight: String, // kg
+
+    activityLevel: {
+      type: String,
+      enum: ["sedentary", "lightly active", "moderately active", "very active"],
+    },
+
+    experienceLevel: {
+      type: String,
+      enum: ["beginner", "intermediate", "advanced"],
+    },
+
+    bmi: Number,
+    bmr: Number,
+    maintenanceCalories: Number,
+
+    // Useful flag
+    profileCompleted: {
+      type: Boolean,
+      default: false,
+    },
+    
+  },
+  { timestamps: true },
+);
+
+export default mongoose.model("User", userSchema);

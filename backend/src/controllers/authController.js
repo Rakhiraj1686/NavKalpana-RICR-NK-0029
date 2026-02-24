@@ -1,6 +1,9 @@
 import bcrypt from "bcrypt";
-import User from "../models/userModel.js";
-// import { genToken } from "../utils/authToken.js";
+import User from "../models/userProfileModel.js";
+import { genToken ,genOtpToken} from "../utils/authToken.js";
+import OTP from "../models/otpModal.js";
+import { sendOTPEmail } from "../utils/emailService.js";
+import Ticket from "../models/ticketModel.js";
 
 export const UserRegister = async (req, res, next) => {
   try {
@@ -30,16 +33,23 @@ export const UserRegister = async (req, res, next) => {
     const salt = await bcrypt.genSalt(10);
     const hashPassword = await bcrypt.hash(password, salt);
 
+    //use placeholder image for profile photo
+    const photoURL = `https://placehold.co/600x400?text=${fullName.charAt(0).toUpperCase()}`;
+    const photo = {
+      url: photoURL,
+    };
+
     //save data to database
     const newUser = await User.create({
       fullName,
       email: email.toLowerCase(),
       mobileNumber,
       password: hashPassword,
+      photo,
     });
 
     console.log(newUser);
-    res.status(201).json({ message: "Registration Successfull" });
+    res.status(201).json({ message: "Registration Successfull !" });
   } catch (error) {
     next(error);
   }
@@ -48,19 +58,23 @@ export const UserRegister = async (req, res, next) => {
 export const UserLogin = async (req, res, next) => {
   try {
     //fetch data from fronted
-    const { email, password } = req.body;
+    const { identifier, password } = req.body;
+
+    console.log(req.body);
 
     //verify that all data exist
-    if (!email || !password) {
+    if (!identifier || !password) {
       const error = new Error("All Field Required");
       error.statusCode = 400;
       return next(error);
     }
 
     //check for if user is registered or not
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({
+      $or: [{ email: identifier }, { mobileNumber: identifier }],
+    });
     if (!existingUser) {
-      const error = new Error("Email not registered");
+      const error = new Error("User not registered");
       error.statusCode = 401;
       return next(error);
     }
@@ -74,10 +88,169 @@ export const UserLogin = async (req, res, next) => {
     }
 
     //Token Genration will be done here
-    // genToken(existingUser, res);
+    genToken(existingUser, res);
 
     //send message to fronted
-    res.status(200).json({ message: "Login Successfull", data: existingUser });
+    res
+      .status(200)
+      .json({ message: "Login Successfull !", data: existingUser });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const UserLogout = async (req, res, next) => {
+  try {
+    // send mesage to frontend
+    res.clearCookie("parle");
+
+    res.status(200).json({ message: "Logout Successfull" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const UserGenOTP = async (req, res, next) => {
+  try {
+    //fetch data from frontend
+    const { email } = req.body;
+
+    //verify that all data exist
+    if (!email) {
+      const error = new Error("All fields required");
+      error.statusCode = 400;
+      return next(error);
+    }
+
+    //check if user is registred or not
+    const existingUser = await User.findOne({ email });
+    if (!existingUser) {
+      const error = new Error("Email not registered");
+      error.statusCode = 401;
+      return next(error);
+    }
+
+    //Check if user is otp is there or not
+    const existingUserOTP = await OTP.findOne({ email });
+    if (existingUserOTP) {
+      await existingUserOTP.deleteOne();
+    }
+
+    const otp = Math.floor(Math.random() * 1000000).toString();
+    console.log(typeof otp);
+
+    // encrypt the opt
+    const salt = await bcrypt.genSalt(10);
+    const hashOTP = await bcrypt.hash(otp, salt);
+
+    console.log(hashOTP);
+
+    await OTP.create({
+      email,
+      otp: hashOTP,
+    });
+
+    await sendOTPEmail(email, otp);
+
+    res.status(200).json({ message: "OTP send on registered email" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const UserVerifyOtp = async (req, res, next) => {
+  try {
+    //fetch data from frontend
+    const { email, otp } = req.body;
+
+    //verify that all data exist
+    if (!email || !otp) {
+      const error = new Error("All fields required");
+      error.statusCode = 400;
+      return next(error);
+    }
+
+    //check for if user is registred or not
+    const existingUserOTP = await OTP.findOne({ email });
+    if (!existingUserOTP) {
+      const error = new error("OTP match error ,Please Retry");
+      error.statusCode = 401;
+      return next(error);
+    }
+
+    //verify password
+    const isVerified = await bcrypt.compare(otp, existingUserOTP.otp);
+    if (!isVerified) {
+      const error = new Error("OTP match error, Please Retry");
+      error.statusCode = 401;
+      return next(error);
+    }
+
+    await existingUserOTP.deleteOne();
+
+    const existingUser = await User.findOne({ email });
+    if (!existingUser) {
+      const error = new error("Email not registered");
+      error.statusCode = 401;
+      return next(error);
+    }
+
+    //Token Genration will be done here
+    genOtpToken(existingUser, res);
+
+    //send message to frontend
+    res.status(200).json({
+      message: "OTP Verified. Create new password now",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const UserForgetPassword = async (req, res, next) => {
+  try {
+    const { newPassword } = req.body;
+    const currentUser = req.user;
+
+    if (!newPassword) {
+      const error = new Error("All field required");
+      error.statusCode = 400;
+      return next(error);
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashPassword = await bcrypt.hash(newPassword, salt);
+
+    currentUser.password = hashPassword;
+
+    await currentUser.save();
+
+    res.status(200).clearCookie("otpToken").json({
+      message: "OTP Verified. Create new password now",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+export const createTicket = async (req, res, next) => {
+  try {
+    const { type, description } = req.body;
+
+    if (!type || !description) {
+      return res.status(400).json({ message: "All fields required" });
+    }
+
+    const ticket = await Ticket.create({
+      type,
+      description
+    });
+
+    res.status(201).json({
+      message: "Ticket created successfully",
+      ticket
+    });
   } catch (error) {
     next(error);
   }

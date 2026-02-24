@@ -9,22 +9,24 @@ import {
   AiOutlineSafety,
 } from "react-icons/ai";
 import toast from "react-hot-toast";
-import api from "../config/Api";
+import api from "../Config/Api";
 import { useAuth } from "../context/AuthContext";
+import ForgetPasswordModal from "../components/publicModals/ForgetPasswordModal";
 
 const Login = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    email: "",
+    identifier: "",
     password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [isForgetPasswordModal, setIsForgetPasswordModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { setUser, setIsLogin } = useAuth();
 
   const handleClear = () => {
     setFormData({
-      email: "",
+      identifier: "",
       password: "",
     });
   };
@@ -84,20 +86,20 @@ const Login = () => {
             {/* Email */}
             <div>
               <label className="text-gray-300 text-sm mb-2 block">
-                Email Address
+                Email Address/Mobile Number
               </label>
 
               <div className="relative">
                 <LuUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
 
                 <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
+                  type="text"
+                  name="identifier"
+                  value={formData.identifier}
                   onChange={handleChange}
                   disabled={isLoading}
                   required
-                  placeholder="Enter your email"
+                  placeholder="Enter your email or phone"
                   className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:ring-2 focus:ring-purple-500 outline-none transition"
                 />
               </div>
@@ -148,12 +150,16 @@ const Login = () => {
 
             {/* Forgot Password */}
             <div className="text-right border-b border-white/10 pb-4">
-              <Link
-                to="/forgot-password"
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setIsForgetPasswordModal(true);
+                }}
                 className="text-sm text-gray-400 hover:text-purple-400"
               >
                 Forgot Password?
-              </Link>
+              </button>
             </div>
 
             {/* Signup */}
@@ -172,6 +178,9 @@ const Login = () => {
           By signing in you agree to our terms & privacy policy.
         </p>
       </div>
+      {isForgetPasswordModal && (
+        <ForgetPasswordModal onClose={() => setIsForgetPasswordModal(false)} />
+      )}
     </div>
   );
 };
