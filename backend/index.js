@@ -11,7 +11,7 @@ import UserRouter from "./src/routers/userRouter.js";
 import PublicRouter from "./src/routers/PublicRouter.js";
 import connectDB from "./src/config/db.js";
 import ticketRouter from "./src/routers/ticketRouter.js";
-// import workoutRoutes from "./routes/workoutRoutes.js";
+import workoutRoutes from "./src/routers/workoutRoutes.js";
 
 const app = express();
 
