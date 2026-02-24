@@ -2,7 +2,9 @@ import bcrypt from "bcrypt";
 import User from "../models/userProfileModel.js";
 import cloudinary from "../config/cloudinary.js";
 import chatHistory from "../models/chatHistory.js";
-// import OpenAI from "openai";
+import { generateAIPlan } from "../services/aiPlanService.js";
+import Ticket from "../models/ticketModel.js";
+// import ProgressLog from "../models/ProgressLog.js";
 
 export const UserResetPassword = async (req, res, next) => {
   try {
@@ -113,11 +115,17 @@ export const UserUpdateProfile = async (req, res, next) => {
     currentUser.maintenanceCalories = maintenanceCalories;
 
     console.log("OldData: ", req.user);
-    const freshUser = await User.findById(currentUser._id);
+    // const freshUser = await User.findById(currentUser._id);
 
-    freshUser.profileCompleted = true;
+    currentUser.profileCompleted = true;
 
-    await freshUser.save();
+    await currentUser.save();
+
+    const plan = generateAIPlan(currentUser);
+
+    currentUser.aiPlan = plan;
+
+    await currentUser.save();
     res
       .status(200)
       .json({ message: "Profile updated successful.", data: currentUser });
@@ -293,26 +301,91 @@ export const RegeneratePlan = async (req, res, next) => {
   }
 };
 
-// const openai = new OpenAI({
-//   apiKey: process.env.OPENAI_API_KEY,
-// });
-
-export const getDietSuggestion = async (req, res) => {
+export const generatePlan = async (req, res, next) => {
   try {
-    const { type } = req.body; // breakfast | lunch | dinner
+    const user = await User.findById(req.user._id);
 
-    const prompt = `Give me 8 healthy ${type} meal suggestions in simple text format.`;
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [{ role: "user", content: prompt }],
+    
+    const newPlan = generateAIPlan(user);
+    console.log("Generate Plan",newPlan);
+
+    user.aiPlan = newPlan;
+    await user.save();
+
+    res.status(200).json({
+      message: "AI Plan regenerated successfully",
+      aiPlan: newPlan,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getMyTickets = async (req, res, next) => {
+  try {
+    res.set("Cache-Control", "no-store");
+
+    const tickets = await Ticket.find({ user: req.user._id }).sort({
+      createdAt: -1,
     });
 
     res.status(200).json({
       success: true,
-      suggestions: completion.choices[0].message.content,
+      tickets,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
+  }
+};
+
+export const createWeeklyProgress = async (req, res) => {
+  try {
+    const {
+      workoutAdherencePercent,
+      dietAdherencePercent,
+      habitScore,
+    } = req.body;
+
+    const newLog = await ProgressLog.create({
+      user: req.user._id,
+      weekStartDate: new Date(),
+      workoutAdherencePercent,
+      dietAdherencePercent,
+      habitScore,
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Progress saved successfully",
+      log: newLog,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error saving progress" });
+  }
+};
+
+export const getProgressGraph = async (req, res) => {
+  try {
+    const logs = await ProgressLog.find({
+      user: req.user._id,
+    }).sort({ weekStartDate: 1 });
+
+    const graphData = logs.map((log) => ({
+      week: new Date(log.weekStartDate).toLocaleDateString(),
+      workout: log.workoutAdherencePercent,
+      diet: log.dietAdherencePercent,
+      habit: log.habitScore,
+    }));
+
+    res.status(200).json({
+      success: true,
+      graphData,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching graph data" });
   }
 };

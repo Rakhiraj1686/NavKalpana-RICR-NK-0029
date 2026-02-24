@@ -236,22 +236,31 @@ export const UserForgetPassword = async (req, res, next) => {
 
 export const createTicket = async (req, res, next) => {
   try {
+    console.log("Logged user:", req.user);
+
     const { type, description } = req.body;
 
     if (!type || !description) {
       return res.status(400).json({ message: "All fields required" });
     }
 
+    if (!req.user) {
+      return res.status(401).json({ message: "User not authenticated" });
+    }
+
     const ticket = await Ticket.create({
+      user: req.user._id,
       type,
-      description
+      description,
+      status: "Open",
     });
 
     res.status(201).json({
       message: "Ticket created successfully",
-      ticket
+      ticket,
     });
   } catch (error) {
+    console.log("Error creating ticket:", error);
     next(error);
   }
 };

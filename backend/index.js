@@ -18,6 +18,7 @@ import connectDB from "./src/config/db.js";
 import ticketRouter from "./src/routers/ticketRouter.js";
 // import aiRoutes from "./routes/aiRoutes.js";
 
+
 const app = express();
 
 // Middlewares

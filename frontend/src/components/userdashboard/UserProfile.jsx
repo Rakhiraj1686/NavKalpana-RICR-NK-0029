@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import UserImage from "../../assets/userImage.jpg";
 import { FaCamera, FaPhoneAlt } from "react-icons/fa";
@@ -7,6 +7,7 @@ import ResetPasswordModal from "./modals/ResetPasswordModal";
 import UpdateProfileModal from "./modals/UpdateProfileModal";
 import toast from "react-hot-toast";
 import api from "../../config/Api";
+import ProgressGraph from "../components/ProgressGraph";
 
 const UserProfile = () => {
   const { user, setUser } = useAuth();
@@ -15,8 +16,9 @@ const UserProfile = () => {
     useState(false);
   const [isResetPasswordModalOpen, setIsResetPasswordModalOpen] =
     useState(false);
-
+  const [tickets, setTickets] = useState([]);
   const [preview, setPreview] = useState("");
+ const [progressData, setProgressData] = useState([]);
 
   const changePhoto = async (photo) => {
     const form_Data = new FormData();
@@ -50,7 +52,7 @@ const UserProfile = () => {
 
   const handleRegenerate = async () => {
     try {
-      const res = await api.post("/user/regenerate-plan");
+      const res = await api.post("/user/generateplan");
 
       toast.success(res.data.message);
 
@@ -70,6 +72,40 @@ const UserProfile = () => {
       toast.error(error?.response?.data?.message || "Something went wrong");
     }
   };
+
+  const saveProgress = async () => {
+  try {
+    await api.post("/user/progress", {
+      workoutAdherencePercent: 80,
+      dietAdherencePercent: 75,
+      habitScore: 85,
+    });
+
+    // Refresh graph after saving
+    const res = await api.get("/user/progress-graph");
+    setProgressData(res.data.graphData);
+
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+
+  useEffect(() => {
+    const fetchTickets = async () => {
+      try {
+        const res = await api.get("/user/mytickets");
+        console.log("Tickets: ", res.data);
+        setTickets(res.data.tickets);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    fetchTickets();
+  }, []);
+
+ 
 
   return (
     <>
@@ -175,12 +211,12 @@ const UserProfile = () => {
                       Reset Password
                     </button>
 
-                    <button
+                    {/* <button
                       onClick={handleRegenerate}
                       className="mb-6 bg-purple-600 px-4 py-2 rounded-lg hover:bg-purple-700 transition"
                     >
                       Regenerate AI Plan
-                    </button>
+                    </button> */}
                   </div>
                 </div>
               </div>
@@ -231,15 +267,62 @@ const UserProfile = () => {
               </div>
             )}
 
-            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-xl">
-              <h2 className="text-xl font-bold mb-4 bg-linear-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-                AI Fitness Status
+            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-xl flex justify-between items-center">
+              <div>
+                <h2 className="text-xl font-bold mb-4 bg-linear-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+                  AI Fitness Status
+                </h2>
+                <p className="text-gray-300 text-sm">
+                  {user?.profileCompleted
+                    ? "Your profile is ready. AI plans and insights are fully enabled."
+                    : "Complete your health details to unlock adaptive AI workout and diet plans."}
+                </p>
+              </div>
+              <button
+                onClick={handleRegenerate}
+                className="mb-6 bg-purple-600 px-4 py-2 rounded-lg hover:bg-purple-700 transition"
+              >
+                Regenerate AI Plan
+              </button>
+            </div>
+
+            <ProgressGraph data={progressData} />
+
+            {/* Support Tickets Section */}
+            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-xl mb-6">
+              <h2 className="text-xl font-bold mb-6 bg-linear-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+                My Support Tickets
               </h2>
-              <p className="text-gray-300 text-sm">
-                {user?.profileCompleted
-                  ? "Your profile is ready. AI plans and insights are fully enabled."
-                  : "Complete your health details to unlock adaptive AI workout and diet plans."}
-              </p>
+
+              {tickets.length === 0 ? (
+                <p className="text-gray-400 text-sm">No tickets raised yet.</p>
+              ) : (
+                tickets.map((ticket) => (
+                  <div
+                    key={ticket._id}
+                    className="bg-white/10 p-4 rounded-xl mb-4 flex justify-between items-start"
+                  >
+                    <div>
+                      <p className="font-semibold text-white">{ticket.type}</p>
+                      <p className="text-sm text-gray-400 mt-1">
+                        {ticket.description}
+                      </p>
+                    </div>
+
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-semibold capitalize ${
+                        ticket.status === "Open"
+                          ? "bg-yellow-500/20 text-yellow-400"
+                          : ticket.status === "In progress"
+                            ? "bg-blue-500/20 text-blue-400"
+                            : "bg-green-500/20 text-green-400"
+                      }`}
+                    >
+                      {ticket.status}
+                    </span>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>
