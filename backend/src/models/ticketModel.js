@@ -19,6 +19,14 @@ const ticketSchema = new mongoose.Schema(
       type: String,
       enum: ["Open", "In Progress", "Resolved"],
       default: "Open"
+    },
+    solution: {
+      type: String,
+      default: null
+    },
+    resolvedAt: {
+      type: Date,
+      default: null
     }
   },
   { timestamps: true }

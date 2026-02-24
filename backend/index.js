@@ -14,9 +14,7 @@ import UserRouter from "./src/routers/userRouter.js";
 import PublicRouter from "./src/routers/PublicRouter.js";   
 import connectDB from "./src/config/db.js";
 import ticketRouter from "./src/routers/ticketRouter.js";
-import progressRouter from "./src/modules/progress/routes/progressRoutes.js";
-
-
+import progressRoutes from "./src/routers/progressRoutes.js";
 const app = express();
 
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
@@ -28,7 +26,7 @@ app.use("/public", PublicRouter);
 app.use("/auth", AuthRouter);
 app.use("/user", UserRouter);
 app.use("/api/ticket", ticketRouter);
-app.use("/api/v1/progress", progressRouter);
+app.use("/api/v1/progress", progressRoutes);
 
 app.get("/", (req, res) => {
   console.log("server is working");

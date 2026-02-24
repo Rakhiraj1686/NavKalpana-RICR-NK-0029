@@ -230,16 +230,18 @@ export const GetUserGoal = async (req, res, next) => {
   try {
     const currentUser = req.user;
     const user = await User.findById(currentUser._id).select(
-      "primaryGoal calorieTarget goalWeight goalStatus",
+      "primaryGoal calorieTarget goalWeight goalStatus workoutsPerWeek weight",
     );
 
     res.status(200).json({
       success: true,
       data: {
         primaryGoal: user.primaryGoal,
-        calorieTarget: user.calorieTarget,
+        calorieTarget: user.calorieTarget || 2000,
         goalWeight: user.goalWeight,
         goalStatus: user.goalStatus,
+        workoutsPerWeek: user.workoutsPerWeek || 5,
+        currentWeight: parseFloat(user.weight) || 0,
       },
       message: "Goal fetched successfully",
     });
@@ -416,12 +418,14 @@ export const createWeeklyProgress = async (req, res) => {
         .json({ message: "All progress fields are required" });
     }
 
-    const weekStartDate = getWeekStartDate();
+    // Use today's date for daily progress tracking
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
     const updatedLog = await Progress.findOneAndUpdate(
       {
         user: req.user._id,
-        weekStartDate,
+        date: today,
       },
       {
         $set: {
@@ -438,17 +442,15 @@ export const createWeeklyProgress = async (req, res) => {
     );
 
     const graphData = await Progress.find({ user: req.user._id })
-      .sort({ weekStartDate: 1 })
-      .select(
-        "weekStartDate workoutAdherencePercent dietAdherencePercent habitScore",
-      );
+      .sort({ date: 1 })
+      .select("date workoutAdherencePercent dietAdherencePercent habitScore");
 
     res.status(201).json({
       success: true,
-      message: "Weekly progress saved successfully",
+      message: "Daily progress saved successfully",
       log: updatedLog,
       graphData: graphData.map((log) => ({
-        week: new Date(log.weekStartDate).toLocaleDateString("en-IN", {
+        week: new Date(log.date).toLocaleDateString("en-IN", {
           day: "2-digit",
           month: "short",
         }),
@@ -467,13 +469,11 @@ export const getProgressGraph = async (req, res) => {
     const logs = await Progress.find({
       user: req.user._id,
     })
-      .sort({ weekStartDate: 1 })
-      .select(
-        "weekStartDate workoutAdherencePercent dietAdherencePercent habitScore",
-      );
+      .sort({ date: 1 })
+      .select("date workoutAdherencePercent dietAdherencePercent habitScore");
 
     const graphData = logs.map((log) => ({
-      week: new Date(log.weekStartDate).toLocaleDateString("en-IN", {
+      week: new Date(log.date).toLocaleDateString("en-IN", {
         day: "2-digit",
         month: "short",
       }),

@@ -97,6 +97,17 @@ const userSchema = new mongoose.Schema(
       default: "ongoing",
     },
 
+    // Goal tracking
+    calorieTarget: {
+      type: Number,
+      default: 2000,
+    },
+
+    workoutsPerWeek: {
+      type: Number,
+      default: 5,
+    },
+
     // Useful flag
     profileCompleted: {
       type: Boolean,
