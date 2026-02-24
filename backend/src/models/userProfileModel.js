@@ -75,6 +75,28 @@ const userSchema = new mongoose.Schema(
     bmr: Number,
     maintenanceCalories: Number,
 
+    primaryGoal: {
+      type: String,
+      enum: [
+        "weight loss",
+        "muscle gain",
+        "body recomposition",
+        "maintain",
+        "improve endurance",
+      ],
+      default: "maintain",
+    },
+
+    goalWeight: {
+      type: Number,
+    },
+
+    goalStatus: {
+      type: String,
+      enum: ["ongoing", "at-risk", "completed"],
+      default: "ongoing",
+    },
+
     // Useful flag
     profileCompleted: {
       type: Boolean,

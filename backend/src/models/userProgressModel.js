@@ -56,12 +56,36 @@ const progressSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    weekStartDate: {
+      type: Date,
+      required: true,
+    },
+    workoutAdherencePercent: {
+      type: Number,
+      min: 0,
+      max: 100,
+      default: 0,
+    },
+    dietAdherencePercent: {
+      type: Number,
+      min: 0,
+      max: 100,
+      default: 0,
+    },
+    habitScore: {
+      type: Number,
+      min: 0,
+      max: 100,
+      default: 0,
+    },
     weight: Number,
     bmi: Number,
-    bodyFat: Number, // optional future use
+    bodyFat: Number,
   },
   { timestamps: true }
 );
+
+progressSchema.index({ user: 1, weekStartDate: 1 }, { unique: true });
 
 const Progress = mongoose.model("Progress", progressSchema);
 

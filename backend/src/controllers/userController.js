@@ -5,7 +5,16 @@ import chatHistory from "../models/chatHistory.js";
 import { generateAIPlan } from "../services/aiPlanService.js";
 import groq from "../config/groq.js";
 import Ticket from "../models/ticketModel.js";
-// import ProgressLog from "../models/ProgressLog.js";
+import Progress from "../models/userProgressModel.js";
+
+const getWeekStartDate = (date = new Date()) => {
+  const current = new Date(date);
+  const day = current.getDay();
+  const diffToMonday = day === 0 ? -6 : 1 - day;
+  current.setDate(current.getDate() + diffToMonday);
+  current.setHours(0, 0, 0, 0);
+  return current;
+};
 
 export const UserResetPassword = async (req, res, next) => {
   try {
@@ -339,24 +348,56 @@ export const getMyTickets = async (req, res, next) => {
 
 export const createWeeklyProgress = async (req, res) => {
   try {
-    const {
-      workoutAdherencePercent,
-      dietAdherencePercent,
-      habitScore,
-    } = req.body;
+    const workoutAdherencePercent = Number(req.body.workoutAdherencePercent);
+    const dietAdherencePercent = Number(req.body.dietAdherencePercent);
+    const habitScore = Number(req.body.habitScore);
 
-    const newLog = await ProgressLog.create({
-      user: req.user._id,
-      weekStartDate: new Date(),
-      workoutAdherencePercent,
-      dietAdherencePercent,
-      habitScore,
-    });
+    if (
+      Number.isNaN(workoutAdherencePercent) ||
+      Number.isNaN(dietAdherencePercent) ||
+      Number.isNaN(habitScore)
+    ) {
+      return res.status(400).json({ message: "All progress fields are required" });
+    }
+
+    const weekStartDate = getWeekStartDate();
+
+    const updatedLog = await Progress.findOneAndUpdate(
+      {
+        user: req.user._id,
+        weekStartDate,
+      },
+      {
+        $set: {
+          workoutAdherencePercent,
+          dietAdherencePercent,
+          habitScore,
+        },
+      },
+      {
+        new: true,
+        upsert: true,
+        runValidators: true,
+      }
+    );
+
+    const graphData = await Progress.find({ user: req.user._id })
+      .sort({ weekStartDate: 1 })
+      .select("weekStartDate workoutAdherencePercent dietAdherencePercent habitScore");
 
     res.status(201).json({
       success: true,
-      message: "Progress saved successfully",
-      log: newLog,
+      message: "Weekly progress saved successfully",
+      log: updatedLog,
+      graphData: graphData.map((log) => ({
+        week: new Date(log.weekStartDate).toLocaleDateString("en-IN", {
+          day: "2-digit",
+          month: "short",
+        }),
+        workout: log.workoutAdherencePercent,
+        diet: log.dietAdherencePercent,
+        habit: log.habitScore,
+      })),
     });
   } catch (error) {
     res.status(500).json({ message: "Error saving progress" });
@@ -365,12 +406,17 @@ export const createWeeklyProgress = async (req, res) => {
 
 export const getProgressGraph = async (req, res) => {
   try {
-    const logs = await ProgressLog.find({
+    const logs = await Progress.find({
       user: req.user._id,
-    }).sort({ weekStartDate: 1 });
+    })
+      .sort({ weekStartDate: 1 })
+      .select("weekStartDate workoutAdherencePercent dietAdherencePercent habitScore");
 
     const graphData = logs.map((log) => ({
-      week: new Date(log.weekStartDate).toLocaleDateString(),
+      week: new Date(log.weekStartDate).toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "short",
+      }),
       workout: log.workoutAdherencePercent,
       diet: log.dietAdherencePercent,
       habit: log.habitScore,
