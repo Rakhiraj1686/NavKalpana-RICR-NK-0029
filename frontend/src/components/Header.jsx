@@ -40,6 +40,9 @@ const Header = () => {
   return (
     <>
       <header className="fixed top-0 left-1/2 -translate-x-1/2 z-50 w-full">
+        <div className="bg-green-600 text-white text-center p-4 text-2xl font-bold">
+          🥗 Diet Planner App
+        </div>
         <div
           className="mx-auto flex items-center justify-between 
           px-24 py-4 
@@ -93,7 +96,7 @@ const Header = () => {
               <div
                 className="relative ml-4 flex items-center gap-5"
 
-                // ref={dropdownRef}
+              // ref={dropdownRef}
               >
                 {/* Notification */}
                 <button className="relative cursor-pointer">
@@ -136,17 +139,15 @@ const Header = () => {
 
       {/* Overlay */}
       <div
-        className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden transition ${
-          menuOpen ? "visible opacity-100" : "invisible opacity-0"
-        }`}
+        className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden transition ${menuOpen ? "visible opacity-100" : "invisible opacity-0"
+          }`}
         onClick={() => setMenuOpen(false)}
       />
 
       {/* Mobile Drawer */}
       <div
-        className={`fixed right-0 top-0 h-full w-[50%] max-w-sm bg-[#020617] text-white z-50 transform transition-transform duration-300 md:hidden ${
-          menuOpen ? "translate-x-0" : "translate-x-full"
-        }`}
+        className={`fixed right-0 top-0 h-full w-[50%] max-w-sm bg-[#020617] text-white z-50 transform transition-transform duration-300 md:hidden ${menuOpen ? "translate-x-0" : "translate-x-full"
+          }`}
       >
         <div className="flex justify-between items-center px-6 py-5 border-b border-white/10">
           <span className="text-xl font-semibold">HealthUP</span>

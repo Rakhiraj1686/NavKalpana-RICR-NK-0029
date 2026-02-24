@@ -1,5 +1,10 @@
 import dotenv from "dotenv";
+
+// Load .env file
 dotenv.config();
+
+// DEBUG: check if Node can read it
+console.log("DEBUG - MONGO_URI:", process.env.MONGO_URI);
 
 import express from "express";
 import cors from "cors";
@@ -11,28 +16,12 @@ import UserRouter from "./src/routers/userRouter.js";
 import PublicRouter from "./src/routers/PublicRouter.js";
 import connectDB from "./src/config/db.js";
 import ticketRouter from "./src/routers/ticketRouter.js";
-// import workoutRoutes from "./routes/workoutRoutes.js";
+// import aiRoutes from "./routes/aiRoutes.js";
 
 const app = express();
 
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://localhost:5174",
-  "http://localhost:5175",
-];
-
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("CORS not allowed"));
-      }
-    },
-    credentials: true,
-  }),
-);
+// Middlewares
+app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 app.use(morgan("dev"));
@@ -41,12 +30,14 @@ app.use("/public", PublicRouter);
 app.use("/auth", AuthRouter);
 app.use("/user", UserRouter);
 app.use("/api/ticket", ticketRouter);
-// app.use("/api/workouts", workoutRoutes);
+// app.use("/api/ai", aiRoutes);
 
 app.get("/", (req, res) => {
-  console.log("server is working");
+  console.log("Server is working");
+  res.send("Server is working");
 });
 
+// Global error handler
 app.use((err, req, res, next) => {
   const ErrorMessage = err.message || "Internal Server Error";
   const StatusCode = err.statusCode || 500;
@@ -55,6 +46,7 @@ app.use((err, req, res, next) => {
   res.status(StatusCode).json({ message: ErrorMessage });
 });
 
+// Start server after DB connection
 const port = process.env.PORT || 5000;
 app.listen(port, async () => {
   console.log("Server started at port: ", port);

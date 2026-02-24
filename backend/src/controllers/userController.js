@@ -2,6 +2,7 @@ import bcrypt from "bcrypt";
 import User from "../models/userProfileModel.js";
 import cloudinary from "../config/cloudinary.js";
 import chatHistory from "../models/chatHistory.js";
+// import OpenAI from "openai";
 
 export const UserResetPassword = async (req, res, next) => {
   try {
@@ -289,5 +290,29 @@ export const RegeneratePlan = async (req, res, next) => {
     });
   } catch (error) {
     next(error);
+  }
+};
+
+// const openai = new OpenAI({
+//   apiKey: process.env.OPENAI_API_KEY,
+// });
+
+export const getDietSuggestion = async (req, res) => {
+  try {
+    const { type } = req.body; // breakfast | lunch | dinner
+
+    const prompt = `Give me 8 healthy ${type} meal suggestions in simple text format.`;
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: prompt }],
+    });
+
+    res.status(200).json({
+      success: true,
+      suggestions: completion.choices[0].message.content,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
