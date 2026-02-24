@@ -208,7 +208,23 @@ export const UserSetGoal = async (req, res, next) => {
   }
 };
 
-export const UserCompleteGoal = async (req, res, next) => {};
+export const UserCompleteGoal = async (req, res, next) => {
+  try {
+    const currentUser = req.user;
+
+    if (currentUser.goalStatus !== "ongoing") {
+      const error = new Error("No ongoing goal to complete.");
+      error.statusCode = 400;
+      return next(error);
+    }
+    currentUser.goalStatus = "completed";
+
+    await currentUser.save();
+    res.status(200).json({ message: "Goal completed successfully." });
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const GetUserGoal = async (req, res, next) => {
   try {
@@ -227,6 +243,14 @@ export const GetUserGoal = async (req, res, next) => {
         workoutsPerWeek: user.workoutsPerWeek || 5,
         currentWeight: parseFloat(user.weight) || 0,
       },
+      message: "Goal fetched successfully",
+    });
+
+    console.log("GetUserGoal response:", {
+      primaryGoal: user.primaryGoal,
+      calorieTarget: user.calorieTarget,
+      goalWeight: user.goalWeight,
+      goalStatus: user.goalStatus,
     });
   } catch (error) {
     next(error);
@@ -315,9 +339,8 @@ export const generatePlan = async (req, res, next) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    
     const newPlan = generateAIPlan(user);
-    console.log("Generate Plan",newPlan);
+    console.log("Generate Plan", newPlan);
 
     user.aiPlan = newPlan;
     await user.save();
@@ -327,6 +350,37 @@ export const generatePlan = async (req, res, next) => {
       aiPlan: newPlan,
     });
   } catch (error) {
+    next(error);
+  }
+};
+
+export const createTicket = async (req, res, next) => {
+  try {
+    console.log("Logged user:", req.user);
+
+    const { type, description } = req.body;
+
+    if (!type || !description) {
+      return res.status(400).json({ message: "All fields required" });
+    }
+
+    if (!req.user) {
+      return res.status(401).json({ message: "User not authenticated" });
+    }
+
+    const ticket = await Ticket.create({
+      user: req.user._id,
+      type,
+      description,
+      status: "Open",
+    });
+
+    res.status(201).json({
+      message: "Ticket created successfully",
+      ticket,
+    });
+  } catch (error) {
+    console.log("Error creating ticket:", error);
     next(error);
   }
 };
@@ -359,7 +413,9 @@ export const createWeeklyProgress = async (req, res) => {
       Number.isNaN(dietAdherencePercent) ||
       Number.isNaN(habitScore)
     ) {
-      return res.status(400).json({ message: "All progress fields are required" });
+      return res
+        .status(400)
+        .json({ message: "All progress fields are required" });
     }
 
     // Use today's date for daily progress tracking
@@ -382,7 +438,7 @@ export const createWeeklyProgress = async (req, res) => {
         new: true,
         upsert: true,
         runValidators: true,
-      }
+      },
     );
 
     const graphData = await Progress.find({ user: req.user._id })
