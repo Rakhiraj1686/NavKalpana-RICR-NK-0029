@@ -16,6 +16,7 @@ import UserRouter from "./src/routers/userRouter.js";
 import PublicRouter from "./src/routers/PublicRouter.js";   
 import connectDB from "./src/config/db.js";
 import ticketRouter from "./src/routers/ticketRouter.js";
+// import aiRoutes from "./routes/aiRoutes.js";
 
 const app = express();
 
@@ -29,6 +30,7 @@ app.use("/public", PublicRouter);
 app.use("/auth", AuthRouter);
 app.use("/user", UserRouter);
 app.use("/api/ticket", ticketRouter);
+// app.use("/api/ai", aiRoutes);
 
 app.get("/", (req, res) => {
   console.log("Server is working");
