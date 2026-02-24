@@ -1,12 +1,9 @@
-import React from "react";
+import React from 'react'
 
-const userPlan = () => {
+const UserPlan = () => {
   return (
-    <>
-      <div>User Workout Plan</div>
-      <div>User Diet Plan</div>
-    </>
-  );
-};
+    <div>UserPlan</div>
+  )
+}
 
-export default userPlan;
+export default UserPlan
