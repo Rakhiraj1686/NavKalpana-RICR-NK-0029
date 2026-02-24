@@ -1,7 +1,7 @@
 import React from "react";
 import {
   FiHome,
-  FiActivity,
+  // FiActivity,
   FiUser,
   FiBarChart2,
   FiChevronLeft,
@@ -19,8 +19,8 @@ import api from "../../config/Api";
 const menuItems = [
   { id: "overview", label: "Overview", icon: <FiHome /> },
   { id: "goal", label: "Goal", icon: <GoGoal /> },
-  { id: "workout", label: "Workout Plan", icon: <FiActivity /> },
-  { id: "diet", label: "Diet Plan", icon: <FiBarChart2 /> },
+  // { id: "workout", label: "Workout Plan", icon: <FiActivity /> },
+  { id: "plan", label: "Plan", icon: <FiBarChart2 /> },
   { id: "progress", label: "Progress", icon: <GiProgression /> },
   { id: "profile", label: "Profile", icon: <FiUser /> },
   {id: "support", label:"Support", icon: <MdOutlineContactSupport/>}
