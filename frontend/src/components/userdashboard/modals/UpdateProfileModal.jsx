@@ -5,7 +5,7 @@ import { RxCross2 } from "react-icons/rx";
 import { createPortal } from "react-dom";
 
 const UserEditProfileModal = ({ onClose }) => {
-  const { user, setUser, setIsLogin } = useAuth();
+  const { user, setUser } = useAuth();
 
   const [formData, setFormData] = useState({
     fullName: user?.fullName || "",
@@ -64,7 +64,6 @@ const UserEditProfileModal = ({ onClose }) => {
       if (res.data?.data) {
         sessionStorage.setItem("HealthUp", JSON.stringify(res.data.data));
         setUser(res.data.data);
-        setIsLogin(true);
         setMessage({
           type: "success",
           text: "Profile updated successfully!",

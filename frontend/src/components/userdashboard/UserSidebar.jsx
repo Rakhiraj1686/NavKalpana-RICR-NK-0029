@@ -33,7 +33,7 @@ const UserSidebar = ({
   setIsCollapsed,
   setMobileOpen,
 }) => {
-  const { user, setUser, setIsLogin } = useAuth();
+  const { user, setUser } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -43,9 +43,8 @@ const UserSidebar = ({
 
       sessionStorage.removeItem("HealthUP");
       setUser("");
-      setIsLogin(false);
       navigate("/");
-    } catch (error) {
+    } catch {
       toast.error("Logout failed");
     }
   };

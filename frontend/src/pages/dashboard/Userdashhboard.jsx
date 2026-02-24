@@ -12,7 +12,7 @@ import UserGoal from "../../components/userdashboard/UserGoal";
 import { User } from "lucide-react";
 
 const UserDashboard = () => {
-  const { role, isLogin } = useAuth();
+  const { isLogin } = useAuth();
   const navigate = useNavigate();
 
   const [active, setActive] = useState("overview");

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useState, useContext } from "react";
 
 const AuthContext = React.createContext();
 
@@ -8,13 +8,9 @@ export const AuthProvider = ({ children }) => {
     return storedUser ? JSON.parse(storedUser) : null;
   });
 
-  const [isLogin, setIsLogin] = useState(!!user);
+  const isLogin = !!user;
 
-  useEffect(() => {
-    setIsLogin(!!user);
-  }, [user]);
-
-  const value = { user, setUser, isLogin, setIsLogin };
+  const value = { user, setUser, isLogin };
 
   return (
     <AuthContext.Provider value={value}>
