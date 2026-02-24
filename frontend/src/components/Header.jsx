@@ -40,9 +40,6 @@ const Header = () => {
   return (
     <>
       <header className="fixed top-0 left-1/2 -translate-x-1/2 z-50 w-full">
-        <div className="bg-green-600 text-white text-center p-4 text-2xl font-bold">
-          🥗 Diet Planner App
-        </div>
         <div
           className="mx-auto flex items-center justify-between 
           px-24 py-4 

@@ -1,30 +1,140 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import HelpSection from "../help/HelpSection";
+import axiosInstance from "../../config/Api";
 
 export default function Support() {
   const [openFAQ, setOpenFAQ] = useState(null);
   const [ticketType, setTicketType] = useState("Workout Issue");
   const [ticketDescription, setTicketDescription] = useState("");
-  const [ticketSuccess, setTicketSuccess] = useState(false);
+  const [ticketSuccess, setTicketSuccess] = useState("");
+  const [ticketError, setTicketError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingTickets, setIsLoadingTickets] = useState(true);
+  const [tickets, setTickets] = useState([]);
 
-  const handleTicketSubmit = () => {
+  const visibleTickets = useMemo(() => {
+    const fiveMinutesInMs = 5 * 60 * 1000;
+    const now = Date.now();
+
+    return tickets.filter((ticket) => {
+      if (ticket.status === "Resolved") {
+        return false;
+      }
+
+      if (!ticket.createdAt) {
+        return true;
+      }
+
+      const createdAtMs = new Date(ticket.createdAt).getTime();
+      return now - createdAtMs <= fiveMinutesInMs;
+    });
+  }, [tickets]);
+
+  const statusStyles = useMemo(
+    () => ({
+      Open: "bg-green-500/20 text-green-300 border border-green-500/40",
+      "In Progress": "bg-yellow-500/20 text-yellow-300 border border-yellow-500/40",
+      Closed: "bg-red-500/20 text-red-300 border border-red-500/40",
+      Resolved: "bg-blue-500/20 text-blue-300 border border-blue-500/40",
+    }),
+    [],
+  );
+
+  const getTicketId = (ticketId) => {
+    if (!ticketId) return "#0000";
+    const suffix = ticketId.slice(-6);
+    const numeric = Number.parseInt(suffix, 16);
+    if (Number.isNaN(numeric)) return `#${ticketId.slice(-4).toUpperCase()}`;
+    return `#${String(numeric).slice(-4).padStart(4, "0")}`;
+  };
+
+  const getTitle = (description) => {
+    if (!description) return "General Support Issue";
+    const cleaned = description.trim();
+    if (cleaned.length <= 48) return cleaned;
+    return `${cleaned.slice(0, 48)}...`;
+  };
+
+  const getSubtitle = (description) => {
+    if (!description) return "No additional details";
+    const cleaned = description.trim();
+    if (cleaned.length <= 90) return cleaned;
+    return `${cleaned.slice(0, 90)}...`;
+  };
+
+  const loadTickets = async (showLoader = true) => {
+    try {
+      if (showLoader) {
+        setIsLoadingTickets(true);
+      }
+      const { data } = await axiosInstance.get("/user/mytickets");
+      setTickets(data?.tickets || []);
+    } catch (error) {
+      setTicketError(
+        error?.response?.data?.message ||
+          "Unable to fetch your tickets right now. Please try again.",
+      );
+    } finally {
+      if (showLoader) {
+        setIsLoadingTickets(false);
+      }
+    }
+  };
+
+  useEffect(() => {
+    loadTickets();
+
+    const intervalId = setInterval(() => {
+      loadTickets(false);
+    }, 30000);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
+  const handleTicketSubmit = async () => {
     if (!ticketDescription.trim()) {
-      alert("Please describe your issue.");
+      setTicketError("Please describe your issue.");
       return;
     }
 
-    // Demo submission
-    console.log("Ticket Submitted:", {
-      type: ticketType,
-      description: ticketDescription,
+    try {
+      setIsSubmitting(true);
+      setTicketError("");
+      setTicketSuccess("");
+
+      const payload = {
+        type: ticketType,
+        description: ticketDescription.trim(),
+      };
+
+      const { data } = await axiosInstance.post("/api/ticket/createTicket", payload);
+
+      setTicketSuccess(data?.message || "Your support ticket has been submitted.");
+      setTicketDescription("");
+      await loadTickets(false);
+
+      setTimeout(() => {
+        setTicketSuccess("");
+      }, 3000);
+    } catch (error) {
+      setTicketError(
+        error?.response?.data?.message ||
+          "Ticket submission failed. Please try again.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const formatDate = (dateValue) => {
+    if (!dateValue) return "-";
+    return new Date(dateValue).toLocaleString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
-
-    setTicketSuccess(true);
-    setTicketDescription("");
-
-    setTimeout(() => {
-      setTicketSuccess(false);
-    }, 3000);
   };
 
   const faqs = [
@@ -185,7 +295,10 @@ export default function Support() {
 
       {/* Raise Ticket Section */}
       <div className="bg-[#111827] border border-gray-700 rounded-2xl p-6 mb-10">
-        <h2 className="text-xl font-semibold mb-4">Raise a Support Ticket</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold">Raise a Support Ticket</h2>
+          <span className="text-xs text-gray-400">Avg response: 24-48 hours</span>
+        </div>
 
         <select
           value={ticketType}
@@ -207,15 +320,71 @@ export default function Support() {
 
         <button
           onClick={handleTicketSubmit}
-          className="w-full bg-linear-to-r from-purple-600 to-purple-800 py-2 rounded-xl hover:opacity-90 transition"
+          disabled={isSubmitting}
+          className="w-full bg-linear-to-r from-purple-600 to-purple-800 py-2 rounded-xl hover:opacity-90 transition disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          Submit Ticket
+          {isSubmitting ? "Submitting..." : "Submit Ticket"}
         </button>
 
+        {ticketError && <p className="text-red-400 mt-3 text-sm">{ticketError}</p>}
+
         {ticketSuccess && (
-          <p className="text-green-400 mt-3 text-sm">
-            ✅ Your support ticket has been submitted successfully!
+          <p className="text-green-400 mt-3 text-sm">✅ {ticketSuccess}</p>
+        )}
+      </div>
+
+      <div className="bg-[#111827] border border-gray-700 rounded-2xl p-6 mb-10">
+        <div className="mb-4 pb-4 border-b border-white/10">
+          <p className="text-xs uppercase tracking-wide text-purple-300">AI Dashboard</p>
+          <h2 className="text-xl font-semibold mt-1">AI Support Ticket Tracker</h2>
+        </div>
+
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold">Recent Ticket Updates</h3>
+          <button
+            onClick={() => loadTickets()}
+            className="text-xs px-3 py-1 rounded-lg border border-gray-600 text-gray-300 hover:bg-gray-800 transition"
+          >
+            Refresh
+          </button>
+        </div>
+
+        {isLoadingTickets ? (
+          <p className="text-gray-400 text-sm">Loading your tickets...</p>
+        ) : visibleTickets.length === 0 ? (
+          <p className="text-gray-400 text-sm">
+            No active tickets. Resolved tickets and tickets older than 5 minutes are hidden automatically.
           </p>
+        ) : (
+          <div className="space-y-3">
+            {visibleTickets.map((ticket) => (
+              <div
+                key={ticket._id}
+                className="rounded-xl border border-gray-700 bg-[#0F172A] p-4 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:border-purple-500/60 hover:shadow-lg hover:shadow-purple-500/10"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="font-semibold text-sm text-white">
+                      {getTitle(ticket.description)}
+                    </p>
+                    <p className="text-xs text-gray-400 mt-1">
+                      {ticket.type} • {getTicketId(ticket._id)}
+                    </p>
+                  </div>
+                  <span
+                    className={`px-2 py-1 rounded-lg text-xs font-medium ${
+                      statusStyles[ticket.status] ||
+                      "bg-gray-500/20 text-gray-300 border border-gray-500/40"
+                    }`}
+                  >
+                    {ticket.status}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-300 mt-3">{getSubtitle(ticket.description)}</p>
+                <p className="text-xs text-gray-500 mt-2">Raised: {formatDate(ticket.createdAt)}</p>
+              </div>
+            ))}
+          </div>
         )}
       </div>
       {/* Disclaimer */}

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import DietForm from "./components/DietForm";
-import DietResult from "./components/DietResult";
+// import DietForm from "./components/DietForm";
+// import DietResult from "./components/DietResult";
 import Header from "./components/Header";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
@@ -11,9 +11,9 @@ import Home from "./pages/Home";
 import UserDashboard from "./pages/dashboard/Userdashhboard";
 import { Toaster } from "react-hot-toast";
 import AiChatWidget from "./components/AiChatWidget";
-import WorkoutPlan from "./pages/WorkoutPlan";
+// import WorkoutPlan from "./pages/WorkoutPlan";
 
-<Route path="/workout" element={<WorkoutPlan />} />
+{/* <Route path="/workout" element={<WorkoutPlan />} /> */}
 
 
 const App = () => {
@@ -34,14 +34,6 @@ const App = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/user-dashboard" element={<UserDashboard />} />
-        <div className="min-h-screen bg-gray-100">
-          <Header />
-          <div className="container mx-auto p-6">
-            <DietForm setDietData={setDietData} />
-            {dietData && <DietResult dietData={dietData} />}
-          </div>
-        </div>
-
 
       </Routes>
     </BrowserRouter>

@@ -7,7 +7,7 @@ import ResetPasswordModal from "./modals/ResetPasswordModal";
 import UpdateProfileModal from "./modals/UpdateProfileModal";
 import toast from "react-hot-toast";
 import api from "../../config/Api";
-import ProgressGraph from "../components/ProgressGraph";
+// import ProgressGraph from "../components/ProgressGraph";
 
 const UserProfile = () => {
   const { user, setUser } = useAuth();
@@ -73,22 +73,22 @@ const UserProfile = () => {
     }
   };
 
-  const saveProgress = async () => {
-  try {
-    await api.post("/user/progress", {
-      workoutAdherencePercent: 80,
-      dietAdherencePercent: 75,
-      habitScore: 85,
-    });
+//   const saveProgress = async () => {
+//   try {
+//     await api.post("/user/progress", {
+//       workoutAdherencePercent: 80,
+//       dietAdherencePercent: 75,
+//       habitScore: 85,
+//     });
 
-    // Refresh graph after saving
-    const res = await api.get("/user/progress-graph");
-    setProgressData(res.data.graphData);
+//     // Refresh graph after saving
+//     const res = await api.get("/user/progress-graph");
+//     setProgressData(res.data.graphData);
 
-  } catch (error) {
-    console.log(error);
-  }
-};
+//   } catch (error) {
+//     console.log(error);
+//   }
+// };
 
 
   useEffect(() => {
@@ -286,7 +286,7 @@ const UserProfile = () => {
               </button>
             </div>
 
-            <ProgressGraph data={progressData} />
+            {/* <ProgressGraph data={progressData} /> */}
 
             {/* Support Tickets Section */}
             <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-xl mb-6">
