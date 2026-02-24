@@ -56,7 +56,7 @@ const progressSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    weekStartDate: {
+    date: {
       type: Date,
       required: true,
     },
@@ -85,7 +85,7 @@ const progressSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-progressSchema.index({ user: 1, weekStartDate: 1 }, { unique: true });
+progressSchema.index({ user: 1, date: 1 }, { unique: true });
 
 const Progress = mongoose.model("Progress", progressSchema);
 

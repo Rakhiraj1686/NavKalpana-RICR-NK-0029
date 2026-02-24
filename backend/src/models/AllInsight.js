@@ -39,6 +39,6 @@ const aiInsightSchema = new mongoose.Schema(
 
 aiInsightSchema.index({ user: 1, weekKey: 1 }, { unique: true });
 
-const AIInsight = mongoose.model("AIInsight", aiInsightSchema);
+const AllInsight = mongoose.model("AllInsight", aiInsightSchema);
 
-export default AIInsight;
+export default AllInsight;

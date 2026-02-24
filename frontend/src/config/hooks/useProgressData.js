@@ -4,7 +4,7 @@ import {
   getProgressOverviewGraph,
   logWeight,
   logWorkout,
-} from "../api/progressApi";
+} from "../progressApi"
 
 const initialDashboard = {
   goal: { progressPercent: 0, currentWeight: null, targetWeight: null },
@@ -32,7 +32,41 @@ export const useProgressData = () => {
         getProgressOverviewGraph(),
       ]);
 
-      setDashboard(dashboardData || initialDashboard);
+      // Calculate streak from graphData (workout history)
+      let currentStreak = 0;
+      let longestStreak = 0;
+      let tempStreak = 0;
+
+      if (overviewGraph && overviewGraph.length > 0) {
+        for (let i = overviewGraph.length - 1; i >= 0; i--) {
+          if (overviewGraph[i].workout > 0) {
+            tempStreak++;
+            if (i === overviewGraph.length - 1) {
+              currentStreak = tempStreak;
+            }
+          } else {
+            if (tempStreak > longestStreak) {
+              longestStreak = tempStreak;
+            }
+            tempStreak = 0;
+          }
+        }
+
+        if (tempStreak > longestStreak) {
+          longestStreak = tempStreak;
+        }
+      }
+
+      // Merge calculated streak with dashboard data
+      const updatedDashboard = {
+        ...(dashboardData || initialDashboard),
+        streak: {
+          currentStreakDays: currentStreak,
+          longestStreakDays: longestStreak,
+        },
+      };
+
+      setDashboard(updatedDashboard);
       setGraphData(overviewGraph);
     } catch (err) {
       setError(err?.response?.data?.message || "Failed to load progress dashboard");
