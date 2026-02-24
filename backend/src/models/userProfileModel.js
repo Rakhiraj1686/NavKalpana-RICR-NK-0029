@@ -49,7 +49,7 @@ const userSchema = new mongoose.Schema(
     foodPreference: {
       type: String,
       enum: ["vegetarian", "vegan", "nonvegetarian"],
-    },  
+    },
 
     age: String,
 
@@ -80,6 +80,7 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    
   },
   { timestamps: true },
 );
