@@ -56,16 +56,31 @@ const AiChatWidget = ({ chatOpen, setChatOpen }) => {
         setMessages((prev) => [...prev, { role: "ai", text: res.data.reply }]);
       }
     } catch (error) {
-      if (error?.response?.status === 403) {
-        toast.error("Free AI limit reached. Please login.");
+      if (user && isLogin) {
+        if (error?.response?.status === 403) {
+          toast.error(
+            "Your free AI service for Today is completed. \n Please Upgrade to access more.",
+          );
 
-        setTimeout(() => {
-          navigate("/login");
-        }, 1200);
+          setTimeout(() => {
+            navigate("/login");
+          }, 1200);
 
-        return;
+          return;
+        }
+        toast.error("Something went wrong.");
+      } else {
+        if (error?.response?.status === 403) {
+          toast.error("Please Login or SignUp to access more about HealthUP.");
+
+          setTimeout(() => {
+            navigate("/login");
+          }, 1200);
+
+          return;
+        }
+        toast.error("Something went wrong.");
       }
-      toast.error("Something went wrong.");
     } finally {
       setInput("");
       setTyping(false);
