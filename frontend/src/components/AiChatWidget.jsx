@@ -33,7 +33,7 @@ const AiChatWidget = ({ chatOpen, setChatOpen }) => {
         },
       ]);
     }
-  }, [chatOpen]);
+  }, [chatOpen, messages.length]);
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -74,7 +74,7 @@ const AiChatWidget = ({ chatOpen, setChatOpen }) => {
 
   useEffect(() => {
     setChatOpen(false);
-  }, [location]);
+  }, [location, setChatOpen]);
 
   return (
     <>

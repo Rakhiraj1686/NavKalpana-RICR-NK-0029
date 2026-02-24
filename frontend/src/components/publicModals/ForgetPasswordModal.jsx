@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { BsArrowClockwise } from "react-icons/bs";
 import { Eye, EyeOff } from "lucide-react";
-import api from "../../Config/Api";
+import api from "../../config/Api";
 import toast from "react-hot-toast";
 import { RxCross2 } from "react-icons/rx";
 

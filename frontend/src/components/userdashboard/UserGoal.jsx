@@ -55,7 +55,7 @@ const UserGoal = () => {
       const res = await api.put("/user/completeGoal");
       toast.success("Goal marked as completed 🎉");
       setUser(res.data.data);
-    } catch (err) {
+    } catch {
       toast.error("Failed to complete goal");
     }
   };
@@ -66,13 +66,13 @@ const UserGoal = () => {
         const res = await api.get("/user/goal");
          console.log("Goal response:", res.data); 
         setUser((prev) => ({ ...prev, ...res.data.data }));
-      } catch (err) {
+      } catch {
         console.log("Failed to fetch goal");
       }
     };
 
     fetchGoal();
-  }, []);
+  }, [setUser]);
 
   return (
     <div className="min-h-screen p-6">

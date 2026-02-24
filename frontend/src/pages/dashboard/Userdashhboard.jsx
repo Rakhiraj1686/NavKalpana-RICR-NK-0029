@@ -1,18 +1,17 @@
 import React, { useState, useEffect } from "react";
 import UserSidebar from "../../components/userdashboard/UserSidebar";
 import UserOverview from "../../components/userdashboard/UserOverview";
-import UserSupport from"../../components/userdashboard/UserSupport"
+import UserSupport from "../../components/userdashboard/UserSupport";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import UserWorkout from "../../components/userdashboard/UserWorkout";
-import UserDiet from "../../components/userdashboard/UserDiet";
+// import UserWorkout from "../../components/userdashboard/UserWorkout";
 import UserProgress from "../../components/userdashboard/UserProgress";
 import UserProfile from "../../components/userdashboard/UserProfile";
 import UserGoal from "../../components/userdashboard/UserGoal";
-import { User } from "lucide-react";
+import UserPlan from "../../components/userdashboard/userPlan";
 
 const UserDashboard = () => {
-  const { role, isLogin } = useAuth();
+  const { isLogin } = useAuth();
   const navigate = useNavigate();
 
   const [active, setActive] = useState("overview");
@@ -63,12 +62,12 @@ const UserDashboard = () => {
 
         <div className={`mx-auto p-6 ${isCollapsed ? "w-56/60" : "w-50/60"}`}>
           {active === "overview" && <UserOverview />}
-          {active === "workout" && <UserWorkout />}
-          {active === "diet" && <UserDiet />}
+          {/* {active === "workout" && <UserWorkout />} */}
+          {active === "plan" && <UserPlan/>}
           {active === "progress" && <UserProgress />}
           {active === "profile" && <UserProfile />}
           {active === "goal" && <UserGoal />}
-          {active === "support" && <UserSupport/>}
+          {active === "support" && <UserSupport />}
         </div>
       </main>
     </div>
