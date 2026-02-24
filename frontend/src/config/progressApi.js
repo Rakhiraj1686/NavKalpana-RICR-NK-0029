@@ -1,4 +1,4 @@
-import api from "../../../config/Api";
+import api from "../config/Api"
 
 export const getProgressDashboard = async () => {
   const res = await api.get("/api/v1/progress/dashboard");

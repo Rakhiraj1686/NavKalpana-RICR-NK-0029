@@ -2,9 +2,9 @@ import DailyProgress from "../models/DailyProgress.js";
 import WorkoutLog from "../models/WorkoutLog.js";
 import StreakState from "../models/StreakState.js";
 import ProgressAggregate from "../models/ProgressAggregate.js";
-import AIInsight from "../models/AIInsight.js";
+import AllInsight from "../models/AllInsight.js";
 import { UserBadge } from "../models/Badge.js";
-import User from "../../../models/userProfileModel.js";
+import User from "../models/userProfileModel.js";
 import {
   clampPercent,
   normalizeDate,
@@ -269,7 +269,7 @@ export const generateRuleBasedInsight = async (userId) => {
 
   const summary = summaryParts.join(" ");
 
-  const insight = await AIInsight.findOneAndUpdate(
+  const insight = await AllInsight .findOneAndUpdate(
     { user: userId, weekKey: latestWeek },
     {
       $set: {
@@ -286,7 +286,7 @@ export const generateRuleBasedInsight = async (userId) => {
 };
 
 export const getLatestInsight = async (userId) => {
-  const latestInsight = await AIInsight.findOne({ user: userId }).sort({ createdAt: -1 });
+  const latestInsight = await AllInsight.findOne({ user: userId }).sort({ createdAt: -1 });
 
   if (latestInsight) return latestInsight;
 

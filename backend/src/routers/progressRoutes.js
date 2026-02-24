@@ -1,5 +1,5 @@
 import express from "express";
-import { Protect } from "../../../middlewares/authMiddleware.js";
+import { Protect } from "../middlewares/authMiddleware.js";
 import {
   logWeightEntry,
   logWorkoutCompletion,

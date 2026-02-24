@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useAuth } from "../../context/AuthContext";
 import UserImage from "../../assets/userImage.jpg";
 import { FaCamera, FaPhoneAlt } from "react-icons/fa";
@@ -49,6 +49,16 @@ const UserProfile = () => {
   };
 
   const profileCompletion = user?.profileCompleted ? 100 : 60;
+
+  const getTicketId = useMemo(() => {
+    return (ticketId) => {
+      if (!ticketId) return "#0000";
+      const suffix = ticketId.slice(-6);
+      const numeric = Number.parseInt(suffix, 16);
+      if (Number.isNaN(numeric)) return `#${ticketId.slice(-4).toUpperCase()}`;
+      return `#${String(numeric).slice(-4).padStart(4, "0")}`;
+    };
+  }, []);
 
   const handleRegenerate = async () => {
     try {
@@ -103,6 +113,12 @@ const UserProfile = () => {
     };
 
     fetchTickets();
+
+    const intervalId = setInterval(() => {
+      fetchTickets();
+    }, 30000);
+
+    return () => clearInterval(intervalId);
   }, []);
 
  
@@ -280,7 +296,7 @@ const UserProfile = () => {
               </div>
               <button
                 onClick={handleRegenerate}
-                className="mb-6 bg-purple-600 px-4 py-2 rounded-lg hover:bg-purple-700 transition"
+                className="mb-6 bg-purple-600 px-4 py-2 rounded-lg hover:bg-purple-700 transition cursor-pointer"
               >
                 Regenerate AI Plan
               </button>
@@ -300,26 +316,46 @@ const UserProfile = () => {
                 tickets.map((ticket) => (
                   <div
                     key={ticket._id}
-                    className="bg-white/10 p-4 rounded-xl mb-4 flex justify-between items-start"
+                    className="bg-white/10 p-4 rounded-xl mb-4 flex flex-col gap-3 border border-white/5 hover:border-purple-500/40 transition-all cursor-pointer"
                   >
-                    <div>
-                      <p className="font-semibold text-white">{ticket.type}</p>
-                      <p className="text-sm text-gray-400 mt-1">
-                        {ticket.description}
-                      </p>
+                    <div className="flex justify-between items-start gap-3">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <p className="font-semibold text-white">{ticket.type}</p>
+                          <span className="text-xs bg-purple-500/20 text-purple-300 px-2 py-1 rounded border border-purple-500/40">
+                            {getTicketId(ticket._id)}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-400 mt-1">
+                          {ticket.description}
+                        </p>
+                      </div>
+
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${
+                          ticket.status === "Open"
+                            ? "bg-green-500/20 text-green-400 border border-green-500/40"
+                            : ticket.status === "In Progress"
+                              ? "bg-yellow-500/20 text-yellow-400 border border-yellow-500/40"
+                              : "bg-blue-500/20 text-blue-400 border border-blue-500/40"
+                        }`}
+                      >
+                        🔘 {ticket.status}
+                      </span>
                     </div>
 
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-semibold capitalize ${
-                        ticket.status === "Open"
-                          ? "bg-yellow-500/20 text-yellow-400"
-                          : ticket.status === "In progress"
-                            ? "bg-blue-500/20 text-blue-400"
-                            : "bg-green-500/20 text-green-400"
-                      }`}
-                    >
-                      {ticket.status}
-                    </span>
+                    {ticket.solution && (
+                      <div className="bg-white/5 p-3 rounded-lg border-l-2 border-blue-500">
+                        <p className="text-xs text-blue-300 font-semibold mb-1">✓ Solution:</p>
+                        <p className="text-sm text-gray-300">{ticket.solution}</p>
+                      </div>
+                    )}
+
+                    {ticket.resolvedAt && (
+                      <p className="text-xs text-gray-500">
+                        Resolved: {new Date(ticket.resolvedAt).toLocaleDateString("en-IN")}
+                      </p>
+                    )}
                   </div>
                 ))
               )}

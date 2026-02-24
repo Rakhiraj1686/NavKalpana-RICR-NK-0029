@@ -292,7 +292,6 @@ export default function Support() {
           advice.
         </p>
       </div> */}
-
       {/* Raise Ticket Section */}
       <div className="bg-[#111827] border border-gray-700 rounded-2xl p-6 mb-10">
         <div className="flex items-center justify-between mb-4">
@@ -321,7 +320,7 @@ export default function Support() {
         <button
           onClick={handleTicketSubmit}
           disabled={isSubmitting}
-          className="w-full bg-linear-to-r from-purple-600 to-purple-800 py-2 rounded-xl hover:opacity-90 transition disabled:opacity-60 disabled:cursor-not-allowed"
+          className="w-full bg-linear-to-r from-purple-600 to-purple-800 py-2 rounded-xl hover:opacity-90 transition disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
         >
           {isSubmitting ? "Submitting..." : "Submit Ticket"}
         </button>
@@ -333,60 +332,6 @@ export default function Support() {
         )}
       </div>
 
-      <div className="bg-[#111827] border border-gray-700 rounded-2xl p-6 mb-10">
-        <div className="mb-4 pb-4 border-b border-white/10">
-          <p className="text-xs uppercase tracking-wide text-purple-300">AI Dashboard</p>
-          <h2 className="text-xl font-semibold mt-1">AI Support Ticket Tracker</h2>
-        </div>
-
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">Recent Ticket Updates</h3>
-          <button
-            onClick={() => loadTickets()}
-            className="text-xs px-3 py-1 rounded-lg border border-gray-600 text-gray-300 hover:bg-gray-800 transition"
-          >
-            Refresh
-          </button>
-        </div>
-
-        {isLoadingTickets ? (
-          <p className="text-gray-400 text-sm">Loading your tickets...</p>
-        ) : visibleTickets.length === 0 ? (
-          <p className="text-gray-400 text-sm">
-            No active tickets. Resolved tickets and tickets older than 5 minutes are hidden automatically.
-          </p>
-        ) : (
-          <div className="space-y-3">
-            {visibleTickets.map((ticket) => (
-              <div
-                key={ticket._id}
-                className="rounded-xl border border-gray-700 bg-[#0F172A] p-4 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:border-purple-500/60 hover:shadow-lg hover:shadow-purple-500/10"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="font-semibold text-sm text-white">
-                      {getTitle(ticket.description)}
-                    </p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      {ticket.type} • {getTicketId(ticket._id)}
-                    </p>
-                  </div>
-                  <span
-                    className={`px-2 py-1 rounded-lg text-xs font-medium ${
-                      statusStyles[ticket.status] ||
-                      "bg-gray-500/20 text-gray-300 border border-gray-500/40"
-                    }`}
-                  >
-                    {ticket.status}
-                  </span>
-                </div>
-                <p className="text-sm text-gray-300 mt-3">{getSubtitle(ticket.description)}</p>
-                <p className="text-xs text-gray-500 mt-2">Raised: {formatDate(ticket.createdAt)}</p>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
       {/* Disclaimer */}
       <div className="border border-red-600 bg-red-900/20 rounded-xl p-4 mb-6 text-sm text-red-300">
         ⚠ This platform provides general fitness guidance and does not replace
