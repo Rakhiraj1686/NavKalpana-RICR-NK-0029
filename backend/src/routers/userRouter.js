@@ -9,6 +9,10 @@ import {
   GetUserGoal,
   UserChatWithAI,
   RegeneratePlan,
+  generatePlan,
+  getMyTickets,
+  createWeeklyProgress,
+  getProgressGraph
 } from "../controllers/userController.js";
 import { Protect } from "../middlewares/authMiddleware.js";
 import { checkUserChatLimit } from "../middlewares/chatUseLimit.js";
@@ -24,7 +28,11 @@ router.put("/completeGoal", Protect, UserCompleteGoal);
 router.put("/completeGoal", Protect, UserCompleteGoal);
 router.get("/goal", Protect, GetUserGoal);
 router.post("/chat", Protect, checkUserChatLimit, UserChatWithAI);
-router.get("/goal",Protect, GetUserGoal);
+router.get("/goal", Protect, GetUserGoal);
 router.post("/regenerate-plan", Protect, RegeneratePlan);
+router.post("/generatePlan", Protect, generatePlan);
+router.get("/mytickets", Protect, getMyTickets);
+router.post("/progress", Protect, createWeeklyProgress);
+router.get("/progress-graph", Protect, getProgressGraph);
 
 export default router;

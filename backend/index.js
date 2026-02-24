@@ -12,6 +12,7 @@ import PublicRouter from "./src/routers/PublicRouter.js";
 import connectDB from "./src/config/db.js";
 import ticketRouter from "./src/routers/ticketRouter.js";
 
+
 const app = express();
 
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
