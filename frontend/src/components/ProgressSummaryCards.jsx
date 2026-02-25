@@ -1,14 +1,24 @@
-const Card = ({ title, value, subtitle }) => (
-  <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-    <p className="text-xs text-gray-400">{title}</p>
-    <p className="text-2xl font-bold text-white mt-1">{value}</p>
-    {subtitle && <p className="text-xs text-gray-400 mt-1">{subtitle}</p>}
-  </div>
-);
+const Card = ({ title, value, subtitle, status }) => {
+  let statusColor = "text-gray-400";
+  if (status === "under") statusColor = "text-blue-400";
+  else if (status === "over") statusColor = "text-red-400";
+  else if (status === "perfect") statusColor = "text-green-400";
+  
+  return (
+    <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+      <p className="text-xs text-gray-400">{title}</p>
+      <p className="text-2xl font-bold text-white mt-1">{value}</p>
+      {subtitle && <p className={`text-xs ${statusColor} mt-1`}>{subtitle}</p>}
+    </div>
+  );
+};
 
-const ProgressSummaryCards = ({ dashboard }) => {
+const ProgressSummaryCards = ({ dashboard, calorieTarget: calorieTargetProp }) => {
   const goal = dashboard?.goal || {};
-  const streak = dashboard?.streak || {};
+
+  // Calculate calorie status (assuming we'll track this later)
+  const calorieTarget = calorieTargetProp || goal.calorieTarget || 2000;
+  const workoutsPerWeek = goal.workoutsPerWeek || 5;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
@@ -23,14 +33,15 @@ const ProgressSummaryCards = ({ dashboard }) => {
         subtitle={goal.targetWeight ? `Target ${goal.targetWeight} kg` : "Set a target in Goal"}
       />
       <Card
-        title="Current Streak"
-        value={`${streak.currentStreakDays || 0} days`}
-        subtitle="Workout consistency"
+        title="Calorie Target"
+        value={`${calorieTarget} kcal`}
+        subtitle="Daily calorie goal"
+        status="under"
       />
       <Card
-        title="Longest Streak"
-        value={`${streak.longestStreakDays || 0} days`}
-        subtitle="Best performance"
+        title="Weekly Workout Goal"
+        value={`${workoutsPerWeek} days`}
+        subtitle="Target workouts per week"
       />
     </div>
   );

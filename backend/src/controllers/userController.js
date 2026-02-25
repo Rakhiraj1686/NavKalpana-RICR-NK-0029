@@ -6,6 +6,12 @@ import { generateAIPlan } from "../services/aiPlanService.js";
 import groq from "../config/groq.js";
 import Ticket from "../models/ticketModel.js";
 import Progress from "../models/userProgressModel.js";
+import {
+  calculateBMR,
+  calculateMaintenanceCalories,
+  calculateTargetCalories,
+  generateMacros,
+} from "../utils/fitnessCalculation.js"
 
 const getWeekStartDate = (date = new Date()) => {
   const current = new Date(date);
@@ -49,7 +55,7 @@ export const UserResetPassword = async (req, res, next) => {
 
 export const UserUpdateProfile = async (req, res, next) => {
   try {
-    let {
+    const {
       fullName,
       email,
       mobileNumber,
@@ -57,9 +63,9 @@ export const UserUpdateProfile = async (req, res, next) => {
       height,
       weight,
       biologicalSex,
-      foodPreference,
-      experienceLevel,
       activityLevel,
+      experienceLevel,
+      goal,
     } = req.body;
 
     const currentUser = req.user;
@@ -72,73 +78,72 @@ export const UserUpdateProfile = async (req, res, next) => {
       return next(error);
     }
 
-    // Convert string to numbers
-    age = Number(age);
-    height = Number(height); //in cm
-    weight = Number(weight); //in kg
+    // Convert to numbers
+    const numAge = Number(age);
+    const numHeight = Number(height);
+    const numWeight = Number(weight);
 
-    // BMI Calculation
+    // BMI
     let bmi = null;
-    if (height && weight) {
-      const heightMeter = height / 100;
-      bmi = weight / (heightMeter * heightMeter);
-      bmi = Number(bmi.toFixed(2));
+    if (numHeight && numWeight) {
+      const heightMeter = numHeight / 100;
+      bmi = Number((numWeight / (heightMeter * heightMeter)).toFixed(2));
     }
 
-    // BMR Calculation
-    let bmr = null;
-    if (age && height && weight && biologicalSex) {
-      if (biologicalSex === "male") {
-        bmr = 10 * weight + 6.25 * height - 5 * age + 5;
-      } else if (biologicalSex === "female") {
-        bmr = 10 * weight + 6.25 * height - 5 * age - 161;
-      }
-      bmr = Math.round(bmr);
-    }
+    // ---- CALCULATIONS ----
+    const bmr = calculateBMR({
+      weight: numWeight,
+      height: numHeight,
+      age: numAge,
+      biologicalSex,
+    });
 
-    // Maintenance Calories
-    const multiplier = {
-      sedentary: 1.2,
-      "lightly active": 1.375,
-      "moderately active": 1.55,
-      "very active": 1.725,
-    };
+    const maintenanceCalories = calculateMaintenanceCalories(
+      bmr,
+      activityLevel,
+    );
 
-    const maintenanceCalories =
-      bmr && multiplier[activityLevel]
-        ? Math.round(bmr * multiplier[activityLevel])
-        : null;
+    const targetCalories = calculateTargetCalories({
+      maintenanceCalories,
+      goal,
+    });
 
+    const macros = generateMacros({
+      weight: numWeight,
+      goal,
+      targetCalories,
+    });
+
+    // ---- SAVE USER ----
     currentUser.fullName = fullName;
     currentUser.email = email;
     currentUser.mobileNumber = mobileNumber;
-    if (age !== undefined) currentUser.age = age;
-    if (height !== undefined) currentUser.height = height;
-    if (weight !== undefined) currentUser.weight = weight;
-    if (foodPreference) currentUser.foodPreference = foodPreference;
-    currentUser.biologicalSex = biologicalSex || currentUser.biologicalSex;
-    currentUser.experienceLevel =
-      experienceLevel || currentUser.experienceLevel;
-    currentUser.activityLevel = activityLevel || currentUser.activityLevel;
+    currentUser.age = numAge;
+    currentUser.height = numHeight;
+    currentUser.weight = numWeight;
+    currentUser.biologicalSex = biologicalSex;
+    currentUser.activityLevel = activityLevel;
+    currentUser.experienceLevel = experienceLevel;
+    currentUser.goal = goal;
+
     currentUser.bmi = bmi;
     currentUser.bmr = bmr;
     currentUser.maintenanceCalories = maintenanceCalories;
+    currentUser.targetCalories = targetCalories;
+    currentUser.macros = macros;
 
-    console.log("OldData: ", req.user);
-    // const freshUser = await User.findById(currentUser._id);
+    // Generate AI Plan
+    const plan = generateAIPlan(currentUser);
+    currentUser.aiPlan = plan;
 
     currentUser.profileCompleted = true;
 
     await currentUser.save();
 
-    const plan = generateAIPlan(currentUser);
-
-    currentUser.aiPlan = plan;
-
-    await currentUser.save();
-    res
-      .status(200)
-      .json({ message: "Profile updated successful.", data: currentUser });
+    res.status(200).json({
+      message: "Profile updated successfully.",
+      data: currentUser,
+    });
   } catch (error) {
     next(error);
   }
@@ -339,7 +344,38 @@ export const generatePlan = async (req, res, next) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const newPlan = generateAIPlan(user);
+    const recentProgress = await Progress.find({ user: req.user._id })
+      .sort({ date: -1 })
+      .limit(14)
+      .select("workoutAdherencePercent dietAdherencePercent habitScore");
+
+    const progressSummary = recentProgress.length
+      ? recentProgress.reduce(
+          (acc, item) => {
+            acc.avgWorkoutAdherence += Number(item.workoutAdherencePercent || 0);
+            acc.avgDietAdherence += Number(item.dietAdherencePercent || 0);
+            acc.avgHabitScore += Number(item.habitScore || 0);
+            return acc;
+          },
+          { avgWorkoutAdherence: 0, avgDietAdherence: 0, avgHabitScore: 0 },
+        )
+      : null;
+
+    const normalizedProgressSummary = progressSummary
+      ? {
+          avgWorkoutAdherence: Number(
+            (progressSummary.avgWorkoutAdherence / recentProgress.length).toFixed(2),
+          ),
+          avgDietAdherence: Number(
+            (progressSummary.avgDietAdherence / recentProgress.length).toFixed(2),
+          ),
+          avgHabitScore: Number(
+            (progressSummary.avgHabitScore / recentProgress.length).toFixed(2),
+          ),
+        }
+      : null;
+
+    const newPlan = generateAIPlan(user, normalizedProgressSummary);
     console.log("Generate Plan", newPlan);
 
     user.aiPlan = newPlan;

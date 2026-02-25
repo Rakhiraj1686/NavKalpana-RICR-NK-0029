@@ -4,7 +4,7 @@ import api from "../../config/Api";
 import toast from "react-hot-toast";
 
 const UserPlan = () => {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
   const [activeTab, setActiveTab] = useState("diet");
   const [loading, setLoading] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
@@ -308,6 +308,40 @@ const UserPlan = () => {
     ],
   });
 
+  const applyAIPlanToState = (plan) => {
+    if (!plan) return;
+
+    if (plan.calories || plan.macros || plan.meals) {
+      setDietPlan((prev) => ({
+        ...prev,
+        calories: Number(plan.calories || prev.calories || 0),
+        macros: {
+          protein: Number(plan?.macros?.protein || prev?.macros?.protein || 0),
+          carbs: Number(plan?.macros?.carbs || prev?.macros?.carbs || 0),
+          fats: Number(plan?.macros?.fats || prev?.macros?.fats || 0),
+        },
+        meals:
+          Array.isArray(plan.meals) && plan.meals.length > 0
+            ? plan.meals
+            : prev.meals,
+      }));
+    }
+
+    if (Array.isArray(plan.workoutDays) && plan.workoutDays.length > 0) {
+      setWorkoutPlan((prev) => ({
+        ...prev,
+        level: plan.workoutLevel || prev.level,
+        days: plan.workoutDays,
+      }));
+    }
+  };
+
+  useEffect(() => {
+    if (user?.aiPlan) {
+      applyAIPlanToState(user.aiPlan);
+    }
+  }, [user?.aiPlan]);
+
   // Calculate total macros from meals
   useEffect(() => {
     if (dietPlan.meals && dietPlan.meals.length > 0) {
@@ -337,7 +371,7 @@ const UserPlan = () => {
   }, []);
 
   const handleRegeneratePlan = async () => {
-    if (!user?.primaryGoal) {
+    if (!user?.primaryGoal && !user?.goal) {
       toast.error("Please set your fitness goal first!");
       return;
     }
@@ -346,10 +380,16 @@ const UserPlan = () => {
     try {
       const res = await api.post("/user/generatePlan");
       toast.success("Plan regenerated successfully! 🎉");
-      // Update plans with AI-generated data if available
       if (res.data.aiPlan) {
-        // You can update the diet plan based on AI response
-        console.log("AI Plan:", res.data.aiPlan);
+        applyAIPlanToState(res.data.aiPlan);
+
+        const updatedUser = {
+          ...user,
+          aiPlan: res.data.aiPlan,
+        };
+
+        setUser(updatedUser);
+        sessionStorage.setItem("HealthUP", JSON.stringify(updatedUser));
       }
     } catch (err) {
       toast.error(err?.response?.data?.message || "Failed to regenerate plan");

@@ -10,6 +10,14 @@ const UserOverview = () => {
   const [goalData, setGoalData] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const effectiveCalorieTarget = useMemo(() => {
+    const profileCalories = Number(user?.aiPlan?.calories);
+    if (Number.isFinite(profileCalories) && profileCalories > 0) {
+      return profileCalories;
+    }
+    return goalData?.calorieTarget || 2000;
+  }, [user?.aiPlan?.calories, goalData?.calorieTarget]);
+
   useEffect(() => {
     if (!user?.profileCompleted) {
       setLoading(false);
@@ -30,7 +38,11 @@ const UserOverview = () => {
 
         setGoalData(goalFetched);
 
-        const calorieTarget = goalFetched?.calorieTarget || 2000;
+        const profileCalories = Number(user?.aiPlan?.calories);
+        const calorieTarget =
+          Number.isFinite(profileCalories) && profileCalories > 0
+            ? profileCalories
+            : goalFetched?.calorieTarget || 2000;
         const workoutsPlanned = goalFetched?.workoutsPerWeek || 5;
 
         if (graphData.length > 0) {
@@ -38,16 +50,14 @@ const UserOverview = () => {
 
           const workoutPercent = latest.workout || 0;
           const workoutsCompleted = Math.round(
-            (workoutPercent / 100) * workoutsPlanned
+            (workoutPercent / 100) * workoutsPlanned,
           );
 
           setProgressData({
             workoutsCompleted,
             workoutsPlanned,
-            caloriesIn: Math.round(
-              ((latest.diet || 0) / 100) * calorieTarget
-            ),
-            proteinTarget: Math.round((calorieTarget * 0.25) / 4),
+            caloriesIn: Math.round(((latest.diet || 0) / 100) * calorieTarget),
+            proteinTarget: user?.aiPlan?.macros?.protein || 0,
             adherenceScore: latest.habit || 0,
           });
 
@@ -96,7 +106,7 @@ const UserOverview = () => {
     };
 
     fetchDashboardData();
-  }, [user?.profileCompleted]);
+  }, [user?.profileCompleted, user?.aiPlan?.calories]);
 
   // ---- GOAL PROGRESS ----
   const goalPercent = useMemo(() => {
@@ -133,11 +143,30 @@ const UserOverview = () => {
   };
 
   const getNutritionStatus = () => {
-    if (!progressData?.caloriesIn)
-      return "Log meals to track your nutrition.";
-    const target = goalData?.calorieTarget || 2000;
-    const remaining = Math.max(0, target - progressData.caloriesIn);
-    return `${remaining} kcal remaining. Protein Target: ${progressData.proteinTarget}g`;
+    if (!progressData?.caloriesIn) return "Log meals to track your nutrition.";
+    const target = effectiveCalorieTarget;
+    const diff = target - progressData.caloriesIn;
+
+    if (diff > 0) {
+      return `${diff} kcal remaining. Protein Target: ${progressData.proteinTarget}g`;
+    } else if (diff < 0) {
+      return `${Math.abs(diff)} kcal over target! Protein Target: ${progressData.proteinTarget}g`;
+    } else {
+      return `Perfect! Target met. Protein Target: ${progressData.proteinTarget}g`;
+    }
+  };
+
+  const getCalorieStatus = () => {
+    const caloriesIn = progressData?.caloriesIn || 0;
+    const target = effectiveCalorieTarget;
+
+    if (caloriesIn < target) {
+      return { status: "under", message: "Under Target", color: "blue" };
+    } else if (caloriesIn > target) {
+      return { status: "over", message: "Over Target", color: "red" };
+    } else {
+      return { status: "perfect", message: "Perfect!", color: "green" };
+    }
   };
 
   const getStreakColor = (days) => {
@@ -176,16 +205,16 @@ const UserOverview = () => {
             <Stat
               title="Calories Today"
               value={`${progressData?.caloriesIn || 0} kcal`}
-              subtitle={`Target: ${goalData?.calorieTarget || 2000}`}
-              color="blue"
+              subtitle={`Target: ${effectiveCalorieTarget} | ${getCalorieStatus().message}`}
+              color={getCalorieStatus().color}
               icon="🍽️"
             />
             <Stat
-              title="Goal Progress"
-              value={`${goalPercent}%`}
-              subtitle={`${goalData?.primaryGoal?.replace(/_/g, " ")}`}
-              color={goalPercent >= 60 ? "green" : "yellow"}
-              icon="🎯"
+              title="Target Workouts"
+              value={`${goalData?.workoutsPerWeek || 5}/week`}
+              subtitle={`${progressData?.workoutsCompleted || 0} completed this week`}
+              color="purple"
+              icon="💪"
             />
             <Stat
               title="Habit Adherence"
@@ -207,7 +236,7 @@ const UserOverview = () => {
               title="🥗 Nutrition Summary"
               desc={getNutritionStatus()}
               calories={progressData?.caloriesIn}
-              target={goalData?.calorieTarget || 2000}
+              target={effectiveCalorieTarget}
             />
           </div>
         </main>
@@ -240,7 +269,9 @@ const Stat = ({ title, value, subtitle, color, icon }) => {
         <h3 className="text-gray-400 text-sm">{title}</h3>
         <span className="text-2xl">{icon}</span>
       </div>
-      <p className={`text-3xl font-bold ${colorClasses[color] || "text-blue-400"}`}>
+      <p
+        className={`text-3xl font-bold ${colorClasses[color] || "text-blue-400"}`}
+      >
         {value}
       </p>
       {subtitle && <p className="text-gray-500 text-xs mt-2">{subtitle}</p>}
@@ -257,12 +288,16 @@ const GlassCard = ({ title, desc, planned, completed, calories, target }) => (
       <>
         <div className="flex justify-between text-xs text-gray-400 mb-2">
           <span>Progress</span>
-          <span>{completed}/{planned}</span>
+          <span>
+            {completed}/{planned}
+          </span>
         </div>
         <div className="w-full bg-white/10 rounded-full h-2">
           <div
             className="bg-purple-500 h-2 rounded-full"
-            style={{ width: `${planned > 0 ? (completed / planned) * 100 : 0}%` }}
+            style={{
+              width: `${planned > 0 ? (completed / planned) * 100 : 0}%`,
+            }}
           />
         </div>
       </>
@@ -272,12 +307,16 @@ const GlassCard = ({ title, desc, planned, completed, calories, target }) => (
       <>
         <div className="flex justify-between text-xs text-gray-400 mb-2 mt-4">
           <span>Calorie Intake</span>
-          <span>{calories}/{target}</span>
+          <span>
+            {calories}/{target}
+          </span>
         </div>
         <div className="w-full bg-white/10 rounded-full h-2">
           <div
             className="bg-blue-500 h-2 rounded-full"
-            style={{ width: `${target > 0 ? Math.min((calories / target) * 100, 100) : 0}%` }}
+            style={{
+              width: `${target > 0 ? Math.min((calories / target) * 100, 100) : 0}%`,
+            }}
           />
         </div>
       </>
