@@ -12,6 +12,7 @@ import {
   generatePlan,
   createWeeklyProgress,
   getProgressGraph,
+  getMyTickets,
 } from "../controllers/userController.js";
 import { Protect } from "../middlewares/authMiddleware.js";
 import { checkUserChatLimit } from "../middlewares/chatUseLimit.js";
@@ -39,5 +40,8 @@ router.post("/generatePlan", Protect, generatePlan);
 // Progress routes
 router.post("/progress", Protect, createWeeklyProgress);
 router.get("/progress-graph", Protect, getProgressGraph);
+
+// Ticket routes
+router.get("/mytickets", Protect, getMyTickets);
 
 export default router;

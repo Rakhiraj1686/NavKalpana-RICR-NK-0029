@@ -204,11 +204,11 @@ export default function Support() {
   // };
 
   return (
-    <div className="overflow-y-auto no-scrollbar text-white p-8">
+    <div className="overflow-y-auto no-scrollbar text-white p-4 sm:p-8">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">Support & Help Center</h1>
-        <p className="text-gray-400 mt-2">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold">Support & Help Center</h1>
+        <p className="text-gray-400 mt-2 text-sm sm:text-base">
           Need help with your fitness journey? We're here for you.
         </p>
         <div className="h-1 w-32 bg-linear-to-r from-purple-500 to-purple-700 mt-4 rounded-full"></div>
@@ -216,27 +216,27 @@ export default function Support() {
 
       {/* help section */}
       
-      <div className="mb-10">
+      <div className="mb-8 sm:mb-10">
         <HelpSection />
       </div>
 
       {/* FAQ Section */}
-      <div className="mb-10">
-        <h2 className="text-2xl font-semibold mb-6">
+      <div className="mb-8 sm:mb-10">
+        <h2 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6">
           Frequently Asked Questions
         </h2>
         {faqs.map((faq, index) => (
           <div
             key={index}
-            className="bg-[#111827] border border-gray-700 rounded-xl mb-4 p-5 cursor-pointer"
+            className="bg-[#111827] border border-gray-700 rounded-xl mb-3 sm:mb-4 p-3 sm:p-5 cursor-pointer hover:border-gray-600 transition-colors"
             onClick={() => setOpenFAQ(openFAQ === index ? null : index)}
           >
-            <div className="flex justify-between items-center">
-              <h3 className="font-medium">{faq.question}</h3>
-              <span>{openFAQ === index ? "-" : "+"}</span>
+            <div className="flex justify-between items-start gap-2 sm:items-center">
+              <h3 className="font-medium text-sm sm:text-base">{faq.question}</h3>
+              <span className="text-lg shrink-0">{openFAQ === index ? "-" : "+"}</span>
             </div>
             {openFAQ === index && (
-              <p className="text-gray-400 mt-3">{faq.answer}</p>
+              <p className="text-gray-400 mt-2 sm:mt-3 text-xs sm:text-sm">{faq.answer}</p>
             )}
           </div>
         ))}
@@ -293,16 +293,16 @@ export default function Support() {
         </p>
       </div> */}
       {/* Raise Ticket Section */}
-      <div className="bg-[#111827] border border-gray-700 rounded-2xl p-6 mb-10">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">Raise a Support Ticket</h2>
-          <span className="text-xs text-gray-400">Avg response: 24-48 hours</span>
+      <div className="bg-[#111827] border border-gray-700 rounded-2xl p-4 sm:p-6 mb-8 sm:mb-10">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-2">
+          <h2 className="text-lg sm:text-xl font-semibold">Raise a Support Ticket</h2>
+          <span className="text-xs text-gray-400 whitespace-nowrap">Avg response: 24-48 hours</span>
         </div>
 
         <select
           value={ticketType}
           onChange={(e) => setTicketType(e.target.value)}
-          className="w-full bg-[#0F172A] border border-gray-600 rounded-xl px-4 py-2 mb-4"
+          className="w-full bg-[#0F172A] border border-gray-600 rounded-xl px-3 sm:px-4 py-2 mb-4 text-sm sm:text-base"
         >
           <option>Workout Issue</option>
           <option>Diet Issue</option>
@@ -314,26 +314,26 @@ export default function Support() {
           value={ticketDescription}
           onChange={(e) => setTicketDescription(e.target.value)}
           placeholder="Describe your issue..."
-          className="w-full bg-[#0F172A] border border-gray-600 rounded-xl px-4 py-2 mb-4 h-28"
+          className="w-full bg-[#0F172A] border border-gray-600 rounded-xl px-3 sm:px-4 py-2 mb-4 h-24 sm:h-28 text-sm sm:text-base"
         ></textarea>
 
         <button
           onClick={handleTicketSubmit}
           disabled={isSubmitting}
-          className="w-full bg-linear-to-r from-purple-600 to-purple-800 py-2 rounded-xl hover:opacity-90 transition disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+          className="w-full bg-linear-to-r from-purple-600 to-purple-800 py-2 rounded-xl hover:opacity-90 transition disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer text-sm sm:text-base font-medium"
         >
           {isSubmitting ? "Submitting..." : "Submit Ticket"}
         </button>
 
-        {ticketError && <p className="text-red-400 mt-3 text-sm">{ticketError}</p>}
+        {ticketError && <p className="text-red-400 mt-3 text-xs sm:text-sm">{ticketError}</p>}
 
         {ticketSuccess && (
-          <p className="text-green-400 mt-3 text-sm">✅ {ticketSuccess}</p>
+          <p className="text-green-400 mt-3 text-xs sm:text-sm">✅ {ticketSuccess}</p>
         )}
       </div>
 
       {/* Disclaimer */}
-      <div className="border border-red-600 bg-red-900/20 rounded-xl p-4 mb-6 text-sm text-red-300">
+      <div className="border border-red-600 bg-red-900/20 rounded-xl p-3 sm:p-4 mb-6 text-xs sm:text-sm text-red-300">
         ⚠ This platform provides general fitness guidance and does not replace
         professional medical advice. Always consult a healthcare professional
         before starting a new program.
