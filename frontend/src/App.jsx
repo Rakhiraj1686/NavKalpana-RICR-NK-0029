@@ -9,6 +9,10 @@ import Home from "./pages/Home";
 import UserDashboard from "./pages/dashboard/Userdashhboard";
 import { Toaster } from "react-hot-toast";
 import AiChatWidget from "./components/AiChatWidget";
+import RoadmapPreview from "./pages/RoadmapPreview";
+// import MonthlyReport from "./pages/MonthlyReport";
+
+
 
 const App = () => {
   const [chatOpen, setChatOpen] = useState(false);
@@ -25,6 +29,9 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/user-dashboard" element={<UserDashboard />} />
+          {/* <Route path="/monthlyReport" element={<MonthlyReport />} /> */}
+          < Route path="roadmapPreview" element={<RoadmapPreview/>}/>
+
         </Routes>
       </BrowserRouter>
     </>
