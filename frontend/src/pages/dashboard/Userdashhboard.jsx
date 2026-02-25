@@ -10,6 +10,8 @@ import UserProfile from "../../components/userdashboard/UserProfile";
 import UserGoal from "../../components/userdashboard/UserGoal";
 import UserPlan from "../../components/userdashboard/userPlan";
 import { FaArrowRight, FaBars } from "react-icons/fa";
+import ProgressionPlan from "../../components/ProgressionPlan";
+import AdvancedAnalytics from "../../components/AdvancedAnalytics";
 
 const UserDashboard = () => {
   const { isLogin } = useAuth();
@@ -64,8 +66,11 @@ const UserDashboard = () => {
 
         <div className={`mx-auto p-6 ${isCollapsed ? "w-56/60" : "w-50/60"}`}>
           {active === "overview" && <UserOverview />}
-          {/* {active === "workout" && <UserWorkout />} */}
-          {active === "plan" && <UserPlan />}
+          {/* {active === "workout" && <UserWorkout />} 
+          {active === "plan" && <UserPlan/>}
+          {active === "plan" && <UserPlan/>}
+          {active === "progression" && <ProgressionPlan />}
+          {active === "analytics" && <AdvancedAnalytics />}
           {active === "progress" && <UserProgress />}
           {active === "profile" && <UserProfile />}
           {active === "goal" && <UserGoal />}

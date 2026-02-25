@@ -45,7 +45,38 @@ const dailyProgressSchema = new mongoose.Schema(
       type: Number,
       min: 0,
     },
+    dietAdherencePercent: {
+      type: Number,
+      min: 0,
+      max: 100,
+      default: 0,
+    },
     proteinG: {
+      type: Number,
+      min: 0,
+    },
+    energyLevel: {
+      type: String,
+      enum: ["energized", "normal", "slightly_fatigued", "very_tired"],
+      default: "normal",
+    },
+    waistCm: {
+      type: Number,
+      min: 0,
+    },
+    chestCm: {
+      type: Number,
+      min: 0,
+    },
+    hipsCm: {
+      type: Number,
+      min: 0,
+    },
+    armsCm: {
+      type: Number,
+      min: 0,
+    },
+    thighsCm: {
       type: Number,
       min: 0,
     },

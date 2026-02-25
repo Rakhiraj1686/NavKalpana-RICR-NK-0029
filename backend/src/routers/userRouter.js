@@ -13,6 +13,7 @@ import {
   createWeeklyProgress,
   getProgressGraph,
   getMyTickets,
+  evaluateAndAdjustPlan,
 } from "../controllers/userController.js";
 import { Protect } from "../middlewares/authMiddleware.js";
 import { checkUserChatLimit } from "../middlewares/chatUseLimit.js";
@@ -36,6 +37,7 @@ router.post("/chat", Protect, checkUserChatLimit, UserChatWithAI);
 // Additional routes for AI plan generation
 router.post("/regenerate-plan", Protect, RegeneratePlan);
 router.post("/generatePlan", Protect, generatePlan);
+router.post("/plan/evaluate", Protect, evaluateAndAdjustPlan);
 
 // Progress routes
 router.post("/progress", Protect, createWeeklyProgress);

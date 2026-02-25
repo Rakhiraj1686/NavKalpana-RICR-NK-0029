@@ -2,342 +2,69 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../config/Api";
 import toast from "react-hot-toast";
+import PlanAdjustmentPanel from "./PlanAdjustmentPanel";
 
 const UserPlan = () => {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
   const [activeTab, setActiveTab] = useState("diet");
-  const [loading, setLoading] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
 
-  // Sample diet plan structure
-  const [dietPlan, setDietPlan] = useState({
+  const emptyDietPlan = {
     calories: 0,
     macros: { protein: 0, carbs: 0, fats: 0 },
-    meals: [
-      {
-        mealName: "Breakfast",
-        time: "7:00 AM - 8:00 AM",
-        calories: 450,
-        items: ["Oatmeal with berries", "2 Boiled Eggs", "Green Tea"],
-        macros: { protein: 20, carbs: 50, fats: 15 },
-      },
-      {
-        mealName: "Mid-Morning Snack",
-        time: "10:00 AM - 10:30 AM",
-        calories: 200,
-        items: ["Apple", "Almonds (10-12)"],
-        macros: { protein: 5, carbs: 25, fats: 10 },
-      },
-      {
-        mealName: "Lunch",
-        time: "12:30 PM - 1:30 PM",
-        calories: 550,
-        items: [
-          "Grilled Chicken Breast",
-          "Brown Rice",
-          "Mixed Vegetable Salad",
-          "Yogurt",
-        ],
-        macros: { protein: 40, carbs: 60, fats: 12 },
-      },
-      {
-        mealName: "Evening Snack",
-        time: "4:00 PM - 4:30 PM",
-        calories: 180,
-        items: ["Protein Shake", "Banana"],
-        macros: { protein: 25, carbs: 30, fats: 3 },
-      },
-      {
-        mealName: "Dinner",
-        time: "7:00 PM - 8:00 PM",
-        calories: 500,
-        items: [
-          "Baked Salmon",
-          "Quinoa",
-          "Steamed Broccoli",
-          "Mixed Green Salad",
-        ],
-        macros: { protein: 45, carbs: 40, fats: 18 },
-      },
-    ],
-  });
+    meals: [],
+  };
 
-  // Sample workout plan structure
-  const [workoutPlan, setWorkoutPlan] = useState({
+  const emptyWorkoutPlan = {
     weekStartDate: new Date(),
-    level: "Intermediate",
-    days: [
-      {
-        dayName: "Monday",
-        focus: "Chest & Triceps",
-        duration: "45-60 min",
-        exercises: [
-          {
-            name: "Bench Press",
-            sets: 4,
-            reps: "8-10",
-            rest: "90 sec",
-            formGuide: "Keep back flat, lower to chest",
-          },
-          {
-            name: "Incline Dumbbell Press",
-            sets: 3,
-            reps: "10-12",
-            rest: "60 sec",
-            formGuide: "30-45 degree incline",
-          },
-          {
-            name: "Cable Flyes",
-            sets: 3,
-            reps: "12-15",
-            rest: "45 sec",
-            formGuide: "Slight bend in elbows",
-          },
-          {
-            name: "Tricep Dips",
-            sets: 3,
-            reps: "10-12",
-            rest: "60 sec",
-            formGuide: "Keep elbows tucked in",
-          },
-          {
-            name: "Overhead Cable Extension",
-            sets: 3,
-            reps: "12-15",
-            rest: "45 sec",
-            formGuide: "Keep upper arms stationary",
-          },
-        ],
-      },
-      {
-        dayName: "Tuesday",
-        focus: "Back & Biceps",
-        duration: "45-60 min",
-        exercises: [
-          {
-            name: "Pull-ups",
-            sets: 4,
-            reps: "8-10",
-            rest: "90 sec",
-            formGuide: "Full range of motion",
-          },
-          {
-            name: "Barbell Rows",
-            sets: 4,
-            reps: "8-10",
-            rest: "90 sec",
-            formGuide: "Keep back straight",
-          },
-          {
-            name: "Lat Pulldown",
-            sets: 3,
-            reps: "10-12",
-            rest: "60 sec",
-            formGuide: "Pull to upper chest",
-          },
-          {
-            name: "Barbell Curls",
-            sets: 3,
-            reps: "10-12",
-            rest: "60 sec",
-            formGuide: "No swinging motion",
-          },
-          {
-            name: "Hammer Curls",
-            sets: 3,
-            reps: "12-15",
-            rest: "45 sec",
-            formGuide: "Neutral grip throughout",
-          },
-        ],
-      },
-      {
-        dayName: "Wednesday",
-        focus: "Rest or Active Recovery",
-        duration: "30 min",
-        exercises: [
-          {
-            name: "Light Cardio",
-            sets: 1,
-            reps: "20-30 min",
-            rest: "N/A",
-            formGuide: "Walk, swim, or cycle at easy pace",
-          },
-          {
-            name: "Stretching",
-            sets: 1,
-            reps: "10 min",
-            rest: "N/A",
-            formGuide: "Focus on tight muscle groups",
-          },
-        ],
-      },
-      {
-        dayName: "Thursday",
-        focus: "Legs & Glutes",
-        duration: "60-75 min",
-        exercises: [
-          {
-            name: "Squats",
-            sets: 4,
-            reps: "8-10",
-            rest: "2 min",
-            formGuide: "Depth to parallel or below",
-          },
-          {
-            name: "Romanian Deadlifts",
-            sets: 4,
-            reps: "10-12",
-            rest: "90 sec",
-            formGuide: "Keep knees slightly bent",
-          },
-          {
-            name: "Leg Press",
-            sets: 3,
-            reps: "12-15",
-            rest: "60 sec",
-            formGuide: "Full range of motion",
-          },
-          {
-            name: "Walking Lunges",
-            sets: 3,
-            reps: "12 each leg",
-            rest: "60 sec",
-            formGuide: "90-degree knee angle",
-          },
-          {
-            name: "Leg Curls",
-            sets: 3,
-            reps: "12-15",
-            rest: "45 sec",
-            formGuide: "Controlled movement",
-          },
-        ],
-      },
-      {
-        dayName: "Friday",
-        focus: "Shoulders & Abs",
-        duration: "45-60 min",
-        exercises: [
-          {
-            name: "Military Press",
-            sets: 4,
-            reps: "8-10",
-            rest: "90 sec",
-            formGuide: "Press overhead fully",
-          },
-          {
-            name: "Lateral Raises",
-            sets: 3,
-            reps: "12-15",
-            rest: "60 sec",
-            formGuide: "Slight bend in elbows",
-          },
-          {
-            name: "Front Raises",
-            sets: 3,
-            reps: "12-15",
-            rest: "60 sec",
-            formGuide: "Raise to shoulder height",
-          },
-          {
-            name: "Planks",
-            sets: 3,
-            reps: "60 sec",
-            rest: "45 sec",
-            formGuide: "Keep body in straight line",
-          },
-          {
-            name: "Russian Twists",
-            sets: 3,
-            reps: "20 each side",
-            rest: "45 sec",
-            formGuide: "Controlled rotation",
-          },
-        ],
-      },
-      {
-        dayName: "Saturday",
-        focus: "Full Body HIIT",
-        duration: "30-40 min",
-        exercises: [
-          {
-            name: "Burpees",
-            sets: 4,
-            reps: "15-20",
-            rest: "30 sec",
-            formGuide: "Explosive movement",
-          },
-          {
-            name: "Mountain Climbers",
-            sets: 4,
-            reps: "30 sec",
-            rest: "30 sec",
-            formGuide: "Fast-paced alternating",
-          },
-          {
-            name: "Kettlebell Swings",
-            sets: 4,
-            reps: "15-20",
-            rest: "45 sec",
-            formGuide: "Hip hinge movement",
-          },
-          {
-            name: "Jump Squats",
-            sets: 4,
-            reps: "12-15",
-            rest: "45 sec",
-            formGuide: "Land softly",
-          },
-        ],
-      },
-      {
-        dayName: "Sunday",
-        focus: "Rest & Recovery",
-        duration: "Rest",
-        exercises: [
-          {
-            name: "Full Rest Day",
-            sets: 1,
-            reps: "N/A",
-            rest: "N/A",
-            formGuide: "Focus on recovery, hydration, and meal prep",
-          },
-        ],
-      },
-    ],
+    level: "--",
+    days: [],
+  };
+
+  const [dietPlan, setDietPlan] = useState({
+    ...emptyDietPlan,
   });
 
-  // Calculate total macros from meals
-  useEffect(() => {
-    if (dietPlan.meals && dietPlan.meals.length > 0) {
-      const totalCalories = dietPlan.meals.reduce(
-        (sum, meal) => sum + meal.calories,
-        0,
-      );
-      const totalProtein = dietPlan.meals.reduce(
-        (sum, meal) => sum + meal.macros.protein,
-        0,
-      );
-      const totalCarbs = dietPlan.meals.reduce(
-        (sum, meal) => sum + meal.macros.carbs,
-        0,
-      );
-      const totalFats = dietPlan.meals.reduce(
-        (sum, meal) => sum + meal.macros.fats,
-        0,
-      );
+  const [workoutPlan, setWorkoutPlan] = useState({
+    ...emptyWorkoutPlan,
+  });
 
+  const applyAIPlanToState = (plan) => {
+    if (!plan) return;
+
+    if (plan.calories || plan.macros || plan.meals) {
       setDietPlan((prev) => ({
         ...prev,
-        calories: totalCalories,
-        macros: { protein: totalProtein, carbs: totalCarbs, fats: totalFats },
+        calories: Number(plan.calories || prev.calories || 0),
+        macros: {
+          protein: Number(plan?.macros?.protein || prev?.macros?.protein || 0),
+          carbs: Number(plan?.macros?.carbs || prev?.macros?.carbs || 0),
+          fats: Number(plan?.macros?.fats || prev?.macros?.fats || 0),
+        },
+        meals:
+          Array.isArray(plan.meals) && plan.meals.length > 0
+            ? plan.meals
+            : prev.meals,
       }));
     }
-  }, []);
+
+    if (Array.isArray(plan.workoutDays) && plan.workoutDays.length > 0) {
+      setWorkoutPlan((prev) => ({
+        ...prev,
+        level: plan.workoutLevel || prev.level,
+        days: plan.workoutDays,
+      }));
+    }
+  };
+
+  useEffect(() => {
+    if (user?.aiPlan) {
+      applyAIPlanToState(user.aiPlan);
+    }
+  }, [user?.aiPlan]);
 
   const handleRegeneratePlan = async () => {
-    if (!user?.primaryGoal) {
+    if (!user?.primaryGoal && !user?.goal) {
       toast.error("Please set your fitness goal first!");
       return;
     }
@@ -346,10 +73,16 @@ const UserPlan = () => {
     try {
       const res = await api.post("/user/generatePlan");
       toast.success("Plan regenerated successfully! 🎉");
-      // Update plans with AI-generated data if available
       if (res.data.aiPlan) {
-        // You can update the diet plan based on AI response
-        console.log("AI Plan:", res.data.aiPlan);
+        applyAIPlanToState(res.data.aiPlan);
+
+        const updatedUser = {
+          ...user,
+          aiPlan: res.data.aiPlan,
+        };
+
+        setUser(updatedUser);
+        sessionStorage.setItem("HealthUP", JSON.stringify(updatedUser));
       }
     } catch (err) {
       toast.error(err?.response?.data?.message || "Failed to regenerate plan");
@@ -358,10 +91,15 @@ const UserPlan = () => {
     }
   };
 
-  //currently it is hard coded 
+  const hasDietPlan = Array.isArray(dietPlan.meals) && dietPlan.meals.length > 0;
+  const hasWorkoutPlan = Array.isArray(workoutPlan.days) && workoutPlan.days.length > 0;
+
   return (
     <>
       <div className="min-h-screen p-6 mb-8">
+        {/* Plan Adjustment Panel */}
+        <PlanAdjustmentPanel />
+
         {/* Hero Section */}
         <div className="mb-10 bg-linear-to-r from-purple-600/20 via-blue-600/20 to-indigo-600/20 border border-purple-500/30 rounded-3xl p-10 backdrop-blur-sm">
           <div className="max-w-4xl mx-auto">
@@ -452,6 +190,12 @@ const UserPlan = () => {
 
               {/* Meals */}
               <div className="space-y-4">
+                {!hasDietPlan && (
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-6 text-gray-300">
+                    No AI diet plan found. Click "Regenerate AI Plan" after updating your profile.
+                  </div>
+                )}
+
                 {dietPlan.meals.map((meal, index) => (
                   <div
                     key={index}
@@ -508,6 +252,12 @@ const UserPlan = () => {
               </div>
 
               <div className="space-y-4">
+                {!hasWorkoutPlan && (
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-6 text-gray-300">
+                    No AI workout plan found. Click "Regenerate AI Plan" after updating your profile.
+                  </div>
+                )}
+
                 {workoutPlan.days.map((day, index) => (
                   <div
                     key={index}

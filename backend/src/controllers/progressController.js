@@ -1,5 +1,6 @@
 import {
   logWeight,
+  logDailyCheckIn,
   trackWorkoutCompletion,
   getStreak,
   getGoalProgress,
@@ -11,6 +12,8 @@ import {
   getWeightHistory,
   generateRuleBasedInsight,
 } from "../services/progressService.js";
+import { getAllAdvancedAnalytics } from "../services/advancedAnalyticsService.js";
+import { generate8WeekPlan, getWeekRecommendations } from "../services/progressionPlanService.js";
 import DailyProgress from "../models/DailyProgress.js";
 import { getWeekKey, normalizeDate } from "../utils/progressUtils.js";
 
@@ -56,6 +59,49 @@ export const logWorkoutCompletion = async (req, res, next) => {
     res.status(201).json({
       success: true,
       message: "Workout log updated",
+      data,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const logDailyCheckInEntry = async (req, res, next) => {
+  try {
+    const {
+      date,
+      timezone,
+      caloriesIn,
+      proteinG,
+      steps,
+      dietAdherencePercent,
+      energyLevel,
+      waistCm,
+      chestCm,
+      hipsCm,
+      armsCm,
+      thighsCm,
+    } = req.body;
+
+    const data = await logDailyCheckIn({
+      userId: req.user._id,
+      date: date || new Date(),
+      timezone,
+      caloriesIn,
+      proteinG,
+      steps,
+      dietAdherencePercent,
+      energyLevel,
+      waistCm,
+      chestCm,
+      hipsCm,
+      armsCm,
+      thighsCm,
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Daily check-in logged",
       data,
     });
   } catch (error) {
@@ -188,6 +234,39 @@ export const getWeeklyOverviewGraph = async (req, res, next) => {
       .sort((a, b) => a.week.localeCompare(b.week));
 
     res.status(200).json({ success: true, graphData });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getAdvancedAnalytics = async (req, res, next) => {
+  try {
+    const weeks = Number(req.query.weeks) || 8;
+    const data = await getAllAdvancedAnalytics(req.user._id, weeks);
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getProgressionPlan = async (req, res, next) => {
+  try {
+    const weeks = Number(req.query.weeks) || 8;
+    const data = await generate8WeekPlan(req.user._id, weeks);
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getWeekPlan = async (req, res, next) => {
+  try {
+    const week = Number(req.params.week);
+    if (!week || week < 1 || week > 8) {
+      return res.status(400).json({ message: "Week must be between 1 and 8" });
+    }
+    const data = await getWeekRecommendations(req.user._id, week);
+    res.status(200).json({ success: true, data });
   } catch (error) {
     next(error);
   }

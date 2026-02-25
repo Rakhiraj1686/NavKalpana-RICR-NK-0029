@@ -4,8 +4,19 @@ import { buildPrompt } from "../services/groqPromptBuilder.js";
 import { getAIResponse } from "../services/groqServices.js";
 import cloudinary from "../config/cloudinary.js";
 import { generateAIPlan } from "../services/aiPlanService.js";
+import {
+  evaluateWeeklyProgress,
+  calculatePlanAdjustments,
+  applyPlanAdjustments,
+} from "../services/planAdjustmentService.js";
 import Ticket from "../models/ticketModel.js";
 import Progress from "../models/userProgressModel.js";
+import {
+  calculateBMR,
+  calculateMaintenanceCalories,
+  calculateTargetCalories,
+  generateMacros,
+} from "../utils/fitnessCalculation.js"
 
 const getWeekStartDate = (date = new Date()) => {
   const current = new Date(date);
@@ -49,7 +60,7 @@ export const UserResetPassword = async (req, res, next) => {
 
 export const UserUpdateProfile = async (req, res, next) => {
   try {
-    let {
+    const {
       fullName,
       email,
       mobileNumber,
@@ -58,8 +69,9 @@ export const UserUpdateProfile = async (req, res, next) => {
       weight,
       biologicalSex,
       foodPreference,
-      experienceLevel,
       activityLevel,
+      experienceLevel,
+      goal,
     } = req.body;
 
     const currentUser = req.user;
@@ -72,73 +84,73 @@ export const UserUpdateProfile = async (req, res, next) => {
       return next(error);
     }
 
-    // Convert string to numbers
-    age = Number(age);
-    height = Number(height); //in cm
-    weight = Number(weight); //in kg
+    // Convert to numbers
+    const numAge = Number(age);
+    const numHeight = Number(height);
+    const numWeight = Number(weight);
 
-    // BMI Calculation
+    // BMI
     let bmi = null;
-    if (height && weight) {
-      const heightMeter = height / 100;
-      bmi = weight / (heightMeter * heightMeter);
-      bmi = Number(bmi.toFixed(2));
+    if (numHeight && numWeight) {
+      const heightMeter = numHeight / 100;
+      bmi = Number((numWeight / (heightMeter * heightMeter)).toFixed(2));
     }
 
-    // BMR Calculation
-    let bmr = null;
-    if (age && height && weight && biologicalSex) {
-      if (biologicalSex === "male") {
-        bmr = 10 * weight + 6.25 * height - 5 * age + 5;
-      } else if (biologicalSex === "female") {
-        bmr = 10 * weight + 6.25 * height - 5 * age - 161;
-      }
-      bmr = Math.round(bmr);
-    }
+    // ---- CALCULATIONS ----
+    const bmr = calculateBMR({
+      weight: numWeight,
+      height: numHeight,
+      age: numAge,
+      biologicalSex,
+    });
 
-    // Maintenance Calories
-    const multiplier = {
-      sedentary: 1.2,
-      "lightly active": 1.375,
-      "moderately active": 1.55,
-      "very active": 1.725,
-    };
+    const maintenanceCalories = calculateMaintenanceCalories(
+      bmr,
+      activityLevel,
+    );
 
-    const maintenanceCalories =
-      bmr && multiplier[activityLevel]
-        ? Math.round(bmr * multiplier[activityLevel])
-        : null;
+    const targetCalories = calculateTargetCalories({
+      maintenanceCalories,
+      goal,
+    });
 
+    const macros = generateMacros({
+      weight: numWeight,
+      goal,
+      targetCalories,
+    });
+
+    // ---- SAVE USER ----
     currentUser.fullName = fullName;
     currentUser.email = email;
     currentUser.mobileNumber = mobileNumber;
-    if (age !== undefined) currentUser.age = age;
-    if (height !== undefined) currentUser.height = height;
-    if (weight !== undefined) currentUser.weight = weight;
-    if (foodPreference) currentUser.foodPreference = foodPreference;
-    currentUser.biologicalSex = biologicalSex || currentUser.biologicalSex;
-    currentUser.experienceLevel =
-      experienceLevel || currentUser.experienceLevel;
-    currentUser.activityLevel = activityLevel || currentUser.activityLevel;
+    currentUser.age = numAge;
+    currentUser.height = numHeight;
+    currentUser.weight = numWeight;
+    currentUser.biologicalSex = biologicalSex;
+    currentUser.activityLevel = activityLevel;
+    currentUser.experienceLevel = experienceLevel;
+    currentUser.foodPreference = foodPreference || currentUser.foodPreference;
+    currentUser.goal = goal || currentUser.goal || "maintain";
+
     currentUser.bmi = bmi;
     currentUser.bmr = bmr;
     currentUser.maintenanceCalories = maintenanceCalories;
+    currentUser.targetCalories = targetCalories;
+    currentUser.macros = macros;
 
-    console.log("OldData: ", req.user);
-    // const freshUser = await User.findById(currentUser._id);
+    // Generate AI Plan
+    const plan = generateAIPlan(currentUser);
+    currentUser.aiPlan = plan;
 
     currentUser.profileCompleted = true;
 
     await currentUser.save();
 
-    const plan = generateAIPlan(currentUser);
-
-    currentUser.aiPlan = plan;
-
-    await currentUser.save();
-    res
-      .status(200)
-      .json({ message: "Profile updated successful.", data: currentUser });
+    res.status(200).json({
+      message: "Profile updated successfully.",
+      data: currentUser,
+    });
   } catch (error) {
     next(error);
   }
@@ -325,15 +337,80 @@ export const generatePlan = async (req, res, next) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const newPlan = generateAIPlan(user);
+    // Weekly evaluation for intelligent adjustments (optional)
+    let adjustedUser = user;
+    let adjustmentResult = { adjustments: null, triggers: [] };
+    
+    try {
+      const weeklyMetrics = await evaluateWeeklyProgress(req.user._id);
+      if (weeklyMetrics) {
+        adjustmentResult = calculatePlanAdjustments(weeklyMetrics, user);
+        if (
+          adjustmentResult.adjustments &&
+          (adjustmentResult.adjustments.calorieAdjust !== 0 ||
+            adjustmentResult.adjustments.workoutAdjust !== 0)
+        ) {
+          adjustedUser = applyPlanAdjustments(user, adjustmentResult.adjustments);
+        }
+      }
+    } catch (err) {
+      console.log("Weekly evaluation skipped:", err.message);
+      // Continue with plan generation even if evaluation fails
+    }
+
+    const recentProgress = await Progress.find({ user: req.user._id })
+      .sort({ date: -1 })
+      .limit(14)
+      .select("workoutAdherencePercent dietAdherencePercent habitScore");
+
+    const progressSummary = recentProgress.length
+      ? recentProgress.reduce(
+          (acc, item) => {
+            acc.avgWorkoutAdherence += Number(item.workoutAdherencePercent || 0);
+            acc.avgDietAdherence += Number(item.dietAdherencePercent || 0);
+            acc.avgHabitScore += Number(item.habitScore || 0);
+            return acc;
+          },
+          { avgWorkoutAdherence: 0, avgDietAdherence: 0, avgHabitScore: 0 },
+        )
+      : null;
+
+    const normalizedProgressSummary = progressSummary
+      ? {
+          avgWorkoutAdherence: Number(
+            (progressSummary.avgWorkoutAdherence / recentProgress.length).toFixed(2),
+          ),
+          avgDietAdherence: Number(
+            (progressSummary.avgDietAdherence / recentProgress.length).toFixed(2),
+          ),
+          avgHabitScore: Number(
+            (progressSummary.avgHabitScore / recentProgress.length).toFixed(2),
+          ),
+        }
+      : null;
+
+    const newPlan = generateAIPlan(adjustedUser, normalizedProgressSummary);
     console.log("Generate Plan", newPlan);
 
-    user.aiPlan = newPlan;
-    await user.save();
+    adjustedUser.aiPlan = newPlan;
+    
+    // Record adjustment metadata if any adjustments were applied
+    if (adjustmentResult.triggers && adjustmentResult.triggers.length > 0) {
+      adjustedUser.lastPlanAdjustment = {
+        appliedAt: new Date(),
+        triggers: adjustmentResult.triggers,
+        previousCalories: user.targetCalories,
+        newCalories: adjustedUser.targetCalories,
+      };
+    }
+    
+    await adjustedUser.save();
 
     res.status(200).json({
       message: "AI Plan regenerated successfully",
       aiPlan: newPlan,
+      adjustments: adjustmentResult.adjustments || null,
+      triggers: adjustmentResult.triggers || [],
     });
   } catch (error) {
     next(error);
@@ -474,5 +551,95 @@ export const getProgressGraph = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: "Error fetching graph data" });
+  }
+};
+// Weekly Plan Adjustment Evaluation
+export const evaluateAndAdjustPlan = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Evaluate 7-day progress metrics
+    const weeklyMetrics = await evaluateWeeklyProgress(req.user._id);
+
+    if (!weeklyMetrics || weeklyMetrics.dataPoints < 3) {
+      return res.status(200).json({
+        message: "Insufficient progress data for evaluation (need at least 3 days)",
+        weeklyMetrics: null,
+        adjustments: null,
+        triggers: [],
+      });
+    }
+
+    // Calculate required adjustments based on triggers
+    const adjustmentResult = calculatePlanAdjustments(weeklyMetrics, user);
+
+    let response = {
+      message: "Plan evaluation completed",
+      weeklyMetrics,
+      adjustments: null,
+      triggers: [],
+    };
+
+    // Apply adjustments if any triggers detected
+    if (adjustmentResult.triggers && adjustmentResult.triggers.length > 0) {
+      applyPlanAdjustments(user, adjustmentResult.adjustments);
+
+      // Regenerate plan with adjusted parameters
+      const recentProgress = await Progress.find({ user: req.user._id })
+        .sort({ date: -1 })
+        .limit(14)
+        .select("workoutAdherencePercent dietAdherencePercent habitScore");
+
+      const progressSummary = recentProgress.length
+        ? recentProgress.reduce(
+            (acc, item) => {
+              acc.avgWorkoutAdherence += Number(item.workoutAdherencePercent || 0);
+              acc.avgDietAdherence += Number(item.dietAdherencePercent || 0);
+              acc.avgHabitScore += Number(item.habitScore || 0);
+              return acc;
+            },
+            { avgWorkoutAdherence: 0, avgDietAdherence: 0, avgHabitScore: 0 },
+          )
+        : null;
+
+      const normalizedProgressSummary = progressSummary
+        ? {
+            avgWorkoutAdherence: Number(
+              (progressSummary.avgWorkoutAdherence / recentProgress.length).toFixed(2),
+            ),
+            avgDietAdherence: Number(
+              (progressSummary.avgDietAdherence / recentProgress.length).toFixed(2),
+            ),
+            avgHabitScore: Number(
+              (progressSummary.avgHabitScore / recentProgress.length).toFixed(2),
+            ),
+          }
+        : null;
+
+      const newPlan = generateAIPlan(user, normalizedProgressSummary);
+
+      user.aiPlan = newPlan;
+      user.lastPlanAdjustment = {
+        appliedAt: new Date(),
+        triggers: adjustmentResult.triggers,
+        adjustments: adjustmentResult.adjustments,
+        weeklyMetrics,
+      };
+
+      await user.save();
+
+      response.message = "Plan adjusted based on weekly progress";
+      response.adjustments = adjustmentResult.adjustments;
+      response.triggers = adjustmentResult.triggers;
+      response.newPlan = newPlan;
+    }
+
+    res.status(200).json(response);
+  } catch (error) {
+    next(error);
   }
 };

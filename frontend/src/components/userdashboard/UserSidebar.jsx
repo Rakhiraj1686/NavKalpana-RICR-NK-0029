@@ -7,6 +7,8 @@ import {
   FiChevronLeft,
   FiChevronRight,
   FiLogOut,
+  FiTrendingUp,
+  FiMap,
 } from "react-icons/fi";
 import { MdOutlineContactSupport } from "react-icons/md";
 import { GoGoal } from "react-icons/go";
@@ -21,6 +23,8 @@ const menuItems = [
   { id: "goal", label: "Goal", icon: <GoGoal /> },
   // { id: "workout", label: "Workout Plan", icon: <FiActivity /> },
   { id: "plan", label: "Plan", icon: <FiBarChart2 /> },
+  { id: "progression", label: "Progression", icon: <FiMap /> },
+  { id: "analytics", label: "Analytics", icon: <FiTrendingUp /> },
   { id: "progress", label: "Progress", icon: <GiProgression /> },
   { id: "profile", label: "Profile", icon: <FiUser /> },
   {id: "support", label:"Support", icon: <MdOutlineContactSupport/>}

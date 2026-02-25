@@ -18,6 +18,7 @@ const UserEditProfileModal = ({ onClose }) => {
     foodPreference: user?.foodPreference || "",
     experienceLevel: user?.experienceLevel || "",
     activityLevel: user?.activityLevel || "",
+    goal: user?.goal || user?.primaryGoal || "maintain",
   });
 
   const [errors, setErrors] = useState({});
@@ -62,7 +63,7 @@ const UserEditProfileModal = ({ onClose }) => {
       const res = await api.patch("/user/updateProfile", formData);
 
       if (res.data?.data) {
-        sessionStorage.setItem("HealthUp", JSON.stringify(res.data.data));
+        sessionStorage.setItem("HealthUP", JSON.stringify(res.data.data));
         setUser(res.data.data);
         setMessage({
           type: "success",
@@ -385,6 +386,35 @@ const UserEditProfileModal = ({ onClose }) => {
 
                   <option value="very active" className="text-gray-800">
                     Very Active
+                  </option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-gray-300 text-sm mb-2">Goal</label>
+                <select
+                  name="goal"
+                  value={formData.goal}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 rounded-xl
+                bg-white/5 border border-white/10
+                text-white focus:ring-2 focus:ring-purple-500
+                outline-none transition"
+                >
+                  <option value="maintain" className="text-gray-800">
+                    Maintain
+                  </option>
+                  <option value="weight loss" className="text-gray-800">
+                    Weight Loss
+                  </option>
+                  <option value="muscle gain" className="text-gray-800">
+                    Muscle Gain
+                  </option>
+                  <option value="body recomposition" className="text-gray-800">
+                    Body Recomposition
+                  </option>
+                  <option value="improve endurance" className="text-gray-800">
+                    Improve Endurance
                   </option>
                 </select>
               </div>
