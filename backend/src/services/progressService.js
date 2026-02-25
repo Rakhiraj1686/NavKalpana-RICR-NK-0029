@@ -21,9 +21,15 @@ const BADGE_CODES = {
   CONSISTENT_4_WEEKS: "CONSISTENT_4_WEEKS",
 };
 
-const evaluateAdherence = ({ workoutsPlanned = 0, workoutsCompleted = 0 }) => {
-  if (!workoutsPlanned) return 0;
-  return clampPercent((workoutsCompleted / workoutsPlanned) * 100);
+const evaluateAdherence = ({
+  workoutsPlanned = 0,
+  workoutsCompleted = 0,
+  dietAdherencePercent = 0,
+}) => {
+  const workoutAdherence = workoutsPlanned
+    ? clampPercent((workoutsCompleted / workoutsPlanned) * 100)
+    : 0;
+  return clampPercent(workoutAdherence * 0.6 + Number(dietAdherencePercent || 0) * 0.4);
 };
 
 const ensureBadge = async (userId, badgeCode) => {
@@ -56,6 +62,89 @@ export const logWeight = async ({ userId, date, timezone, goalType, weightKg }) 
   );
 
   return progress;
+};
+
+export const logDailyCheckIn = async ({
+  userId,
+  date,
+  timezone,
+  caloriesIn,
+  proteinG,
+  steps,
+  dietAdherencePercent,
+  energyLevel,
+  waistCm,
+  chestCm,
+  hipsCm,
+  armsCm,
+  thighsCm,
+}) => {
+  const normalizedDate = normalizeDate(date || new Date());
+
+  const updateSet = {
+    timezone: timezone || "UTC",
+    weekKey: getWeekKey(normalizedDate),
+    monthKey: getMonthKey(normalizedDate),
+  };
+
+  if (caloriesIn !== undefined && caloriesIn !== null && caloriesIn !== "") {
+    updateSet.caloriesIn = Number(caloriesIn);
+  }
+  if (proteinG !== undefined && proteinG !== null && proteinG !== "") {
+    updateSet.proteinG = Number(proteinG);
+  }
+  if (steps !== undefined && steps !== null && steps !== "") {
+    updateSet.steps = Number(steps);
+  }
+  if (
+    dietAdherencePercent !== undefined &&
+    dietAdherencePercent !== null &&
+    dietAdherencePercent !== ""
+  ) {
+    updateSet.dietAdherencePercent = Number(dietAdherencePercent);
+  }
+  if (energyLevel) {
+    updateSet.energyLevel = energyLevel;
+  }
+
+  const setIfPresent = (key, value) => {
+    if (value !== undefined && value !== null && value !== "") {
+      updateSet[key] = Number(value);
+    }
+  };
+
+  setIfPresent("waistCm", waistCm);
+  setIfPresent("chestCm", chestCm);
+  setIfPresent("hipsCm", hipsCm);
+  setIfPresent("armsCm", armsCm);
+  setIfPresent("thighsCm", thighsCm);
+
+  const updatedDaily = await DailyProgress.findOneAndUpdate(
+    { user: userId, date: normalizedDate },
+    {
+      $set: updateSet,
+      $setOnInsert: {
+        workoutsPlanned: 0,
+        workoutsCompleted: 0,
+      },
+    },
+    { new: true, upsert: true, runValidators: true },
+  );
+
+  updatedDaily.adherenceScore = evaluateAdherence({
+    workoutsPlanned: updatedDaily.workoutsPlanned,
+    workoutsCompleted: updatedDaily.workoutsCompleted,
+    dietAdherencePercent: updatedDaily.dietAdherencePercent,
+  });
+  await updatedDaily.save();
+
+  await recomputeProgressAggregates(
+    userId,
+    getWeekKey(normalizedDate),
+    getMonthKey(normalizedDate),
+  );
+
+  return updatedDaily;
 };
 
 export const trackWorkoutCompletion = async ({
@@ -100,6 +189,7 @@ export const trackWorkoutCompletion = async ({
   updatedDaily.adherenceScore = evaluateAdherence({
     workoutsPlanned: updatedDaily.workoutsPlanned,
     workoutsCompleted: updatedDaily.workoutsCompleted,
+    dietAdherencePercent: updatedDaily.dietAdherencePercent,
   });
   await updatedDaily.save();
 
@@ -182,7 +272,7 @@ const getLatestWeight = async (userId) => {
 };
 
 export const getGoalProgress = async (userId) => {
-  const user = await User.findById(userId).select("weight primaryGoal goalWeight");
+  const user = await User.findById(userId).select("weight primaryGoal goalWeight calorieTarget workoutsPerWeek");
   const currentWeight = await getLatestWeight(userId);
 
   const startWeight = Number(user?.weight);
@@ -208,6 +298,8 @@ export const getGoalProgress = async (userId) => {
     currentWeight,
     targetWeight: goalWeight,
     progressPercent: Number(progressPercent.toFixed(2)),
+    calorieTarget: user?.calorieTarget || 2000,
+    workoutsPerWeek: user?.workoutsPerWeek || 5,
   };
 };
 

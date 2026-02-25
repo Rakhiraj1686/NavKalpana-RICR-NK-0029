@@ -75,6 +75,24 @@ const userSchema = new mongoose.Schema(
     bmr: Number,
     maintenanceCalories: Number,
 
+    goal: {
+      type: String,
+      default: "maintain",
+    },
+
+    targetCalories: Number,
+
+    macros: {
+      protein: { type: Number, default: 0 },
+      carbs: { type: Number, default: 0 },
+      fats: { type: Number, default: 0 },
+    },
+
+    aiPlan: {
+      type: mongoose.Schema.Types.Mixed,
+      default: null,
+    },
+
     primaryGoal: {
       type: String,
       enum: [

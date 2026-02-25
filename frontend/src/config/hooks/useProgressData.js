@@ -4,6 +4,7 @@ import {
   getProgressOverviewGraph,
   logWeight,
   logWorkout,
+  logDailyCheckin,
 } from "../progressApi"
 
 const initialDashboard = {
@@ -79,7 +80,18 @@ export const useProgressData = () => {
     load();
   }, [load]);
 
-  const submitDailyProgress = async ({ weightKg, workoutStatus = "completed" }) => {
+  const submitDailyProgress = async ({
+    weightKg,
+    workoutStatus = "completed",
+    caloriesIn,
+    dietAdherencePercent,
+    energyLevel,
+    waistCm,
+    chestCm,
+    hipsCm,
+    armsCm,
+    thighsCm,
+  }) => {
     try {
       setSaving(true);
       setError("");
@@ -96,6 +108,55 @@ export const useProgressData = () => {
           status: workoutStatus,
           scheduledDate: new Date().toISOString(),
           planWorkoutId: `manual-${Date.now()}`,
+        });
+      }
+
+      const hasCheckinData =
+        (caloriesIn !== undefined && caloriesIn !== null && caloriesIn !== "") ||
+        (dietAdherencePercent !== undefined &&
+          dietAdherencePercent !== null &&
+          dietAdherencePercent !== "") ||
+        !!energyLevel ||
+        (waistCm !== undefined && waistCm !== null && waistCm !== "") ||
+        (chestCm !== undefined && chestCm !== null && chestCm !== "") ||
+        (hipsCm !== undefined && hipsCm !== null && hipsCm !== "") ||
+        (armsCm !== undefined && armsCm !== null && armsCm !== "") ||
+        (thighsCm !== undefined && thighsCm !== null && thighsCm !== "");
+
+      if (hasCheckinData) {
+        await logDailyCheckin({
+          date: new Date().toISOString(),
+          caloriesIn:
+            caloriesIn !== undefined && caloriesIn !== null && caloriesIn !== ""
+              ? Number(caloriesIn)
+              : undefined,
+          dietAdherencePercent:
+            dietAdherencePercent !== undefined &&
+            dietAdherencePercent !== null &&
+            dietAdherencePercent !== ""
+              ? Number(dietAdherencePercent)
+              : undefined,
+          energyLevel,
+          waistCm:
+            waistCm !== undefined && waistCm !== null && waistCm !== ""
+              ? Number(waistCm)
+              : undefined,
+          chestCm:
+            chestCm !== undefined && chestCm !== null && chestCm !== ""
+              ? Number(chestCm)
+              : undefined,
+          hipsCm:
+            hipsCm !== undefined && hipsCm !== null && hipsCm !== ""
+              ? Number(hipsCm)
+              : undefined,
+          armsCm:
+            armsCm !== undefined && armsCm !== null && armsCm !== ""
+              ? Number(armsCm)
+              : undefined,
+          thighsCm:
+            thighsCm !== undefined && thighsCm !== null && thighsCm !== ""
+              ? Number(thighsCm)
+              : undefined,
         });
       }
 

@@ -1,5 +1,6 @@
 import {
   logWeight,
+  logDailyCheckIn,
   trackWorkoutCompletion,
   getStreak,
   getGoalProgress,
@@ -56,6 +57,49 @@ export const logWorkoutCompletion = async (req, res, next) => {
     res.status(201).json({
       success: true,
       message: "Workout log updated",
+      data,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const logDailyCheckInEntry = async (req, res, next) => {
+  try {
+    const {
+      date,
+      timezone,
+      caloriesIn,
+      proteinG,
+      steps,
+      dietAdherencePercent,
+      energyLevel,
+      waistCm,
+      chestCm,
+      hipsCm,
+      armsCm,
+      thighsCm,
+    } = req.body;
+
+    const data = await logDailyCheckIn({
+      userId: req.user._id,
+      date: date || new Date(),
+      timezone,
+      caloriesIn,
+      proteinG,
+      steps,
+      dietAdherencePercent,
+      energyLevel,
+      waistCm,
+      chestCm,
+      hipsCm,
+      armsCm,
+      thighsCm,
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Daily check-in logged",
       data,
     });
   } catch (error) {

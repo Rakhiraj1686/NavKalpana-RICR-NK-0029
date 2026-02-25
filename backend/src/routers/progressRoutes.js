@@ -3,6 +3,7 @@ import { Protect } from "../middlewares/authMiddleware.js";
 import {
   logWeightEntry,
   logWorkoutCompletion,
+  logDailyCheckInEntry,
   getStreakStats,
   getGoalProgressStats,
   getLatestProgressInsight,
@@ -18,6 +19,7 @@ const router = express.Router();
 
 router.post("/weight", Protect, logWeightEntry);
 router.post("/workouts", Protect, logWorkoutCompletion);
+router.post("/checkin", Protect, logDailyCheckInEntry);
 router.get("/timeline/weight", Protect, getWeightTimeline);
 router.get("/streak", Protect, getStreakStats);
 router.get("/goal-progress", Protect, getGoalProgressStats);
