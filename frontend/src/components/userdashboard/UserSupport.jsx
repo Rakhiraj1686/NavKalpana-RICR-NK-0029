@@ -204,7 +204,7 @@ export default function Support() {
   // };
 
   return (
-    <div className="overflow-y-auto no-scrollbar text-white p-4 sm:p-8">
+    <div className="overflow-y-auto no-scrollbar text-white pb-10 md:py-4">
       {/* Header */}
       <div className="mb-6 sm:mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold">Support & Help Center</h1>

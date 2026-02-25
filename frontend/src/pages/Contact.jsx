@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { FiSend } from "react-icons/fi";
 import api from "../config/Api";
+import { FaPhoneAlt } from "react-icons/fa";
 
 const Contact = () => {
   const [contactData, setContactData] = useState({
@@ -92,52 +93,57 @@ const Contact = () => {
 
             {/* Form Card */}
             <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-2xl shadow-xl">
-              <form
-                onSubmit={submitContact}
-                onReset={handleClear}
-                className="flex flex-col gap-6"
-              >
-                <input
-                  type="text"
-                  name="fullName"
-                  placeholder="Full Name"
-                  value={contactData.fullName}
-                  onChange={handleChange}
-                  disabled={isLoading}
-                  required
-                  className="bg-white/5 border border-white/10 px-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none placeholder-gray-400"
-                />
-
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="Email Address"
-                  value={contactData.email}
-                  onChange={handleChange}
-                  disabled={isLoading}
-                  required
-                  className="bg-white/5 border border-white/10 px-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none placeholder-gray-400"
-                />
-
-                <textarea
-                  name="message"
-                  rows="4"
-                  placeholder="Your message..."
-                  value={contactData.message}
-                  onChange={handleChange}
-                  disabled={isLoading}
-                  className="bg-white/5 border border-white/10 px-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none placeholder-gray-400"
-                />
-
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="bg-linear-to-r from-purple-500 to-blue-500 py-3 rounded-xl font-semibold hover:scale-105 transition shadow-lg flex items-center justify-center gap-2"
+              <div>
+                <div className="text-xl font-semibold mb-6 text-purple-400 ">
+                  Get in Touch
+                </div>
+                <form
+                  onSubmit={submitContact}
+                  onReset={handleClear}
+                  className="flex flex-col gap-6"
                 >
-                  <FiSend />
-                  {isLoading ? "Sending..." : "Send Message"}
-                </button>
-              </form>
+                  <input
+                    type="text"
+                    name="fullName"
+                    placeholder="Full Name"
+                    value={contactData.fullName}
+                    onChange={handleChange}
+                    disabled={isLoading}
+                    required
+                    className="bg-white/5 border border-white/10 px-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none placeholder-gray-400"
+                  />
+
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="Email Address"
+                    value={contactData.email}
+                    onChange={handleChange}
+                    disabled={isLoading}
+                    required
+                    className="bg-white/5 border border-white/10 px-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none placeholder-gray-400"
+                  />
+
+                  <textarea
+                    name="message"
+                    rows="4"
+                    placeholder="Your message..."
+                    value={contactData.message}
+                    onChange={handleChange}
+                    disabled={isLoading}
+                    className="bg-white/5 border border-white/10 px-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none placeholder-gray-400"
+                  />
+
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="bg-linear-to-r from-purple-500 to-blue-500 py-3 rounded-xl font-semibold hover:scale-105 transition shadow-lg flex items-center justify-center gap-2"
+                  >
+                    <FiSend />
+                    {isLoading ? "Sending..." : "Send Message"}
+                  </button>
+                </form>
+              </div>
             </div>
           </div>
         </div>
@@ -146,8 +152,7 @@ const Contact = () => {
       {/* Footer Notes */}
       <footer className="bg-[#020617] text-white border-t border-white/10">
         <div className="border-t border-white/10 text-center py-6 text-gray-500 text-md">
-          © {new Date().getFullYear()} HealthUP - Built with ❤️ for smarter
-          fitness.
+          © {new Date().getFullYear()} HealthUP • All Rights reserved.
         </div>
       </footer>
     </>

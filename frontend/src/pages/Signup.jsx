@@ -88,117 +88,129 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen py-28 flex items-center justify-center bg-linear-to-br from-[#020617] to-[#0f172a] px-4 relative overflow-hidden">
-      {/* Background Glow */}
-      <div className="absolute w-100 h-100 bg-purple-600/20 rounded-full blur-[120px] -top-20 -left-20" />
-      <div className="absolute w-87.5 h-87.5 bg-blue-600/20 rounded-full blur-[120px] -bottom-20 -right-20" />
+    <>
+      <div className="min-h-screen py-28 flex items-center justify-center bg-linear-to-br from-[#020617] to-[#0f172a] px-4 relative overflow-hidden">
+        {/* Background Glow */}
+        <div className="absolute w-100 h-100 bg-purple-600/20 rounded-full blur-[120px] -top-20 -left-20" />
+        <div className="absolute w-87.5 h-87.5 bg-blue-600/20 rounded-full blur-[120px] -bottom-20 -right-20" />
 
-      <div className="w-full max-w-md relative z-10">
-        {/* Header */}
-        <div className="flex flex-col items-center mb-8">
-          <div className="text-4xl p-5 rounded-full bg-white/10 backdrop-blur border border-white/20 text-purple-400">
-            <AiOutlineSafety />
+        <div className="w-full max-w-md relative z-10">
+          {/* Header */}
+          <div className="flex flex-col items-center mb-8">
+            <div className="text-4xl p-5 rounded-full bg-white/10 backdrop-blur border border-white/20 text-purple-400">
+              <AiOutlineSafety />
+            </div>
+
+            <h2 className="text-3xl font-bold mt-4 bg-linear-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+              Create Account
+            </h2>
+
+            <p className="text-gray-400 text-sm">Sign up to get started</p>
           </div>
 
-          <h2 className="text-3xl font-bold mt-4 bg-linear-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-            Create Account
-          </h2>
+          {/* Card */}
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-8">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Name */}
+              <InputField
+                icon={<LuUser />}
+                name="fullName"
+                placeholder="Full Name"
+                value={formData.fullName}
+                onChange={handleChange}
+                error={validError.fullName}
+              />
 
-          <p className="text-gray-400 text-sm">Sign up to get started</p>
-        </div>
+              {/* Email */}
+              <InputField
+                icon={<FiMail />}
+                name="email"
+                type="email"
+                placeholder="Email Address"
+                value={formData.email}
+                onChange={handleChange}
+                error={validError.email}
+              />
 
-        {/* Card */}
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Name */}
-            <InputField
-              icon={<LuUser />}
-              name="fullName"
-              placeholder="Full Name"
-              value={formData.fullName}
-              onChange={handleChange}
-              error={validError.fullName}
-            />
+              {/* Phone */}
+              <InputField
+                icon={<FiPhone />}
+                name="mobileNumber"
+                type="tel"
+                placeholder="Phone Number"
+                value={formData.mobileNumber}
+                onChange={handleChange}
+                error={validError.mobileNumber}
+              />
 
-            {/* Email */}
-            <InputField
-              icon={<FiMail />}
-              name="email"
-              type="email"
-              placeholder="Email Address"
-              value={formData.email}
-              onChange={handleChange}
-              error={validError.email}
-            />
+              {/* Password */}
+              <div className="text-end">
+                <div className="relative">
+                  <VscLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
 
-            {/* Phone */}
-            <InputField
-              icon={<FiPhone />}
-              name="mobileNumber"
-              type="tel"
-              placeholder="Phone Number"
-              value={formData.mobileNumber}
-              onChange={handleChange}
-              error={validError.mobileNumber}
-            />
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    placeholder="Create Password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    className="w-full pl-10 pr-10 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:ring-2 focus:ring-purple-500 outline-none"
+                  />
 
-            {/* Password */}
-            <div className="text-end">
-              <div className="relative">
-                <VscLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer"
+                  >
+                    {showPassword ? (
+                      <AiOutlineEyeInvisible />
+                    ) : (
+                      <AiOutlineEye />
+                    )}
+                  </button>
+                </div>
 
-                <input
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  placeholder="Create Password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="w-full pl-10 pr-10 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:ring-2 focus:ring-purple-500 outline-none"
-                />
-
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer"
-                >
-                  {showPassword ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
-                </button>
+                {validError.password && (
+                  <span className="text-xs text-red-400 ">
+                    {validError.password}
+                  </span>
+                )}
               </div>
 
-              {validError.password && (
-                <span className="text-xs text-red-400 ">
-                  {validError.password}
-                </span>
-              )}
-            </div>
+              {/* Submit */}
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full bg-linear-to-r from-purple-500 to-blue-500 py-3 rounded-xl font-semibold hover:scale-105 transition shadow-lg cursor-pointer"
+              >
+                {isLoading ? "Creating Account..." : "Sign Up"}
+              </button>
 
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-linear-to-r from-purple-500 to-blue-500 py-3 rounded-xl font-semibold hover:scale-105 transition shadow-lg cursor-pointer"
-            >
-              {isLoading ? "Creating Account..." : "Sign Up"}
-            </button>
+              {/* Login Redirect */}
+              <div className="text-center border-t border-white/10 pt-5">
+                <p className="text-gray-400 text-sm mb-3">
+                  Already have an account?
+                </p>
 
-            {/* Login Redirect */}
-            <div className="text-center border-t border-white/10 pt-5">
-              <p className="text-gray-400 text-sm mb-3">
-                Already have an account?
-              </p>
+                <Link to="/login" className="text-purple-400 hover:underline">
+                  Login Instead
+                </Link>
+              </div>
+            </form>
+          </div>
 
-              <Link to="/login" className="text-purple-400 hover:underline">
-                Login Instead
-              </Link>
-            </div>
-          </form>
+          <p className="text-center text-xs text-gray-500 mt-6">
+            By signing up you agree to our terms & privacy policy.
+          </p>
         </div>
-
-        <p className="text-center text-xs text-gray-500 mt-6">
-          By signing up you agree to our terms & privacy policy.
-        </p>
       </div>
-    </div>
+      <footer className="bg-[#020617] text-white border-t border-white/10">
+        {/* Footer */}
+        <div className="border-t border-white/10 text-center py-6 text-gray-500 text-md">
+          © {new Date().getFullYear()} HealthUP • All Rights reserved.
+        </div>
+      </footer>
+    </>
   );
 };
 

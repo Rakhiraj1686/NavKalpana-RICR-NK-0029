@@ -271,7 +271,7 @@ export const GetUserGoal = async (req, res, next) => {
 
 export const UserChatWithAI = async (req, res) => {
   try {
-    req.body.userProfile = req.user.profile;
+    // req.body.userProfile = req.user.profile;
     const prompt = buildPrompt(req.body);
 
     const reply = await getAIResponse(prompt);

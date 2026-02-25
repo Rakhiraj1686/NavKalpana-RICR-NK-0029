@@ -86,10 +86,10 @@ const UserGoal = () => {
   }, [setUser]);
 
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-screen pb-10 md:p-6">
       {/* HERO SECTION */}
 
-      <div className=" mx-auto mt-6">
+      <div className=" mx-auto md:mt-6">
         <h1 className="text-3xl md:text-4xl font-bold mb-4 bg-linear-to-r from-purple-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent">
           Your Fitness Journey
         </h1>
@@ -99,15 +99,15 @@ const UserGoal = () => {
         </p>
       </div>
 
-      <div className="mt-6 mx-auto">
+      <div className="md:mt-6 mx-auto">
         {/* ONGOING GOAL SECTION */}
         {user?.primaryGoal && user?.goalStatus === "ongoing" && (
-          <div className="mb-8 bg-linear-to-br from-purple-500/10 to-blue-500/10 border border-purple-500/30 rounded-2xl p-6">
+          <div className="mb-8 bg-linear-to-br from-purple-500/10 to-blue-500/10 border border-purple-500/30 rounded-2xl px-3 py-6 md:p-6">
             <div className="flex items-start justify-between mb-4">
-              <h3 className="text-xl font-bold text-purple-400 flex items-center gap-2">
-                <span className="text-2xl">⚡</span> Your Current Goal
+              <h3 className="md:text-xl font-bold text-purple-400 md:flex items-center gap-2">
+                <span className="md:text-2xl">⚡</span>Your Current Goal
               </h3>
-              <span className="px-3 py-1 bg-purple-500/30 text-purple-300 rounded-full text-sm font-semibold">
+              <span className="md:px-3 md:py-1 px-1.5 py-0.5 bg-purple-500/30 text-purple-300 rounded-full text-xs md:text-sm md:font-semibold">
                 In Progress
               </span>
             </div>
@@ -139,7 +139,7 @@ const UserGoal = () => {
 
             <button
               onClick={handleCompleteGoal}
-              className="w-full py-3 px-4 bg-linear-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-xl hover:from-green-600 hover:to-emerald-600 transition duration-300 shadow-lg hover:shadow-xl cursor-pointer"
+              className="w-full py-1.5 md:py-3 px-4 bg-linear-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-xl hover:from-green-600 hover:to-emerald-600 transition duration-300 shadow-lg hover:shadow-xl cursor-pointer"
             >
               Mark Goal as Completed
             </button>
@@ -167,9 +167,9 @@ const UserGoal = () => {
 
         {/* ADD NEW GOAL SECTION */}
         {(!user?.primaryGoal || user?.goalStatus === "completed") && (
-          <div className="bg-linear-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/20 rounded-2xl p-8 shadow-2xl mb-8">
+          <div className="bg-linear-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/20 rounded-2xl p-6 md:p-8 shadow-2xl mb-8">
             <div className="mb-8">
-              <h2 className="text-3xl font-bold mb-3 bg-linear-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+              <h2 className="text-xl md:text-3xl font-bold mb-3 bg-linear-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
                 Set Your New Goal
               </h2>
               <p className="text-gray-400 text-sm">

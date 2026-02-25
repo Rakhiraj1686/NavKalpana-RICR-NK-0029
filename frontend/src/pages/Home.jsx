@@ -1,7 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-
 export default function Home() {
   return (
     <div className="min-h-screen bg-linear-to-br from-[#020617] to-[#0f172a] text-white relative overflow-hidden">
@@ -13,7 +12,7 @@ export default function Home() {
         <Hero />
         <HowItWorks />
         <Features />
-        <AICoach />
+        {/* <AICoach /> */}
         <Footer />
       </div>
     </div>
@@ -22,10 +21,8 @@ export default function Home() {
 
 function Hero() {
   return (
-    <section className="min-h-screen flex flex-col justify-center items-center text-center px-6">
-      <h1
-        className="text-5xl md:text-7xl font-bold mb-6 leading-tight"
-      >
+    <section className="min-h-screen flex flex-col justify-center md:mt-10 items-center text-center px-6">
+      <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
         <span className="bg-linear-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
           Adaptive Fitness Intelligence
         </span>
@@ -36,7 +33,7 @@ function Hero() {
         fatigue levels, and real-world progress.
       </p>
 
-      <div className="flex gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <Link
           to="/signup"
           className="bg-linear-to-r from-purple-500 to-blue-500 px-8 py-4 rounded-2xl font-semibold hover:scale-105 transition shadow-xl"
@@ -162,8 +159,7 @@ function Footer() {
     <footer className="bg-[#020617] text-white border-t border-white/10">
       {/* Footer */}
       <div className="border-t border-white/10 text-center py-6 text-gray-500 text-md">
-        © {new Date().getFullYear()} HealthUP - Built with ❤️ for smarter
-        fitness.
+        © {new Date().getFullYear()} HealthUP • All Rights reserved.
       </div>
     </footer>
   );

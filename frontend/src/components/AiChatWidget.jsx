@@ -115,7 +115,7 @@ const AiChatWidget = ({ chatOpen, setChatOpen }) => {
       <button
         onClick={() => setChatOpen(!chatOpen)}
         disabled={chatOpen}
-        className={`fixed bottom-4 right-8 z-50 bg-linear-to-r from-blue-500 to-blue-400 backdrop-blur-xl border border-white/10 text-white px-3 py-2 rounded-full shadow-2xltransition-all duration-300  ${chatOpen ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+        className={`fixed bottom-6 right-4 md:bottom-4 md:right-6 z-50 bg-linear-to-r from-blue-500 to-blue-400 backdrop-blur-xl border border-white/10 text-white px-3 py-2 rounded-full shadow-2xltransition-all duration-300  ${chatOpen ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
       >
         Ask FitAI
       </button>
