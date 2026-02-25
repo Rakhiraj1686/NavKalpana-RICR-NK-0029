@@ -156,11 +156,11 @@ const UserOverview = () => {
   }
 
   return (
-    <div className="min-h-screen text-white py-8 px-6">
+    <div className="min-h-screen text-white pb-20 md:py-8 md:px-6">
       {user?.profileCompleted ? (
-        <main className="max-w-7xl mx-auto">
+        <main className="md:max-w-7xl mx-auto">
           <div className="mb-8">
-            <h1 className="text-4xl font-bold">
+            <h1 className="text-2xl font-semibold md:text-4xl md:font-bold">
               Welcome back, {user?.fullName?.split(" ")[0]} 👋
             </h1>
           </div>

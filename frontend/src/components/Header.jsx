@@ -43,7 +43,7 @@ const Header = () => {
       <header className="fixed top-0 left-1/2 -translate-x-1/2 z-50 w-full">
         <div
           className="mx-auto flex items-center justify-between 
-          px-24 py-4 
+          px-4 py-2.5 md:px-16 md:py-3 
           bg-[#0f172a]/80 backdrop-blur-xl 
           border border-white/10 shadow-xl"
         >
@@ -61,10 +61,10 @@ const Header = () => {
               Home
             </Link>
             <Link className="hover:text-purple-400 transition" to="/about">
-              About HealthUP
+              About
             </Link>
             <Link className="hover:text-purple-400 transition" to="/contact">
-              Contact Us
+              Contact
             </Link>
           </nav>
 
@@ -96,14 +96,9 @@ const Header = () => {
 
                 // ref={dropdownRef}
               >
-                {/* Notification */}
-                <button className="relative cursor-pointer">
-                  <IoMdNotificationsOutline className="text-xl text-white" />
-                  <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-                </button>
 
-                {/* Username + Notification */}
-                <div
+                {/* Username */}
+                <button
                   onClick={() => {
                     setProfileOpen(!profileOpen);
                     handleProfileClick();
@@ -122,7 +117,7 @@ const Header = () => {
                   <span className="font-medium text-white">
                     {user?.fullName || "User"}
                   </span>
-                </div>
+                </button>
               </div>
             )}
           </div>
@@ -145,19 +140,19 @@ const Header = () => {
 
       {/* Mobile Drawer */}
       <div
-        className={`fixed right-0 top-0 h-full w-[50%] max-w-sm bg-[#020617] text-white z-50 transform transition-transform duration-300 md:hidden ${
+        className={`fixed right-0 top-0 h-full w-[60%] max-w-sm bg-[#020617] text-white z-50 transform transition-transform duration-300 md:hidden ${
           menuOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        <div className="flex justify-between items-center px-6 py-5 border-b border-white/10">
+        <div className="flex justify-between items-center px-6 py-3 border-b border-white/10">
           <span className="text-xl font-semibold">HealthUP</span>
           <HiOutlineX
-            className="w-7 h-7 cursor-pointer"
+            className="w-6 h-6 text-red-600"
             onClick={() => setMenuOpen(false)}
           />
         </div>
 
-        <nav className="flex flex-col gap-6 px-6 py-10 text-lg">
+        <nav className="flex flex-col gap-4 px-6 py-4 text-lg">
           <Link to="/" onClick={() => setMenuOpen(false)}>
             Home
           </Link>
@@ -168,9 +163,9 @@ const Header = () => {
             Contact
           </Link>
 
-          <div className="border-t border-white pt-6 mt-4">
+          <div className="border-t border-white pt-4 ">
             {!isLogin ? (
-              <>
+              <div className="grid grid-cols-2 gap-4 text-purple-500">
                 <Link to="/login" onClick={() => setMenuOpen(false)}>
                   Login
                 </Link>
@@ -178,22 +173,21 @@ const Header = () => {
                 <Link to="/signup" onClick={() => setMenuOpen(false)}>
                   Sign Up
                 </Link>
-              </>
+              </div>
             ) : (
-              <>
+              <div className=" grid grid-cols-1 gap-4 text-purple-500">
                 <button
                   onClick={() => {
                     navigate("/user-dashboard");
                     setMenuOpen(false);
                   }}
                 >
-                  Profile
+                  Dashboard
                 </button>
-                <br />
                 <button onClick={logout} className="text-red-400">
                   Logout
                 </button>
-              </>
+              </div>
             )}
           </div>
         </nav>

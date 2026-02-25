@@ -16,11 +16,11 @@ const About = () => {
       {/* ================= HERO ================= */}
       <section className="relative z-10 pt-28 px-6">
         <div className="max-w-6xl mx-auto text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-linear-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+          <h1 className="text-5xl md:text-6xl font-bold mb-10 bg-linear-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
             About HealthUP
           </h1>
 
-          <p className="text-gray-300 max-w-3xl mx-auto leading-relaxed text-lg">
+          <p className="text-gray-300 md:max-w-3xl mx-auto leading-relaxed md:text-lg">
             HealthUP is a modern fitness and wellness platform built to help
             individuals transform their health through structure, data-driven
             insights, and adaptive guidance. We combine smart tracking,
@@ -35,26 +35,20 @@ const About = () => {
       <section className="relative z-10 py-20 px-6">
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-14 items-center">
           <div className="space-y-6">
-            <h2 className="text-3xl font-bold text-purple-400">
+            <h2 className="text-4xl font-bold text-purple-400">
               Why HealthUP Exists
             </h2>
 
-            <p className="text-gray-300 leading-relaxed">
-              Many people start fitness journeys with motivation but lose
-              direction due to lack of structure. Generic plans, unrealistic
-              expectations, and no feedback system often lead to frustration.
-            </p>
-
-            <p className="text-gray-300 leading-relaxed">
-              HealthUP was created to solve this gap — by providing a structured
+            <p className="text-gray-300 text-lg">
+              HealthUP was created to solve this gap - by providing a structured
               system that evolves with the user. Instead of one-size-fits-all
               templates, the platform monitors progress, detects patterns, and
               guides users intelligently.
             </p>
           </div>
 
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-xl">
-            <h3 className="text-xl font-semibold mb-4 text-blue-400">
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl md:p-8 px-6 py-4 shadow-xl">
+            <h3 className="text-2xl font-semibold mb-4 text-blue-400">
               Our Core Principle
             </h3>
 
@@ -190,8 +184,7 @@ const About = () => {
       {/* Footer Notes */}
       <footer className="bg-[#020617] text-white border-t border-white/10">
         <div className="border-t border-white/10 text-center py-6 text-gray-500 text-md">
-          © {new Date().getFullYear()} HealthUP - Built with ❤️ for smarter
-          fitness.
+          © {new Date().getFullYear()} HealthUP • All Rights reserved.
         </div>
       </footer>
     </div>

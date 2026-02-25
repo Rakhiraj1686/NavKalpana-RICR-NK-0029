@@ -9,6 +9,7 @@ import UserProgress from "../../components/userdashboard/UserProgress";
 import UserProfile from "../../components/userdashboard/UserProfile";
 import UserGoal from "../../components/userdashboard/UserGoal";
 import UserPlan from "../../components/userdashboard/userPlan";
+import { FaArrowRight, FaBars } from "react-icons/fa";
 
 const UserDashboard = () => {
   const { isLogin } = useAuth();
@@ -23,7 +24,7 @@ const UserDashboard = () => {
   }, [isLogin, navigate]);
 
   return (
-    <div className="fixed top-15 h-screen w-full flex overflow-hidden bg-linear-to-br from-[#020617] to-[#0f172a] text-white">
+    <div className="fixed top-12 md:top-15 h-screen w-full flex overflow-hidden bg-linear-to-br from-[#020617] to-[#0f172a] text-white">
       {/* Mobile overlay */}
       {mobileOpen && (
         <div
@@ -55,15 +56,16 @@ const UserDashboard = () => {
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto">
         {/* Mobile Topbar */}
-        <div className="md:hidden p-4 border-b border-white/10 flex justify-between">
-          <button onClick={() => setMobileOpen(true)}>☰</button>
-          <span>User Dashboard</span>
+        <div className="md:hidden p-4 mt-2 border-white/10 flex justify-between">
+          <button onClick={() => setMobileOpen(true)}>
+            <FaArrowRight />
+          </button>
         </div>
 
         <div className={`mx-auto p-6 ${isCollapsed ? "w-56/60" : "w-50/60"}`}>
           {active === "overview" && <UserOverview />}
           {/* {active === "workout" && <UserWorkout />} */}
-          {active === "plan" && <UserPlan/>}
+          {active === "plan" && <UserPlan />}
           {active === "progress" && <UserProgress />}
           {active === "profile" && <UserProfile />}
           {active === "goal" && <UserGoal />}
@@ -71,6 +73,57 @@ const UserDashboard = () => {
         </div>
       </main>
     </div>
+
+    //   <div className="min-h-screen flex bg-gradient-to-br from-[#020617] to-[#0f172a] text-white">
+
+    //   {/* Overlay (Mobile only) */}
+    //   {mobileOpen && (
+    //     <div
+    //       className="fixed inset-0 bg-black/50 z-40 md:hidden"
+    //       onClick={() => setMobileOpen(false)}
+    //     />
+    //   )}
+
+    //   {/* Sidebar */}
+    //   <aside
+    //     className={`
+    //       fixed md:static z-50 h-full bg-[#020617]
+    //       border-r border-white/10 transition-all duration-300
+    //       ${mobileOpen ? "left-0" : "-left-full"}
+    //       md:left-0
+    //       ${isCollapsed ? "w-20" : "w-64"}
+    //     `}
+    //   >
+    //     <UserSidebar
+    //       active={active}
+    //       setActive={setActive}
+    //       isCollapsed={isCollapsed}
+    //       setIsCollapsed={setIsCollapsed}
+    //       setMobileOpen={setMobileOpen}
+    //     />
+    //   </aside>
+
+    //   {/* Main Content */}
+    //   <main className="flex-1 flex flex-col overflow-hidden">
+
+    //     {/* Mobile Header */}
+    //     <div className="md:hidden flex items-center p-4 border-b border-white/10">
+    //       <button onClick={() => setMobileOpen(true)}>
+    //         <FaBars />
+    //       </button>
+    //     </div>
+
+    //     {/* Page Content */}
+    //     <div className="flex-1 overflow-y-auto p-4 md:p-6">
+    //       {active === "overview" && <UserOverview />}
+    //       {active === "plan" && <UserPlan />}
+    //       {active === "progress" && <UserProgress />}
+    //       {active === "profile" && <UserProfile />}
+    //       {active === "goal" && <UserGoal />}
+    //       {active === "support" && <UserSupport />}
+    //     </div>
+    //   </main>
+    // </div>
   );
 };
 
