@@ -9,6 +9,8 @@ import UserProgress from "../../components/userdashboard/UserProgress";
 import UserProfile from "../../components/userdashboard/UserProfile";
 import UserGoal from "../../components/userdashboard/UserGoal";
 import UserPlan from "../../components/userdashboard/userPlan";
+import ProgressionPlan from "../../components/ProgressionPlan";
+import AdvancedAnalytics from "../../components/AdvancedAnalytics";
 
 const UserDashboard = () => {
   const { isLogin } = useAuth();
@@ -64,6 +66,8 @@ const UserDashboard = () => {
           {active === "overview" && <UserOverview />}
           {/* {active === "workout" && <UserWorkout />} */}
           {active === "plan" && <UserPlan/>}
+          {active === "progression" && <ProgressionPlan />}
+          {active === "analytics" && <AdvancedAnalytics />}
           {active === "progress" && <UserProgress />}
           {active === "profile" && <UserProfile />}
           {active === "goal" && <UserGoal />}

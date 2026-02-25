@@ -13,6 +13,9 @@ import {
   getProgressDashboard,
   getWeightTimeline,
   getWeeklyOverviewGraph,
+  getAdvancedAnalytics,
+  getProgressionPlan,
+  getWeekPlan,
 } from "../controllers/progressController.js";
 
 const router = express.Router();
@@ -26,6 +29,9 @@ router.get("/goal-progress", Protect, getGoalProgressStats);
 router.get("/insights/latest", Protect, getLatestProgressInsight);
 router.get("/analytics/weekly", Protect, getWeeklyProgressAnalytics);
 router.get("/analytics/monthly", Protect, getMonthlyProgressAnalytics);
+router.get("/analytics/advanced", Protect, getAdvancedAnalytics);
+router.get("/plan/progression", Protect, getProgressionPlan);
+router.get("/plan/week/:week", Protect, getWeekPlan);
 router.get("/badges", Protect, getGamificationBadges);
 router.get("/dashboard", Protect, getProgressDashboard);
 router.get("/overview-graph", Protect, getWeeklyOverviewGraph);

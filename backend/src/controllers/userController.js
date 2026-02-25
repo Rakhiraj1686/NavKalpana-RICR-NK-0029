@@ -4,6 +4,11 @@ import { buildPrompt } from "../services/groqPromptBuilder.js";
 import { getAIResponse } from "../services/groqServices.js";
 import cloudinary from "../config/cloudinary.js";
 import { generateAIPlan } from "../services/aiPlanService.js";
+import {
+  evaluateWeeklyProgress,
+  calculatePlanAdjustments,
+  applyPlanAdjustments,
+} from "../services/planAdjustmentService.js";
 import Ticket from "../models/ticketModel.js";
 import Progress from "../models/userProgressModel.js";
 import {
@@ -63,6 +68,7 @@ export const UserUpdateProfile = async (req, res, next) => {
       height,
       weight,
       biologicalSex,
+      foodPreference,
       activityLevel,
       experienceLevel,
       goal,
@@ -124,7 +130,8 @@ export const UserUpdateProfile = async (req, res, next) => {
     currentUser.biologicalSex = biologicalSex;
     currentUser.activityLevel = activityLevel;
     currentUser.experienceLevel = experienceLevel;
-    currentUser.goal = goal;
+    currentUser.foodPreference = foodPreference || currentUser.foodPreference;
+    currentUser.goal = goal || currentUser.goal || "maintain";
 
     currentUser.bmi = bmi;
     currentUser.bmr = bmr;
@@ -330,6 +337,27 @@ export const generatePlan = async (req, res, next) => {
       return res.status(404).json({ message: "User not found" });
     }
 
+    // Weekly evaluation for intelligent adjustments (optional)
+    let adjustedUser = user;
+    let adjustmentResult = { adjustments: null, triggers: [] };
+    
+    try {
+      const weeklyMetrics = await evaluateWeeklyProgress(req.user._id);
+      if (weeklyMetrics) {
+        adjustmentResult = calculatePlanAdjustments(weeklyMetrics, user);
+        if (
+          adjustmentResult.adjustments &&
+          (adjustmentResult.adjustments.calorieAdjust !== 0 ||
+            adjustmentResult.adjustments.workoutAdjust !== 0)
+        ) {
+          adjustedUser = applyPlanAdjustments(user, adjustmentResult.adjustments);
+        }
+      }
+    } catch (err) {
+      console.log("Weekly evaluation skipped:", err.message);
+      // Continue with plan generation even if evaluation fails
+    }
+
     const recentProgress = await Progress.find({ user: req.user._id })
       .sort({ date: -1 })
       .limit(14)
@@ -361,15 +389,28 @@ export const generatePlan = async (req, res, next) => {
         }
       : null;
 
-    const newPlan = generateAIPlan(user, normalizedProgressSummary);
+    const newPlan = generateAIPlan(adjustedUser, normalizedProgressSummary);
     console.log("Generate Plan", newPlan);
 
-    user.aiPlan = newPlan;
-    await user.save();
+    adjustedUser.aiPlan = newPlan;
+    
+    // Record adjustment metadata if any adjustments were applied
+    if (adjustmentResult.triggers && adjustmentResult.triggers.length > 0) {
+      adjustedUser.lastPlanAdjustment = {
+        appliedAt: new Date(),
+        triggers: adjustmentResult.triggers,
+        previousCalories: user.targetCalories,
+        newCalories: adjustedUser.targetCalories,
+      };
+    }
+    
+    await adjustedUser.save();
 
     res.status(200).json({
       message: "AI Plan regenerated successfully",
       aiPlan: newPlan,
+      adjustments: adjustmentResult.adjustments || null,
+      triggers: adjustmentResult.triggers || [],
     });
   } catch (error) {
     next(error);
@@ -510,5 +551,95 @@ export const getProgressGraph = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: "Error fetching graph data" });
+  }
+};
+// Weekly Plan Adjustment Evaluation
+export const evaluateAndAdjustPlan = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Evaluate 7-day progress metrics
+    const weeklyMetrics = await evaluateWeeklyProgress(req.user._id);
+
+    if (!weeklyMetrics || weeklyMetrics.dataPoints < 3) {
+      return res.status(200).json({
+        message: "Insufficient progress data for evaluation (need at least 3 days)",
+        weeklyMetrics: null,
+        adjustments: null,
+        triggers: [],
+      });
+    }
+
+    // Calculate required adjustments based on triggers
+    const adjustmentResult = calculatePlanAdjustments(weeklyMetrics, user);
+
+    let response = {
+      message: "Plan evaluation completed",
+      weeklyMetrics,
+      adjustments: null,
+      triggers: [],
+    };
+
+    // Apply adjustments if any triggers detected
+    if (adjustmentResult.triggers && adjustmentResult.triggers.length > 0) {
+      applyPlanAdjustments(user, adjustmentResult.adjustments);
+
+      // Regenerate plan with adjusted parameters
+      const recentProgress = await Progress.find({ user: req.user._id })
+        .sort({ date: -1 })
+        .limit(14)
+        .select("workoutAdherencePercent dietAdherencePercent habitScore");
+
+      const progressSummary = recentProgress.length
+        ? recentProgress.reduce(
+            (acc, item) => {
+              acc.avgWorkoutAdherence += Number(item.workoutAdherencePercent || 0);
+              acc.avgDietAdherence += Number(item.dietAdherencePercent || 0);
+              acc.avgHabitScore += Number(item.habitScore || 0);
+              return acc;
+            },
+            { avgWorkoutAdherence: 0, avgDietAdherence: 0, avgHabitScore: 0 },
+          )
+        : null;
+
+      const normalizedProgressSummary = progressSummary
+        ? {
+            avgWorkoutAdherence: Number(
+              (progressSummary.avgWorkoutAdherence / recentProgress.length).toFixed(2),
+            ),
+            avgDietAdherence: Number(
+              (progressSummary.avgDietAdherence / recentProgress.length).toFixed(2),
+            ),
+            avgHabitScore: Number(
+              (progressSummary.avgHabitScore / recentProgress.length).toFixed(2),
+            ),
+          }
+        : null;
+
+      const newPlan = generateAIPlan(user, normalizedProgressSummary);
+
+      user.aiPlan = newPlan;
+      user.lastPlanAdjustment = {
+        appliedAt: new Date(),
+        triggers: adjustmentResult.triggers,
+        adjustments: adjustmentResult.adjustments,
+        weeklyMetrics,
+      };
+
+      await user.save();
+
+      response.message = "Plan adjusted based on weekly progress";
+      response.adjustments = adjustmentResult.adjustments;
+      response.triggers = adjustmentResult.triggers;
+      response.newPlan = newPlan;
+    }
+
+    res.status(200).json(response);
+  } catch (error) {
+    next(error);
   }
 };

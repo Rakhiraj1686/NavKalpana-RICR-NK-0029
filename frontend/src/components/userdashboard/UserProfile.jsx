@@ -20,6 +20,15 @@ const UserProfile = () => {
   const [preview, setPreview] = useState("");
  const [progressData, setProgressData] = useState([]);
 
+  // Get BMI category and color
+  const getBMIStatus = (bmi) => {
+    if (!bmi) return { status: "N/A", color: "text-gray-400", bgColor: "bg-gray-400/10" };
+    if (bmi < 18.5) return { status: "Underweight", color: "text-blue-300", bgColor: "bg-blue-400/10" };
+    if (bmi < 25) return { status: "Normal", color: "text-green-300", bgColor: "bg-green-400/10" };
+    if (bmi < 30) return { status: "Overweight", color: "text-yellow-300", bgColor: "bg-yellow-400/10" };
+    return { status: "Obese", color: "text-red-300", bgColor: "bg-red-400/10" };
+  };
+
   const changePhoto = async (photo) => {
     const form_Data = new FormData();
     form_Data.append("image", photo);
@@ -279,6 +288,16 @@ const UserProfile = () => {
                       {user?.aiPlan?.workoutLevel}
                     </p>
                   </div>
+
+                  <div className="bg-white/5 p-4 rounded-xl text-center">
+                    <p className="text-gray-400">BMI</p>
+                    <p className="text-lg font-semibold text-white">
+                      {user?.bmi ? user.bmi.toFixed(1) : "--"}
+                    </p>
+                    <p className={`text-sm mt-2 font-medium ${getBMIStatus(user?.bmi).color}`}>
+                      {getBMIStatus(user?.bmi).status}
+                    </p>
+                  </div>
                 </div>
               </div>
             )}
@@ -294,12 +313,12 @@ const UserProfile = () => {
                     : "Complete your health details to unlock adaptive AI workout and diet plans."}
                 </p>
               </div>
-              <button
+              {/* <button
                 onClick={handleRegenerate}
                 className="mb-6 bg-purple-600 px-4 py-2 rounded-lg hover:bg-purple-700 transition cursor-pointer"
               >
                 Regenerate AI Plan
-              </button>
+              </button> */}
             </div>
 
             {/* <ProgressGraph data={progressData} /> */}
