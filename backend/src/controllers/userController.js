@@ -1,9 +1,9 @@
 import bcrypt from "bcrypt";
 import User from "../models/userProfileModel.js";
+import { buildPrompt } from "../services/groqPromptBuilder.js";
+import { getAIResponse } from "../services/groqServices.js";
 import cloudinary from "../config/cloudinary.js";
-import chatHistory from "../models/chatHistory.js";
 import { generateAIPlan } from "../services/aiPlanService.js";
-import groq from "../config/groq.js";
 import Ticket from "../models/ticketModel.js";
 import Progress from "../models/userProgressModel.js";
 
@@ -257,37 +257,23 @@ export const GetUserGoal = async (req, res, next) => {
   }
 };
 
-export const UserChatWithAI = async (req, res, next) => {
+export const UserChatWithAI = async (req, res) => {
   try {
-    const { message } = req.body;
+    req.body.userProfile = req.user.profile;
+    const prompt = buildPrompt(req.body);
 
-    if (!message) {
-      return res.status(400).json({
-        success: false,
-        message: "Message is required",
-      });
-    }
+    const reply = await getAIResponse(prompt);
 
-    const completion = await groq.chat.completions.create({
-      model: "llama-3.1-8b-instant",
-      messages: [{ role: "user", content: message }],
-    });
-
-    const reply = completion.choices[0].message.content;
-
-    await chatHistory.create({
-      user: req.user._id,
-      question: message,
-      response: reply,
-    });
-
-    res.status(200).json({
+    res.json({
       success: true,
       reply,
     });
   } catch (error) {
-    console.error("AI Error:", error);
-    next(error);
+    console.log(error);
+
+    res.status(500).json({
+      message: "AI processing error",
+    });
   }
 };
 

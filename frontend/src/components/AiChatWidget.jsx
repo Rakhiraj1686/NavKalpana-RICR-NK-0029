@@ -52,10 +52,18 @@ const AiChatWidget = ({ chatOpen, setChatOpen }) => {
     }
   }, [chatOpen]);
 
+  const detectType = (text) => {
+    if (text.includes("workout")) return "WORKOUT_PLAN";
+    if (text.includes("diet")) return "DIET_PLAN";
+    if (text.includes("protein")) return "PROTEIN_RECOMMENDATION";
+    return "PROGRESS_ANALYSIS";
+  };
+
   const sendMessage = async () => {
     if (!input.trim()) return;
 
     const messageText = input;
+    const requestType = detectType(input);
 
     setMessages((prev) => [...prev, { role: "user", text: messageText }]);
     setInput("");
@@ -65,6 +73,14 @@ const AiChatWidget = ({ chatOpen, setChatOpen }) => {
       const endpoint = user && isLogin ? "/user/chat" : "/public/chat";
 
       const res = await api.post(endpoint, {
+        type: requestType,
+        userProfile: {
+          age: user?.age,
+          weight: user?.weight,
+          height: user?.height,
+          goal: user?.goal,
+          experienceLevel: user?.experienceLevel,
+        },
         message: messageText,
       });
 
