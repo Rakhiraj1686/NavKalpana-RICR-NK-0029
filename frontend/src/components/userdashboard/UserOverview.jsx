@@ -1,140 +1,36 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useMemo } from "react";
 import { useAuth } from "../../context/AuthContext";
-import axiosInstance from "../../config/Api";
-import toast from "react-hot-toast";
+import { useProgressData } from "../../config/hooks/useProgressData";
 
 const UserOverview = () => {
   const { user } = useAuth();
-  const [progressData, setProgressData] = useState(null);
-  const [streak, setStreak] = useState(null);
-  const [goalData, setGoalData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { dashboard, graphData, loading } = useProgressData();
+
+  const goalData = dashboard?.goal || {};
+  const streak = dashboard?.streak || { currentStreakDays: 0, longestStreakDays: 0 };
 
   const effectiveCalorieTarget = useMemo(() => {
     const profileCalories = Number(user?.aiPlan?.calories);
     if (Number.isFinite(profileCalories) && profileCalories > 0) {
       return profileCalories;
     }
-    return goalData?.calorieTarget || 2000;
+    return Number(goalData?.calorieTarget) || 2000;
   }, [user?.aiPlan?.calories, goalData?.calorieTarget]);
 
-  useEffect(() => {
-    if (!user?.profileCompleted) {
-      setLoading(false);
-      return;
-    }
+  const progressData = useMemo(() => {
+    const workoutsPlanned = Number(goalData?.workoutsPerWeek) || 5;
+    const latestGraphPoint = graphData?.length ? graphData[graphData.length - 1] : null;
+    const workoutPercent = Number(latestGraphPoint?.workout || 0);
+    const workoutsCompleted = Math.round((workoutPercent / 100) * workoutsPlanned);
 
-    const fetchDashboardData = async () => {
-      try {
-        setLoading(true);
-
-        const [progressRes, goalRes] = await Promise.all([
-          axiosInstance.get("/user/progress-graph"),
-          axiosInstance.get("/user/goal"),
-        ]);
-
-        const graphData = progressRes?.data?.graphData || [];
-        const goalFetched = goalRes?.data?.data || {};
-
-        setGoalData(goalFetched);
-
-        const profileCalories = Number(user?.aiPlan?.calories);
-        const calorieTarget =
-          Number.isFinite(profileCalories) && profileCalories > 0
-            ? profileCalories
-            : goalFetched?.calorieTarget || 2000;
-        const workoutsPlanned = goalFetched?.workoutsPerWeek || 5;
-
-        if (graphData.length > 0) {
-          const latest = graphData[graphData.length - 1];
-
-          const workoutPercent = latest.workout || 0;
-          const workoutsCompleted = Math.round(
-            (workoutPercent / 100) * workoutsPlanned,
-          );
-
-          setProgressData({
-            workoutsCompleted,
-            workoutsPlanned,
-            caloriesIn: Math.round(((latest.diet || 0) / 100) * calorieTarget),
-            proteinTarget: user?.aiPlan?.macros?.protein || 0,
-            adherenceScore: latest.habit || 0,
-          });
-
-          // ---- STREAK CALCULATION ----
-          let current = 0;
-          let longest = 0;
-          let temp = 0;
-
-          for (let i = 0; i < graphData.length; i++) {
-            if (graphData[i].workout > 0) {
-              temp++;
-              longest = Math.max(longest, temp);
-            } else {
-              temp = 0;
-            }
-          }
-
-          for (let i = graphData.length - 1; i >= 0; i--) {
-            if (graphData[i].workout > 0) current++;
-            else break;
-          }
-
-          setStreak({
-            currentStreakDays: current,
-            longestStreakDays: longest,
-          });
-        } else {
-          setProgressData({
-            workoutsCompleted: 0,
-            workoutsPlanned,
-            caloriesIn: 0,
-            proteinTarget: 0,
-            adherenceScore: 0,
-          });
-          setStreak({
-            currentStreakDays: 0,
-            longestStreakDays: 0,
-          });
-        }
-      } catch (err) {
-        console.error(err);
-        toast.error("Failed to load dashboard data");
-      } finally {
-        setLoading(false);
-      }
+    return {
+      workoutsCompleted,
+      workoutsPlanned,
+      caloriesIn: Math.round((Number(latestGraphPoint?.diet || 0) / 100) * effectiveCalorieTarget),
+      proteinTarget: Number(user?.aiPlan?.macros?.protein || user?.macros?.protein || 0),
+      adherenceScore: Number(latestGraphPoint?.habit || 0),
     };
-
-    fetchDashboardData();
-  }, [user?.profileCompleted, user?.aiPlan?.calories]);
-
-  // ---- GOAL PROGRESS ----
-  const goalPercent = useMemo(() => {
-    if (
-      !goalData?.initialWeight ||
-      !goalData?.currentWeight ||
-      !goalData?.goalWeight
-    )
-      return 0;
-
-    const { initialWeight, currentWeight, goalWeight, primaryGoal } = goalData;
-
-    if (primaryGoal === "weight_loss") {
-      const total = initialWeight - goalWeight;
-      const covered = initialWeight - currentWeight;
-      if (total <= 0) return 0;
-      return Math.min(100, Math.max(0, Math.round((covered / total) * 100)));
-    }
-
-    if (primaryGoal === "muscle_gain") {
-      const total = goalWeight - initialWeight;
-      const covered = currentWeight - initialWeight;
-      if (total <= 0) return 0;
-      return Math.min(100, Math.max(0, Math.round((covered / total) * 100)));
-    }
-
-    return 50;
-  }, [goalData]);
+  }, [goalData?.workoutsPerWeek, graphData, effectiveCalorieTarget, user?.aiPlan?.macros?.protein, user?.macros?.protein]);
 
   const getWorkoutStatus = () => {
     if (!progressData?.workoutsCompleted)
