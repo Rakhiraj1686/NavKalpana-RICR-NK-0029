@@ -15,6 +15,7 @@ import PublicRouter from "./src/routers/PublicRouter.js";
 import connectDB from "./src/config/db.js";
 import ticketRouter from "./src/routers/ticketRouter.js";
 import progressRoutes from "./src/routers/progressRoutes.js";
+import { startWeeklyPlanAdjustmentScheduler } from "./src/services/weeklyPlanAdjustmentScheduler.js";
 const app = express();
 
 //"http://localhost:5173" is the frontend URL, adjust if different in production
@@ -45,6 +46,7 @@ const port = process.env.PORT || 5000;
 app.listen(port, async () => {
   console.log("Server started at port: ", port);
   await connectDB();
+  startWeeklyPlanAdjustmentScheduler();
   try {
     const res = await cloudinary.api.ping();
     console.log("Cloudinary connection successful:", res);

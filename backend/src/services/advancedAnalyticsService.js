@@ -44,7 +44,7 @@ export const getMultiWeekHabitTrends = async (userId, weeks = 8) => {
     avgAdherence: week.adherenceScores.length
       ? (week.adherenceScores.reduce((a, b) => a + b, 0) / week.adherenceScores.length).toFixed(1)
       : 0,
-    habitConsistency:
+    habitConsistency: // Multi-week habit trend consistency (% days logged in that week)
       week.dates.length > 0 ? ((week.dates.length / 7) * 100).toFixed(1) : 0, // % of days logged
     workoutDaysCompleted: week.workoutDays,
     avgDietAdherence:
@@ -130,8 +130,8 @@ export const getProgressVelocityAnalysis = async (userId, weeks = 4) => {
 
     analysis.push({
       week: current.week,
-      weightVelocity: Number(weightVelocity) || null, // kg/week
-      adherenceVelocity: Number(adherenceVelocity) || null, // %/week
+      weightVelocity: Number(weightVelocity) || null, // Progress velocity analysis: weekly weight change (kg/week)
+      adherenceVelocity: Number(adherenceVelocity) || null, // Progress velocity analysis: adherence momentum (%/week)
       trend:
         weightVelocity < 0
           ? "decreasing"
@@ -183,9 +183,9 @@ export const getWorkoutVolumeProgression = async (userId, weeks = 8) => {
   // Calculate averages
   const progression = Object.values(weeklyVolume).map((week) => ({
     week: week.week,
-    workoutsCompleted: week.completedCount,
+    workoutsCompleted: week.completedCount, // Workout volume progression graph: training frequency per week
     workoutsMissed: week.missedCount,
-    totalDurationMin: week.totalDurationMin,
+    totalDurationMin: week.totalDurationMin, // Workout volume progression graph: total training minutes per week
     avgDurationPerWorkout:
       week.completedCount > 0
         ? (week.totalDurationMin / week.completedCount).toFixed(1)
@@ -249,10 +249,10 @@ export const getDietMacroAccuracy = async (userId, weeks = 8) => {
       week: week.week,
       avgProteinLogged: avgProtein.toFixed(1),
       targetProtein,
-      proteinAccuracy: Number(proteinAccuracy),
+      proteinAccuracy: Number(proteinAccuracy), // Diet macro accuracy tracking: actual protein vs target protein
       avgCaloriesLogged: avgCalories.toFixed(0),
       targetCalories,
-      calorieAccuracy: Number(calorieAccuracy),
+      calorieAccuracy: Number(calorieAccuracy), // Diet macro accuracy tracking: actual calories vs target calories
       dietAdherenceScore: avgAdherence.toFixed(1),
     };
   });
@@ -398,10 +398,10 @@ export const getAllAdvancedAnalytics = async (userId, weeks = 8) => {
       ]);
 
     return {
-      habitTrends,
-      velocityAnalysis,
-      workoutProgression,
-      macroAccuracy,
+      habitTrends, // 1) Multi-week habit trends
+      velocityAnalysis, // 2) Progress velocity analysis
+      workoutProgression, // 3) Workout volume progression graph data
+      macroAccuracy, // 4) Diet macro accuracy tracking
       roadmap,
     };
   } catch (error) {

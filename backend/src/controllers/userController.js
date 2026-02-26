@@ -1,13 +1,11 @@
 import bcrypt from "bcrypt";
 import User from "../models/userProfileModel.js";
 import { buildPrompt } from "../services/groqPromptBuilder.js";
-import { getAIResponse } from "../services/groqServices.js";
+import { getAIResponse, getExtendedAIResponse } from "../services/groqServices.js";
 import cloudinary from "../config/cloudinary.js";
 import { generateAIPlan } from "../services/aiPlanService.js";
 import {
-  evaluateWeeklyProgress,
-  calculatePlanAdjustments,
-  applyPlanAdjustments,
+  runWeeklyPlanAdjustmentForUser,
 } from "../services/planAdjustmentService.js";
 import Ticket from "../models/ticketModel.js";
 import Progress from "../models/userProgressModel.js";
@@ -17,6 +15,15 @@ import {
   calculateTargetCalories,
   generateMacros,
 } from "../utils/fitnessCalculation.js"
+import {
+  buildAdvancedMacroCustomization,
+  buildMealSwapEngine,
+  buildPersonalizedMealAdjustments,
+  buildDeeperRecoveryInsights,
+  getPremiumCoachingLayerData,
+} from "../services/premiumCoachingService.js";
+import DailyProgress from "../models/DailyProgress.js";
+import WorkoutLog from "../models/WorkoutLog.js";
 
 const getWeekStartDate = (date = new Date()) => {
   const current = new Date(date);
@@ -342,16 +349,12 @@ export const generatePlan = async (req, res, next) => {
     let adjustmentResult = { adjustments: null, triggers: [] };
     
     try {
-      const weeklyMetrics = await evaluateWeeklyProgress(req.user._id);
-      if (weeklyMetrics) {
-        adjustmentResult = calculatePlanAdjustments(weeklyMetrics, user);
-        if (
-          adjustmentResult.adjustments &&
-          (adjustmentResult.adjustments.calorieAdjust !== 0 ||
-            adjustmentResult.adjustments.workoutAdjust !== 0)
-        ) {
-          adjustedUser = applyPlanAdjustments(user, adjustmentResult.adjustments);
-        }
+      const weeklyRun = await runWeeklyPlanAdjustmentForUser(req.user._id);
+      if (weeklyRun?.adjustmentResult) {
+        adjustmentResult = weeklyRun.adjustmentResult;
+      }
+      if (weeklyRun?.updated && weeklyRun.user) {
+        adjustedUser = weeklyRun.user;
       }
     } catch (err) {
       console.log("Weekly evaluation skipped:", err.message);
@@ -394,13 +397,14 @@ export const generatePlan = async (req, res, next) => {
 
     adjustedUser.aiPlan = newPlan;
     
-    // Record adjustment metadata if any adjustments were applied
-    if (adjustmentResult.triggers && adjustmentResult.triggers.length > 0) {
+    // Preserve an explicit before/after summary for UI visibility when changes happen.
+    if (adjustmentResult?.adjustments) {
       adjustedUser.lastPlanAdjustment = {
-        appliedAt: new Date(),
-        triggers: adjustmentResult.triggers,
-        previousCalories: user.targetCalories,
-        newCalories: adjustedUser.targetCalories,
+        ...(adjustedUser.lastPlanAdjustment || {}),
+        triggers: adjustmentResult.triggers || [],
+        adjustments: adjustmentResult.adjustments,
+        previousCalories: adjustmentResult.adjustments.fromCalories,
+        newCalories: adjustmentResult.adjustments.toCalories,
       };
     }
     
@@ -562,20 +566,29 @@ export const evaluateAndAdjustPlan = async (req, res, next) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Evaluate 7-day progress metrics
-    const weeklyMetrics = await evaluateWeeklyProgress(req.user._id);
+    // Manual API call that executes the same weekly rule engine used by automation.
+    const weeklyRun = await runWeeklyPlanAdjustmentForUser(req.user._id);
 
-    if (!weeklyMetrics || weeklyMetrics.dataPoints < 3) {
+    if (!weeklyRun || weeklyRun.reason === "insufficient_data") {
       return res.status(200).json({
         message: "Insufficient progress data for evaluation (need at least 3 days)",
+        weeklyMetrics: weeklyRun?.weeklyMetrics || null,
+        adjustments: null,
+        triggers: [],
+      });
+    }
+
+    if (weeklyRun.reason === "already_adjusted_this_week") {
+      return res.status(200).json({
+        message: "Weekly plan already adjusted in this week",
         weeklyMetrics: null,
         adjustments: null,
         triggers: [],
       });
     }
 
-    // Calculate required adjustments based on triggers
-    const adjustmentResult = calculatePlanAdjustments(weeklyMetrics, user);
+    const weeklyMetrics = weeklyRun.weeklyMetrics || null;
+    const adjustmentResult = weeklyRun.adjustmentResult || { adjustments: null, triggers: [] };
 
     let response = {
       message: "Plan evaluation completed",
@@ -585,8 +598,12 @@ export const evaluateAndAdjustPlan = async (req, res, next) => {
     };
 
     // Apply adjustments if any triggers detected
-    if (adjustmentResult.triggers && adjustmentResult.triggers.length > 0) {
-      applyPlanAdjustments(user, adjustmentResult.adjustments);
+    if (weeklyRun.updated && adjustmentResult.triggers && adjustmentResult.triggers.length > 0) {
+
+      const refreshedUser = await User.findById(req.user._id);
+      if (!refreshedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
 
       // Regenerate plan with adjusted parameters
       const recentProgress = await Progress.find({ user: req.user._id })
@@ -620,25 +637,169 @@ export const evaluateAndAdjustPlan = async (req, res, next) => {
           }
         : null;
 
-      const newPlan = generateAIPlan(user, normalizedProgressSummary);
+      const newPlan = generateAIPlan(refreshedUser, normalizedProgressSummary);
 
-      user.aiPlan = newPlan;
-      user.lastPlanAdjustment = {
-        appliedAt: new Date(),
+      refreshedUser.aiPlan = newPlan;
+      refreshedUser.lastPlanAdjustment = {
+        ...(refreshedUser.lastPlanAdjustment || {}),
         triggers: adjustmentResult.triggers,
         adjustments: adjustmentResult.adjustments,
         weeklyMetrics,
       };
 
-      await user.save();
+      await refreshedUser.save();
 
       response.message = "Plan adjusted based on weekly progress";
       response.adjustments = adjustmentResult.adjustments;
       response.triggers = adjustmentResult.triggers;
       response.newPlan = newPlan;
+    } else {
+      response.message = "Plan evaluation completed. No change required this week";
+      response.adjustments = adjustmentResult.adjustments;
+      response.triggers = adjustmentResult.triggers || [];
     }
 
     res.status(200).json(response);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getPremiumCoachingLayer = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const data = await getPremiumCoachingLayerData(user, req.body || {});
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getAdvancedMacroCustomization = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Premium Coaching Layer - Advanced macro customization endpoint.
+    const data = buildAdvancedMacroCustomization({
+      user,
+      preferences: req.body?.macroPreferences || {},
+    });
+
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getMealSwapRecommendations = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Premium Coaching Layer - Meal swap engine endpoint.
+    const data = buildMealSwapEngine({
+      user,
+      mealName: req.body?.mealName || "breakfast",
+      excludeItems: req.body?.excludeItems || [],
+    });
+
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getPersonalizedMealAdjustments = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const lookbackDays = Math.min(Math.max(Number(req.body?.days || 14), 7), 30);
+    const fromDate = new Date(Date.now() - lookbackDays * 24 * 60 * 60 * 1000);
+
+    const recentDailyProgress = await DailyProgress.find({
+      user: req.user._id,
+      date: { $gte: fromDate },
+    })
+      .sort({ date: -1 })
+      .select("date caloriesIn dietAdherencePercent energyLevel");
+
+    const macroPlan = buildAdvancedMacroCustomization({
+      user,
+      preferences: req.body?.macroPreferences || {},
+    });
+
+    // Premium Coaching Layer - Personalized meal adjustment endpoint.
+    const data = buildPersonalizedMealAdjustments({
+      user,
+      recentDailyProgress,
+      macroPlan,
+    });
+
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getDeeperRecoveryInsightsData = async (req, res, next) => {
+  try {
+    const lookbackDays = Math.min(Math.max(Number(req.body?.days || 14), 7), 30);
+    const fromDate = new Date(Date.now() - lookbackDays * 24 * 60 * 60 * 1000);
+
+    const [recentWorkoutLogs, recentDailyProgress] = await Promise.all([
+      WorkoutLog.find({ user: req.user._id, scheduledDate: { $gte: fromDate } })
+        .sort({ scheduledDate: -1 })
+        .select("scheduledDate status effortRpe durationMin"),
+      DailyProgress.find({ user: req.user._id, date: { $gte: fromDate } })
+        .sort({ date: -1 })
+        .select("date energyLevel dietAdherencePercent"),
+    ]);
+
+    // Premium Coaching Layer - Deeper recovery insights endpoint.
+    const data = buildDeeperRecoveryInsights({
+      recentWorkoutLogs,
+      recentDailyProgress,
+    });
+
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const premiumExtendedChat = async (req, res, next) => {
+  try {
+    const { message, context } = req.body;
+    if (!message) {
+      return res.status(400).json({ message: "message is required" });
+    }
+
+    const user = await User.findById(req.user._id).select(
+      "primaryGoal goal targetCalories workoutsPerWeek experienceLevel foodPreference",
+    );
+
+    // Premium Coaching Layer - Extended AI chat response with richer profile + context signal.
+    const reply = await getExtendedAIResponse({
+      prompt: message,
+      context: {
+        ...(context || {}),
+        userProfile: user,
+      },
+    });
+
+    res.status(200).json({ success: true, reply });
   } catch (error) {
     next(error);
   }

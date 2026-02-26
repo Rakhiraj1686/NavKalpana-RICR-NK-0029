@@ -48,18 +48,18 @@ export const generate8WeekPlan = async (userId, weeks = 8) => {
       const workoutsThisWeek = Math.min(
         baseConfig.baseWorkouts + Math.floor(week / 2),
         6
-      );
-      const durationMin = 45 + week * 2; // Start at 45 min, increase by 2 min/week
-      const rpeLevel = (baseConfig.rpeStart + week * baseConfig.increment).toFixed(1);
+      ); // Planned intensity increase: every ~2 weeks workout frequency goes up (capped for safety)
+      const durationMin = 45 + week * 2; // Planned intensity increase: session duration timeline (+2 min/week)
+      const rpeLevel = (baseConfig.rpeStart + week * baseConfig.increment).toFixed(1); // Planned intensity increase: progressive RPE load by week
       const intensityPercent = ((Number(rpeLevel) / 10) * 100).toFixed(0);
 
       // Diet adjustments
       const adjustedCalories = Math.round(
         currentCalories + calorieAdjPerWeek * week
-      );
+      ); // Diet adjustments timeline: calories are adjusted each week based on deficit/surplus strategy
       const adjustedProtein = Math.round(
         currentProtein + proteinAdjPerWeek * week
-      );
+      ); // Diet adjustments timeline: protein is increased weekly for recovery/muscle retention
       // Keep carbs/fats in consistent ratio
       const macroRatio = (currentCarbs + currentFats) / currentCalories;
       const adjustedMacros = Math.round(adjustedCalories * macroRatio);
@@ -71,10 +71,10 @@ export const generate8WeekPlan = async (userId, weeks = 8) => {
 
       // Milestone markers
       const milestones = [];
-      if (week === 2) milestones.push("Habit Formation Week");
-      if (week === 4) milestones.push("First Assessment");
-      if (week === 6) milestones.push("Plateau Watch");
-      if (week === 8) milestones.push("Goal Review");
+      if (week === 2) milestones.push("Habit Formation Week"); // Projected milestone marker: consistency checkpoint
+      if (week === 4) milestones.push("First Assessment"); // Projected milestone marker: mid-cycle performance check
+      if (week === 6) milestones.push("Plateau Watch"); // Projected milestone marker: stagnation detection window
+      if (week === 8) milestones.push("Goal Review"); // Projected milestone marker: end-of-cycle review
 
       plan.push({
         week,
@@ -82,7 +82,7 @@ export const generate8WeekPlan = async (userId, weeks = 8) => {
           workoutsPerWeek: workoutsThisWeek,
           avgDurationMin: durationMin,
           rpeLevel: Number(rpeLevel),
-          intensityPercent: Number(intensityPercent),
+          intensityPercent: Number(intensityPercent), // UI can plot week-wise intensity curve for 4-8 week preview
           description:
             week <= 2
               ? "Foundation Building"
@@ -101,11 +101,11 @@ export const generate8WeekPlan = async (userId, weeks = 8) => {
             week === 1
               ? "Establishment"
               : Math.abs(calorieAdjPerWeek) > 0
-                ? `${dietStrategy === "deficit" ? "-" : "+"}${Math.abs(calorieAdjPerWeek)} cal/week`
+                ? `${dietStrategy === "deficit" ? "-" : "+"}${Math.abs(calorieAdjPerWeek)} cal/week` // Diet adjustment timeline label per week
                 : "Maintenance",
         },
         projection: {
-          projectedWeight: Number(projectedWeight),
+          projectedWeight: Number(projectedWeight), // Projected milestone marker basis: expected weight at each week
           weeklyChange: weeklyChangeNeeded.toFixed(2),
           progress:
             ((Math.abs(currentWeight - Number(projectedWeight)) / totalWeightDifference) *

@@ -11,6 +11,8 @@ import {
   getMonthlyProgressAnalytics,
   getGamificationBadges,
   getProgressDashboard,
+  getMonthlyFitnessReportData,
+  downloadMonthlyFitnessReportPdf,
   getWeightTimeline,
   getWeeklyOverviewGraph,
   getAdvancedAnalytics,
@@ -34,6 +36,8 @@ router.get("/plan/progression", Protect, getProgressionPlan);
 router.get("/plan/week/:week", Protect, getWeekPlan);
 router.get("/badges", Protect, getGamificationBadges);
 router.get("/dashboard", Protect, getProgressDashboard);
+router.get("/report/monthly", Protect, getMonthlyFitnessReportData);
+router.get("/report/monthly/pdf", Protect, downloadMonthlyFitnessReportPdf);
 router.get("/overview-graph", Protect, getWeeklyOverviewGraph);
 
 export default router;

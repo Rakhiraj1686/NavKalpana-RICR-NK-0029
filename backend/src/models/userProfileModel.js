@@ -126,6 +126,26 @@ const userSchema = new mongoose.Schema(
       default: 5,
     },
 
+    // Weekly smart engine writes adjustment audit here (trigger, metrics, safety changes).
+    lastPlanAdjustment: {
+      appliedAt: Date,
+      weekKey: String,
+      automated: { type: Boolean, default: false },
+      skipped: { type: Boolean, default: false },
+      reason: String,
+      simplifyWorkouts: { type: Boolean, default: false },
+      triggers: [
+        {
+          trigger: String,
+          message: String,
+        },
+      ],
+      adjustments: mongoose.Schema.Types.Mixed,
+      weeklyMetrics: mongoose.Schema.Types.Mixed,
+      previousCalories: Number,
+      newCalories: Number,
+    },
+
     // Useful flag
     profileCompleted: {
       type: Boolean,

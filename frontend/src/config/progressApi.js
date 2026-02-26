@@ -29,3 +29,17 @@ export const refreshInsight = async () => {
   const res = await api.get("/api/v1/progress/insights/latest?force=true");
   return res.data?.data;
 };
+
+export const getMonthlyFitnessReport = async (monthKey) => {
+  const query = monthKey ? `?monthKey=${monthKey}` : "";
+  const res = await api.get(`/api/v1/progress/report/monthly${query}`);
+  return res.data?.data;
+};
+
+export const downloadMonthlyFitnessReportPdf = async (monthKey) => {
+  const query = monthKey ? `?monthKey=${monthKey}` : "";
+  const res = await api.get(`/api/v1/progress/report/monthly/pdf${query}`, {
+    responseType: "blob",
+  });
+  return res.data;
+};
