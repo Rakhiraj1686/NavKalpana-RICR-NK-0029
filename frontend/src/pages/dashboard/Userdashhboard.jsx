@@ -4,11 +4,10 @@ import UserOverview from "../../components/userdashboard/UserOverview";
 import UserSupport from "../../components/userdashboard/UserSupport";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-// import UserWorkout from "../../components/userdashboard/UserWorkout";
 import UserProgress from "../../components/userdashboard/UserProgress";
 import UserProfile from "../../components/userdashboard/UserProfile";
 import UserGoal from "../../components/userdashboard/UserGoal";
-import UserPlan from "../../components/userdashboard/userPlan";
+import UserPlan from "../../components/userdashboard/UserPlan";
 import { FaArrowRight, FaBars } from "react-icons/fa";
 import ProgressionPlan from "../../components/ProgressionPlan";
 import AdvancedAnalytics from "../../components/AdvancedAnalytics";
@@ -66,9 +65,8 @@ const UserDashboard = () => {
 
         <div className={`mx-auto p-6 ${isCollapsed ? "w-56/60" : "w-50/60"}`}>
           {active === "overview" && <UserOverview />}
-          {/* {active === "workout" && <UserWorkout />} 
-          {active === "plan" && <UserPlan/>}
-          {active === "plan" && <UserPlan/>}
+          {active === "workout" && <UserWorkout />}
+          {active === "plan" && <UserPlan />}
           {active === "progression" && <ProgressionPlan />}
           {active === "analytics" && <AdvancedAnalytics />}
           {active === "progress" && <UserProgress />}
@@ -79,55 +77,55 @@ const UserDashboard = () => {
       </main>
     </div>
 
-    //   <div className="min-h-screen flex bg-gradient-to-br from-[#020617] to-[#0f172a] text-white">
+    // <div className="min-h-screen flex bg-gradient-to-br from-[#020617] to-[#0f172a] text-white">
 
-    //   {/* Overlay (Mobile only) */}
-    //   {mobileOpen && (
-    //     <div
-    //       className="fixed inset-0 bg-black/50 z-40 md:hidden"
-    //       onClick={() => setMobileOpen(false)}
-    //     />
-    //   )}
+    // // {/* Overlay (Mobile only) */}
+    // {mobileOpen && (
+    //   <div
+    //     className="fixed inset-0 bg-black/50 z-40 md:hidden"
+    //     onClick={() => setMobileOpen(false)}
+    //   />
+    // )}
 
-    //   {/* Sidebar */}
-    //   <aside
-    //     className={`
-    //       fixed md:static z-50 h-full bg-[#020617]
-    //       border-r border-white/10 transition-all duration-300
-    //       ${mobileOpen ? "left-0" : "-left-full"}
-    //       md:left-0
-    //       ${isCollapsed ? "w-20" : "w-64"}
-    //     `}
-    //   >
-    //     <UserSidebar
-    //       active={active}
-    //       setActive={setActive}
-    //       isCollapsed={isCollapsed}
-    //       setIsCollapsed={setIsCollapsed}
-    //       setMobileOpen={setMobileOpen}
-    //     />
-    //   </aside>
+    // // {/* Sidebar */}
+    // <aside
+    //   className={`
+    //     fixed md:static z-50 h-full bg-[#020617]
+    //     border-r border-white/10 transition-all duration-300
+    //     ${mobileOpen ? "left-0" : "-left-full"}
+    //     md:left-0
+    //     ${isCollapsed ? "w-20" : "w-64"}
+    //   `}
+    // >
+    //   <UserSidebar
+    //     active={active}
+    //     setActive={setActive}
+    //     isCollapsed={isCollapsed}
+    //     setIsCollapsed={setIsCollapsed}
+    //     setMobileOpen={setMobileOpen}
+    //   />
+    // </aside>
 
-    //   {/* Main Content */}
-    //   <main className="flex-1 flex flex-col overflow-hidden">
+    // {/* Main Content */}
+    // <main className="flex-1 flex flex-col overflow-hidden">
 
-    //     {/* Mobile Header */}
-    //     <div className="md:hidden flex items-center p-4 border-b border-white/10">
-    //       <button onClick={() => setMobileOpen(true)}>
-    //         <FaBars />
-    //       </button>
-    //     </div>
+    //   {/* Mobile Header */}
+    //   <div className="md:hidden flex items-center p-4 border-b border-white/10">
+    //     <button onClick={() => setMobileOpen(true)}>
+    //       <FaBars />
+    //     </button>
+    //   </div>
 
-    //     {/* Page Content */}
-    //     <div className="flex-1 overflow-y-auto p-4 md:p-6">
-    //       {active === "overview" && <UserOverview />}
-    //       {active === "plan" && <UserPlan />}
-    //       {active === "progress" && <UserProgress />}
-    //       {active === "profile" && <UserProfile />}
-    //       {active === "goal" && <UserGoal />}
-    //       {active === "support" && <UserSupport />}
-    //     </div>
-    //   </main>
+    //   {/* Page Content */}
+    //   <div className="flex-1 overflow-y-auto p-4 md:p-6">
+    //     {active === "overview" && <UserOverview />}
+    //     {active === "plan" && <UserPlan />}
+    //     {active === "progress" && <UserProgress />}
+    //     {active === "profile" && <UserProfile />}
+    //     {active === "goal" && <UserGoal />}
+    //     {active === "support" && <UserSupport />}
+    //   </div>
+    // </main>
     // </div>
   );
 };
