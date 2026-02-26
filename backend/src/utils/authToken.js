@@ -13,10 +13,10 @@ export const genToken = (user, res) => {
     console.log(token);
 
     res.cookie("HealthUP", token, {
-      maxAge: 1000 * 60 * 60 * 24,
+      maxAge: 1000 * 60 * 60 * 24, // 1 day
       httpOnly: true,
-      secure: false,
-      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production" ? true : false,
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     });
   } catch (error) {
     throw error;
