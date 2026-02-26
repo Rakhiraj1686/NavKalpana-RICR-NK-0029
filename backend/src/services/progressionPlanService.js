@@ -6,15 +6,31 @@ import User from "../models/userProfileModel.js";
  */
 export const generate8WeekPlan = async (userId, weeks = 8) => {
   try {
-    const user = await User.findById(userId).select("weight goal aiPlan experienceLevel");
+    const user = await User.findById(userId).select(
+      "weight goal primaryGoal goalWeight aiPlan experienceLevel",
+    );
 
-    if (!user || !user.goal || !user.weight) {
+    if (!user || !user.weight) {
       return { error: "Insufficient user data", plan: [] };
     }
 
-    const currentWeight = user.weight;
-    const targetWeight = user.goal.targetWeight;
-    const dietGoal = user.goal.dietGoal;
+    const currentWeight = Number(user.weight);
+    const goalLabel = String(user.primaryGoal || user.goal || "maintain").toLowerCase();
+    const configuredGoalWeight = Number(user.goalWeight);
+
+    let targetWeight = Number.isFinite(configuredGoalWeight) ? configuredGoalWeight : null;
+    if (!Number.isFinite(targetWeight)) {
+      // Fallback target ensures UI output is always available even before explicit goal weight is configured.
+      if (goalLabel.includes("loss")) {
+        targetWeight = Number((currentWeight - 4).toFixed(1));
+      } else if (goalLabel.includes("gain")) {
+        targetWeight = Number((currentWeight + 3).toFixed(1));
+      } else {
+        targetWeight = currentWeight;
+      }
+    }
+
+    const dietGoal = goalLabel;
     const experienceLevel = user.experienceLevel || "beginner";
     const currentCalories = user.aiPlan?.calories || 2000;
     const currentProtein = user.aiPlan?.macros?.protein || 150;

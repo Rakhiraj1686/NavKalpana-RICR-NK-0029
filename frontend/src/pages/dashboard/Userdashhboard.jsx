@@ -11,6 +11,7 @@ import UserPlan from "../../components/userdashboard/UserPlan";
 import { FaArrowRight, FaBars } from "react-icons/fa";
 import ProgressionPlan from "../../components/ProgressionPlan";
 import AdvancedAnalytics from "../../components/AdvancedAnalytics";
+import DashboardDisclaimer from "../../components/userdashboard/DashboardDisclaimer";
 
 const UserDashboard = () => {
   const { isLogin } = useAuth();
@@ -73,6 +74,7 @@ const UserDashboard = () => {
           {active === "profile" && <UserProfile />}
           {active === "goal" && <UserGoal />}
           {active === "support" && <UserSupport />}
+          <DashboardDisclaimer section={active} />
         </div>
       </main>
     </div>

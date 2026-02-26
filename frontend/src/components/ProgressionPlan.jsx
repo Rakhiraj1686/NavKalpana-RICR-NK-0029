@@ -198,7 +198,7 @@ const ProgressionPlan = () => {
             </div>
 
             {/* Projection */}
-            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8">
+            {/* <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8">
               <div className="flex items-center gap-3 mb-6">
                 <FiTrendingUp className="text-2xl text-green-400" />
                 <h3 className="text-xl font-bold text-white">Progress Projection</h3>
@@ -218,7 +218,7 @@ const ProgressionPlan = () => {
                   <p className="text-2xl font-bold text-purple-400">{currentWeekPlan.projection.progress}</p>
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {/* Week Tips */}
             {weekDetails && (

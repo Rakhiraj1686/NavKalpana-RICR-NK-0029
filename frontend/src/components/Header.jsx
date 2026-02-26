@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { HiOutlineMenu, HiOutlineX } from "react-icons/hi";
-import { FaRegUserCircle } from "react-icons/fa";
-import { IoMdNotificationsOutline } from "react-icons/io";
+import { FaRegCircleUser } from "react-icons/fa6";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
 import api from "../config/Api";
