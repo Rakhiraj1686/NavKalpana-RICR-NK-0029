@@ -3,12 +3,40 @@ import { useAuth } from "../../context/AuthContext";
 import axiosInstance from "../../config/Api";
 import toast from "react-hot-toast";
 
+/* ---- FITNESS MOTIVATIONAL QUOTES ---- */
+const fitnessQuotes = [
+  "Your body can do it. It’s your mind you must convince.",
+  "Consistency is your best workout partner.",
+  "Health is built daily, not overnight.",
+  "Progress over perfection.",
+  "Strong habits create strong bodies.",
+  "Push yourself because no one else will.",
+  "Small steps lead to big results.",
+  "Discipline today, strength tomorrow.",
+  "A little progress each day adds up.",
+  "Take care of your body — it’s the only place you live."
+];
+
 const UserOverview = () => {
   const { user } = useAuth();
   const [progressData, setProgressData] = useState(null);
   const [streak, setStreak] = useState(null);
   const [goalData, setGoalData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [quote, setQuote] = useState("");
+
+  /* ---- RANDOM QUOTE EFFECT ---- */
+  useEffect(() => {
+    const getQuote = () => {
+      const random =
+        fitnessQuotes[Math.floor(Math.random() * fitnessQuotes.length)];
+      setQuote(random);
+    };
+
+    getQuote();
+    const interval = setInterval(getQuote, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   const effectiveCalorieTarget = useMemo(() => {
     const profileCalories = Number(user?.aiPlan?.calories);
@@ -50,7 +78,7 @@ const UserOverview = () => {
 
           const workoutPercent = latest.workout || 0;
           const workoutsCompleted = Math.round(
-            (workoutPercent / 100) * workoutsPlanned,
+            (workoutPercent / 100) * workoutsPlanned
           );
 
           setProgressData({
@@ -61,7 +89,6 @@ const UserOverview = () => {
             adherenceScore: latest.habit || 0,
           });
 
-          // ---- STREAK CALCULATION ----
           let current = 0;
           let longest = 0;
           let temp = 0;
@@ -70,9 +97,7 @@ const UserOverview = () => {
             if (graphData[i].workout > 0) {
               temp++;
               longest = Math.max(longest, temp);
-            } else {
-              temp = 0;
-            }
+            } else temp = 0;
           }
 
           for (let i = graphData.length - 1; i >= 0; i--) {
@@ -108,7 +133,8 @@ const UserOverview = () => {
     fetchDashboardData();
   }, [user?.profileCompleted, user?.aiPlan?.calories]);
 
-  // ---- GOAL PROGRESS ----
+  /* ---- HELPERS ---- */
+
   const goalPercent = useMemo(() => {
     if (
       !goalData?.initialWeight ||
@@ -143,30 +169,17 @@ const UserOverview = () => {
   };
 
   const getNutritionStatus = () => {
-    if (!progressData?.caloriesIn) return "Log meals to track your nutrition.";
-    const target = effectiveCalorieTarget;
-    const diff = target - progressData.caloriesIn;
+    if (!progressData?.caloriesIn)
+      return "Log meals to track your nutrition.";
 
-    if (diff > 0) {
+    const diff = effectiveCalorieTarget - progressData.caloriesIn;
+
+    if (diff > 0)
       return `${diff} kcal remaining. Protein Target: ${progressData.proteinTarget}g`;
-    } else if (diff < 0) {
+    if (diff < 0)
       return `${Math.abs(diff)} kcal over target! Protein Target: ${progressData.proteinTarget}g`;
-    } else {
-      return `Perfect! Target met. Protein Target: ${progressData.proteinTarget}g`;
-    }
-  };
 
-  const getCalorieStatus = () => {
-    const caloriesIn = progressData?.caloriesIn || 0;
-    const target = effectiveCalorieTarget;
-
-    if (caloriesIn < target) {
-      return { status: "under", message: "Under Target", color: "blue" };
-    } else if (caloriesIn > target) {
-      return { status: "over", message: "Over Target", color: "red" };
-    } else {
-      return { status: "perfect", message: "Perfect!", color: "green" };
-    }
+    return `Perfect! Target met. Protein Target: ${progressData.proteinTarget}g`;
   };
 
   const getStreakColor = (days) => {
@@ -176,24 +189,30 @@ const UserOverview = () => {
     return "red";
   };
 
-  if (loading) {
+  if (loading)
     return (
       <div className="min-h-screen flex items-center justify-center text-gray-400">
         Loading your dashboard...
       </div>
     );
-  }
 
   return (
     <div className="min-h-screen text-white pb-20 md:py-8 md:px-6">
       {user?.profileCompleted ? (
         <main className="md:max-w-7xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-2xl font-semibold md:text-4xl md:font-bold">
+          {/* HEADER + MOTIVATION */}
+          <div className="mb-8 space-y-4">
+            <h1 className="text-2xl md:text-4xl font-bold">
               Welcome back, {user?.fullName?.split(" ")[0]} 👋
             </h1>
+
+            <div className="bg-linear-to-r from-purple-600/20 to-pink-600/20 
+            border border-white/10 backdrop-blur-xl p-4 rounded-xl">
+              <p className="italic text-gray-300"> {quote}</p>
+            </div>
           </div>
 
+          {/* STATS */}
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
             <Stat
               title="Workout Streak"
@@ -202,29 +221,33 @@ const UserOverview = () => {
               color={getStreakColor(streak?.currentStreakDays)}
               icon="🔥"
             />
+
             <Stat
               title="Calories Today"
               value={`${progressData?.caloriesIn || 0} kcal`}
-              subtitle={`Target: ${effectiveCalorieTarget} | ${getCalorieStatus().message}`}
-              color={getCalorieStatus().color}
+              subtitle={`Target: ${effectiveCalorieTarget}`}
+              color="blue"
               icon="🍽️"
             />
+
             <Stat
               title="Target Workouts"
               value={`${goalData?.workoutsPerWeek || 5}/week`}
-              subtitle={`${progressData?.workoutsCompleted || 0} completed this week`}
+              subtitle={`${progressData?.workoutsCompleted || 0} completed`}
               color="purple"
               icon="💪"
             />
+
             <Stat
               title="Habit Adherence"
               value={`${progressData?.adherenceScore || 0}%`}
-              subtitle={`${progressData?.workoutsCompleted || 0} workouts`}
-              color={progressData?.adherenceScore >= 75 ? "green" : "yellow"}
+              subtitle="Keep consistency!"
+              color="green"
               icon="✅"
             />
           </div>
 
+          {/* CARDS */}
           <div className="grid md:grid-cols-2 gap-8">
             <GlassCard
               title="🏋️ Today's Workout"
@@ -232,6 +255,7 @@ const UserOverview = () => {
               planned={progressData?.workoutsPlanned}
               completed={progressData?.workoutsCompleted}
             />
+
             <GlassCard
               title="🥗 Nutrition Summary"
               desc={getNutritionStatus()}
@@ -242,7 +266,7 @@ const UserOverview = () => {
         </main>
       ) : (
         <div className="text-center text-gray-400">
-          Please complete your profile to unlock your dashboard.
+          Please complete your profile to unlock dashboard.
         </div>
       )}
     </div>
@@ -254,7 +278,7 @@ export default UserOverview;
 /* ---------- SMALL COMPONENTS ---------- */
 
 const Stat = ({ title, value, subtitle, color, icon }) => {
-  const colorClasses = {
+  const colors = {
     purple: "text-purple-400",
     blue: "text-blue-400",
     green: "text-green-400",
@@ -269,11 +293,11 @@ const Stat = ({ title, value, subtitle, color, icon }) => {
         <h3 className="text-gray-400 text-sm">{title}</h3>
         <span className="text-2xl">{icon}</span>
       </div>
-      <p
-        className={`text-3xl font-bold ${colorClasses[color] || "text-blue-400"}`}
-      >
+
+      <p className={`text-3xl font-bold ${colors[color]}`}>
         {value}
       </p>
+
       {subtitle && <p className="text-gray-500 text-xs mt-2">{subtitle}</p>}
     </div>
   );
@@ -288,16 +312,13 @@ const GlassCard = ({ title, desc, planned, completed, calories, target }) => (
       <>
         <div className="flex justify-between text-xs text-gray-400 mb-2">
           <span>Progress</span>
-          <span>
-            {completed}/{planned}
-          </span>
+          <span>{completed}/{planned}</span>
         </div>
+
         <div className="w-full bg-white/10 rounded-full h-2">
           <div
             className="bg-purple-500 h-2 rounded-full"
-            style={{
-              width: `${planned > 0 ? (completed / planned) * 100 : 0}%`,
-            }}
+            style={{ width: `${planned ? (completed / planned) * 100 : 0}%` }}
           />
         </div>
       </>
@@ -306,16 +327,15 @@ const GlassCard = ({ title, desc, planned, completed, calories, target }) => (
     {calories !== undefined && (
       <>
         <div className="flex justify-between text-xs text-gray-400 mb-2 mt-4">
-          <span>Calorie Intake</span>
-          <span>
-            {calories}/{target}
-          </span>
+          <span>Calories</span>
+          <span>{calories}/{target}</span>
         </div>
+
         <div className="w-full bg-white/10 rounded-full h-2">
           <div
             className="bg-blue-500 h-2 rounded-full"
             style={{
-              width: `${target > 0 ? Math.min((calories / target) * 100, 100) : 0}%`,
+              width: `${target ? Math.min((calories / target) * 100, 100) : 0}%`,
             }}
           />
         </div>
