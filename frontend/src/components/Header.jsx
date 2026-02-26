@@ -96,7 +96,6 @@ const Header = () => {
 
                 // ref={dropdownRef}
               >
-
                 {/* Username */}
                 <button
                   onClick={() => {
@@ -109,8 +108,13 @@ const Header = () => {
                   border border-white/10 backdrop-blur-md transition"
                 >
                   <span className="w-6 h-6 rounded-full ">
-                    {user?.image?.url || (
-                      <FaRegUserCircle className="w-6 h-6 rounded-full " />
+                    {user.photo.url ? (
+                      <img
+                        src={user?.photo?.url}
+                        className="w-6 h-6 rounded-full object-cover border"
+                      />
+                    ) : (
+                      <FaRegCircleUser className="w-6 h-6 text-white" />
                     )}
                   </span>
                   {/* Username */}
