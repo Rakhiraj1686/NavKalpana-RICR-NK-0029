@@ -15,6 +15,7 @@ import { useAuth } from "../../context/AuthContext";
 import ProgressSummaryCards from "../ProgressSummaryCards.jsx";
 import InsightPanel from "../InsightPanel.jsx";
 import BadgeShelf from "../BadgeShelf.jsx";
+import MonthlyFitnessReport from "../MonthlyFitnessReport.jsx";
 
 const getWeekLabel = () => {
   const current = new Date();
@@ -142,6 +143,8 @@ const ProgressGraph = () => {
       </div>
 
       <InsightPanel insight={dashboard?.insight} />
+
+      <MonthlyFitnessReport />
 
       <form
         onSubmit={handleSave}

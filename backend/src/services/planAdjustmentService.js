@@ -2,6 +2,13 @@ import DailyProgress from "../models/DailyProgress.js";
 import User from "../models/userProfileModel.js";
 import { getWeekKey, normalizeDate } from "../utils/progressUtils.js";
 
+const MIN_DATA_POINTS = 3;
+
+const getSafeNumber = (value, fallback = 0) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+};
+
 export const evaluateWeeklyProgress = async (userId) => {
   const today = new Date();
   const sevenDaysAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -10,12 +17,12 @@ export const evaluateWeeklyProgress = async (userId) => {
   const thisWeek = await DailyProgress.find({
     user: userId,
     date: { $gte: sevenDaysAgo, $lte: today },
-  }).select("weightKg workoutAdherencePercent dietAdherencePercent workoutsCompleted workoutsPlanned");
+  }).select("date weightKg workoutAdherencePercent dietAdherencePercent workoutsCompleted workoutsPlanned");
 
   const prevWeek = await DailyProgress.find({
     user: userId,
     date: { $gte: fourteenDaysAgo, $lt: sevenDaysAgo },
-  }).select("weightKg");
+  }).select("date weightKg");
 
   if (thisWeek.length === 0) {
     return null;
@@ -23,10 +30,10 @@ export const evaluateWeeklyProgress = async (userId) => {
 
   // Extract first and last weight of each week
   const thisWeekWeights = thisWeek
-    .filter((d) => d.weightKg)
+    .filter((d) => Number.isFinite(d.weightKg))
     .sort((a, b) => new Date(a.date) - new Date(b.date));
   const prevWeekWeights = prevWeek
-    .filter((d) => d.weightKg)
+    .filter((d) => Number.isFinite(d.weightKg))
     .sort((a, b) => new Date(a.date) - new Date(b.date));
 
   const thisWeekStart = thisWeekWeights[0]?.weightKg;
@@ -34,19 +41,29 @@ export const evaluateWeeklyProgress = async (userId) => {
   const prevWeekStart = prevWeekWeights[0]?.weightKg;
   const prevWeekEnd = prevWeekWeights[prevWeekWeights.length - 1]?.weightKg;
 
-  const weeklyWeightChange = thisWeekStart && thisWeekEnd ? thisWeekEnd - thisWeekStart : null;
+  const weeklyWeightChange = Number.isFinite(thisWeekStart) && Number.isFinite(thisWeekEnd)
+    ? Number((thisWeekEnd - thisWeekStart).toFixed(2))
+    : null;
   const avgAdherence = thisWeek.length
-    ? thisWeek.reduce((sum, d) => sum + (d.dietAdherencePercent || 0), 0) / thisWeek.length
+    ? thisWeek.reduce((sum, d) => sum + getSafeNumber(d.dietAdherencePercent), 0) / thisWeek.length
     : 0;
 
   const workoutCompletion = thisWeek.length
-    ? thisWeek.reduce((sum, d) => sum + (d.workoutsCompleted || 0), 0) /
-      Math.max(thisWeek.reduce((sum, d) => sum + (d.workoutsPlanned || 0), 0), 1)
+    ? thisWeek.reduce((sum, d) => sum + getSafeNumber(d.workoutsCompleted), 0) /
+      Math.max(thisWeek.reduce((sum, d) => sum + getSafeNumber(d.workoutsPlanned), 0), 1)
     : 0;
+
+  const avgWorkoutAdherence = thisWeek.length
+    ? thisWeek.reduce(
+        (sum, d) => sum + getSafeNumber(d.workoutAdherencePercent, getSafeNumber(d.adherenceScore)),
+        0,
+      ) / thisWeek.length
+    : Number((workoutCompletion * 100).toFixed(2));
 
   return {
     weeklyWeightChange,
     avgAdherence: Number(avgAdherence.toFixed(2)),
+    avgWorkoutAdherence: Number(avgWorkoutAdherence.toFixed(2)),
     workoutCompletion: Number((workoutCompletion * 100).toFixed(2)),
     dataPoints: thisWeek.length,
     hasHistoricalData: !!(prevWeekStart && prevWeekEnd),
@@ -60,7 +77,7 @@ export const calculatePlanAdjustments = (weeklyMetrics, user) => {
     triggers: [],
   };
   
-  if (!weeklyMetrics || weeklyMetrics.dataPoints < 3) {
+  if (!weeklyMetrics || weeklyMetrics.dataPoints < MIN_DATA_POINTS) {
     return defaultReturn;
   }
 
@@ -79,7 +96,7 @@ export const calculatePlanAdjustments = (weeklyMetrics, user) => {
         workoutAdjust: 0,
       });
     } else if (weeklyMetrics.weeklyWeightChange < -1.0) {
-      // Losing too much, reduce deficit (safety)
+      // Trigger #1 (Safety): weight loss > 1 kg/week => reduce deficit.
       adjustments.push({
         trigger: "excessive_loss",
         message: "Weight loss > 1 kg/week detected. Reducing calorie deficit for safety.",
@@ -95,7 +112,7 @@ export const calculatePlanAdjustments = (weeklyMetrics, user) => {
         workoutAdjust: 0,
       });
     } else if (weeklyMetrics.weeklyWeightChange >= -0.3 && weeklyMetrics.weeklyWeightChange < 0) {
-      // Slow loss, increase deficit slightly
+      // Trigger #2: weight loss < 0.3 kg/week => slightly increase deficit.
       adjustments.push({
         trigger: "slow_loss",
         message: "Weight loss < 0.3 kg/week. Slightly increasing deficit.",
@@ -130,13 +147,20 @@ export const calculatePlanAdjustments = (weeklyMetrics, user) => {
         calorieAdjust: 0,
         workoutAdjust: 0,
       });
-    } else if (weeklyMetrics.weeklyWeightChange <= 0.5 && weeklyMetrics.weeklyWeightChange >= 0) {
-      // Stagnant or slow gains
+    } else if (weeklyMetrics.weeklyWeightChange <= 0.1 && weeklyMetrics.weeklyWeightChange >= 0) {
+      // Trigger #3: muscle gain stagnant => increase training volume.
       adjustments.push({
         trigger: "stagnant_gain",
-        message: "Muscle gain stagnant. Increasing volume and calories.",
-        calorieAdjust: 150,
+        message: "Muscle gain stagnant. Increasing weekly volume.",
+        calorieAdjust: 75,
         workoutAdjust: 1,
+      });
+    } else if (weeklyMetrics.weeklyWeightChange <= 0.5 && weeklyMetrics.weeklyWeightChange > 0.1) {
+      adjustments.push({
+        trigger: "slow_gain",
+        message: "Muscle gain is slow but positive. Minor nutrition increase applied.",
+        calorieAdjust: 100,
+        workoutAdjust: 0,
       });
     } else {
       // Losing weight, increase calories
@@ -150,18 +174,11 @@ export const calculatePlanAdjustments = (weeklyMetrics, user) => {
   }
 
   // --- ADHERENCE-BASED ADJUSTMENTS ---
-  if (weeklyMetrics.avgAdherence < 50 && weeklyMetrics.workoutCompletion < 50) {
+  if (weeklyMetrics.avgAdherence < 60 || weeklyMetrics.avgWorkoutAdherence < 60) {
+    // Trigger #4: low adherence => simplify plan for better consistency.
     adjustments.push({
       trigger: "low_adherence",
-      message: "Low adherence (< 50%). Simplifying plan: fewer, easier workouts.",
-      calorieAdjust: 0,
-      workoutAdjust: -2,
-      simplifyWorkouts: true,
-    });
-  } else if (weeklyMetrics.avgAdherence < 60) {
-    adjustments.push({
-      trigger: "moderate_adherence",
-      message: "Moderate adherence (< 60%). Adding flexibility and reducing complexity.",
+      message: "Low adherence detected. Simplifying plan: fewer, easier workouts.",
       calorieAdjust: 0,
       workoutAdjust: -1,
       simplifyWorkouts: true,
@@ -180,6 +197,10 @@ export const calculatePlanAdjustments = (weeklyMetrics, user) => {
     calorieAdjust: adjustments.reduce((sum, a) => sum + a.calorieAdjust, 0),
     workoutAdjust: adjustments.reduce((sum, a) => sum + a.workoutAdjust, 0),
     simplifyWorkouts: adjustments.some((a) => a.simplifyWorkouts),
+    fromCalories: currentCalories,
+    toCalories: Math.max(1200, Math.min(3500, currentCalories + adjustments.reduce((sum, a) => sum + a.calorieAdjust, 0))),
+    fromWorkoutsPerWeek: currentWorkouts,
+    toWorkoutsPerWeek: Math.max(3, Math.min(7, currentWorkouts + adjustments.reduce((sum, a) => sum + a.workoutAdjust, 0))),
     triggers: adjustments.map((a) => ({
       trigger: a.trigger,
       message: a.message,
@@ -214,8 +235,68 @@ export const applyPlanAdjustments = (user, adjustments) => {
   updatedUser.lastPlanAdjustment = {
     appliedAt: new Date(),
     adjustments,
+    triggers: adjustments.triggers || [],
     simplifyWorkouts: adjustments.simplifyWorkouts || false,
   };
 
   return updatedUser;
+};
+
+export const runWeeklyPlanAdjustmentForUser = async (userId) => {
+  const user = await User.findById(userId);
+  if (!user) {
+    return { updated: false, reason: "user_not_found" };
+  }
+
+  // Do not run automation repeatedly within the same calendar week.
+  const thisWeekKey = getWeekKey(normalizeDate(new Date()));
+  const alreadyAdjustedThisWeek = user.lastPlanAdjustment?.weekKey === thisWeekKey;
+  if (alreadyAdjustedThisWeek) {
+    return { updated: false, reason: "already_adjusted_this_week" };
+  }
+
+  const weeklyMetrics = await evaluateWeeklyProgress(userId);
+  if (!weeklyMetrics || weeklyMetrics.dataPoints < MIN_DATA_POINTS) {
+    return { updated: false, reason: "insufficient_data", weeklyMetrics };
+  }
+
+  const adjustmentResult = calculatePlanAdjustments(weeklyMetrics, user);
+  const hasEffectiveChange =
+    adjustmentResult.adjustments &&
+    (adjustmentResult.adjustments.calorieAdjust !== 0 || adjustmentResult.adjustments.workoutAdjust !== 0);
+
+  if (!hasEffectiveChange) {
+    user.lastPlanAdjustment = {
+      appliedAt: new Date(),
+      weekKey: thisWeekKey,
+      automated: true,
+      skipped: true,
+      reason: "no_changes_needed",
+      weeklyMetrics,
+      triggers: adjustmentResult.triggers || [],
+      adjustments: adjustmentResult.adjustments,
+    };
+    await user.save();
+    return { updated: false, reason: "no_changes_needed", weeklyMetrics, adjustmentResult };
+  }
+
+  const adjustedUser = applyPlanAdjustments(user, adjustmentResult.adjustments);
+  adjustedUser.lastPlanAdjustment = {
+    ...(adjustedUser.lastPlanAdjustment || {}),
+    weekKey: thisWeekKey,
+    automated: true,
+    skipped: false,
+    weeklyMetrics,
+    triggers: adjustmentResult.triggers || [],
+    adjustments: adjustmentResult.adjustments,
+  };
+
+  await adjustedUser.save();
+
+  return {
+    updated: true,
+    weeklyMetrics,
+    adjustmentResult,
+    user: adjustedUser,
+  };
 };

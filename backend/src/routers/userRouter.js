@@ -14,6 +14,12 @@ import {
   getProgressGraph,
   getMyTickets,
   evaluateAndAdjustPlan,
+  getPremiumCoachingLayer,
+  getAdvancedMacroCustomization,
+  getMealSwapRecommendations,
+  getPersonalizedMealAdjustments,
+  getDeeperRecoveryInsightsData,
+  premiumExtendedChat,
 } from "../controllers/userController.js";
 import { Protect } from "../middlewares/authMiddleware.js";
 import { checkUserChatLimit } from "../middlewares/chatUseLimit.js";
@@ -33,11 +39,19 @@ router.get("/goal", Protect, GetUserGoal);
 
 // AI chat route with usage limit check
 router.post("/chat", Protect, checkUserChatLimit, UserChatWithAI);
+router.post("/premium/chat", Protect, premiumExtendedChat);
 
 // Additional routes for AI plan generation
 router.post("/regenerate-plan", Protect, RegeneratePlan);
 router.post("/generatePlan", Protect, generatePlan);
 router.post("/plan/evaluate", Protect, evaluateAndAdjustPlan);
+
+// Premium Coaching Layer routes
+router.post("/premium/coaching-layer", Protect, getPremiumCoachingLayer);
+router.post("/premium/macros", Protect, getAdvancedMacroCustomization);
+router.post("/premium/meal-swap", Protect, getMealSwapRecommendations);
+router.post("/premium/meal-adjustments", Protect, getPersonalizedMealAdjustments);
+router.post("/premium/recovery-insights", Protect, getDeeperRecoveryInsightsData);
 
 // Progress routes
 router.post("/progress", Protect, createWeeklyProgress);
