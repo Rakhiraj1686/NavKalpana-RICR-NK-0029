@@ -16,6 +16,7 @@ const UserEditProfileModal = ({ onClose }) => {
     weight: user?.weight || "",
     biologicalSex: user?.biologicalSex || "",
     foodPreference: user?.foodPreference || "",
+    workoutPreference: user?.workoutPreference || "",
     experienceLevel: user?.experienceLevel || "",
     activityLevel: user?.activityLevel || "",
     goal: user?.goal || user?.primaryGoal || "maintain",
@@ -305,6 +306,9 @@ const UserEditProfileModal = ({ onClose }) => {
                   <option value="nonvegetarian" className="text-gray-800">
                     Non - Vegetarian
                   </option>
+                  <option value="all" className="text-gray-800">
+                    All
+                  </option>
                 </select>
               </div>
             </div>
@@ -415,6 +419,50 @@ const UserEditProfileModal = ({ onClose }) => {
                   </option>
                   <option value="improve endurance" className="text-gray-800">
                     Improve Endurance
+                  </option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-gray-300 text-sm mb-2">
+                  Preferred Workout Type
+                </label>
+
+                <select
+                  name="workoutPreference"
+                  value={formData.workoutPreference}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 rounded-xl
+                bg-white/5 border border-white/10
+                text-white focus:ring-2 focus:ring-purple-500
+                outline-none transition"
+                >
+                  <option value="" className="text-gray-800">
+                    Select Workout Type
+                  </option>
+
+                  <option value="strength_training" className="text-gray-800">
+                    Strength Training
+                  </option>
+
+                  <option value="endurance_training" className="text-gray-800">
+                    Endurance Training
+                  </option>
+
+                  <option value="functional_training" className="text-gray-800">
+                    Functional Training
+                  </option>
+
+                  <option value="flexibility_mobility_workout" className="text-gray-800">
+                    Flexibility / Mobility Workout
+                  </option>
+
+                  <option value="hiit" className="text-gray-800">
+                    HIIT
+                  </option>
+
+                  <option value="cardio" className="text-gray-800">
+                    Cardio
                   </option>
                 </select>
               </div>

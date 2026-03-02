@@ -27,17 +27,16 @@ export const PublicContactMessage = (req, res, next) => {
   }
 };
 
-export const GuestChatWithAI = async (req, res) => {
+export const GuestChatWithAI = async (req, res, next) => {
   try {
     const { message } = req.body;
 
     console.log("Received message:", message);
 
     if (!message) {
-      return res.status(400).json({
-        success: false,
-        message: "Message is required",
-      });
+      const error = new Error("Message is required");
+      error.statusCode = 400;
+      return next(error);
     }
 
     const completion = await groq.chat.completions.create({
@@ -60,9 +59,8 @@ export const GuestChatWithAI = async (req, res) => {
     });
   } catch (error) {
     console.error("AI Error:", error);
-    res.status(500).json({
-      success: false,
-      message: "AI server error",
-    });
+    error.statusCode = 500;
+    error.message = "AI server error";
+    next(error);
   }
 };

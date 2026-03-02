@@ -48,7 +48,7 @@ const userSchema = new mongoose.Schema(
 
     foodPreference: {
       type: String,
-      enum: ["vegetarian", "vegan", "nonvegetarian"],
+      enum: ["vegetarian", "vegan", "nonvegetarian", "all"],
     },
 
     age: String,
@@ -69,6 +69,18 @@ const userSchema = new mongoose.Schema(
     experienceLevel: {
       type: String,
       enum: ["beginner", "intermediate", "advanced"],
+    },
+
+    workoutPreference: {
+      type: String,
+      enum: [
+        "strength_training",
+        "cardio",
+        "hiit",
+        "endurance_training",
+        "functional_training",
+        "flexibility_mobility_workout",
+      ],
     },
 
     bmi: Number,

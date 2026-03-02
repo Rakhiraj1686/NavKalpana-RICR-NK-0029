@@ -8,9 +8,9 @@ export const checkUserChatLimit = async (req, res, next) => {
     const currentUser = req.user;
 
     if (!currentUser) {
-      return res.status(401).json({
-        msg: "Unauthorized user",
-      });
+      const error = new Error("Unauthorized user");
+      error.statusCode = 401;
+      return next(error);
     }
 
     // Start of today
@@ -23,9 +23,9 @@ export const checkUserChatLimit = async (req, res, next) => {
     });
 
     if (messagesToday >= 50) {
-      return res.status(403).json({
-        msg: "Daily AI limit reached",
-      });
+      const error = new Error("Daily AI limit reached");
+      error.statusCode = 403;
+      return next(error);
     }
 
     next();
@@ -53,9 +53,9 @@ export const GuestChatLimit = async (req, res, next) => {
     }
 
     if (guest.messagesUsed >= 5) {
-      return res.status(403).json({
-        msg: "Please login for more access..",
-      });
+      const error = new Error("Please login for more access..");
+      error.statusCode = 403;
+      return next(error);
     }
 
     guest.messagesUsed++;

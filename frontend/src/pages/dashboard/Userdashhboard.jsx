@@ -8,7 +8,7 @@ import UserProgress from "../../components/userdashboard/UserProgress";
 import UserProfile from "../../components/userdashboard/UserProfile";
 import UserGoal from "../../components/userdashboard/UserGoal";
 import UserPlan from "../../components/userdashboard/UserPlan";
-import { FaArrowRight, FaBars } from "react-icons/fa";
+import { FaBars } from "react-icons/fa";
 import ProgressionPlan from "../../components/ProgressionPlan";
 import AdvancedAnalytics from "../../components/AdvancedAnalytics";
 import DashboardDisclaimer from "../../components/userdashboard/DashboardDisclaimer";
@@ -25,12 +25,17 @@ const UserDashboard = () => {
     if (!isLogin) navigate("/login");
   }, [isLogin, navigate]);
 
+  const handleOpenMobileMenu = () => {
+    setIsCollapsed(false);
+    setMobileOpen(true);
+  };
+
   return (
-    <div className="fixed top-12 md:top-15 h-screen w-full flex overflow-hidden bg-linear-to-br from-[#020617] to-[#0f172a] text-white">
+    <div className="fixed inset-x-0 top-12 md:top-15 bottom-0 flex md:gap-4 overflow-hidden bg-linear-to-br from-[#020617] to-[#0f172a] text-white">
       {/* Mobile overlay */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 bg-black/50 md:hidden z-40"
+          className="fixed inset-0 bg-black/60 md:hidden z-40"
           onClick={() => setMobileOpen(false)}
         />
       )}
@@ -40,10 +45,11 @@ const UserDashboard = () => {
         className={`
           fixed md:static z-50 h-full
           bg-[#020617] border-r border-white/10
-          transition-all duration-300
+          transition-all duration-300 ease-out
           ${mobileOpen ? "left-0" : "-left-full"}
           md:left-0
-          ${isCollapsed ? "w-4/60" : "w-10/60"}
+          w-96 md:w-auto
+          ${isCollapsed ? "md:w-20" : "md:w-96"}
         `}
       >
         <UserSidebar
@@ -56,17 +62,25 @@ const UserDashboard = () => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto md:pl-1">
         {/* Mobile Topbar */}
-        <div className="md:hidden p-4 mt-2 border-white/10 flex justify-between">
-          <button onClick={() => setMobileOpen(true)}>
-            <FaArrowRight />
+        <div className="md:hidden px-4 py-3 border-b border-white/10 flex items-center justify-between sticky top-0 bg-[#020617]/95 backdrop-blur z-30">
+          <button
+            onClick={handleOpenMobileMenu}
+            className="inline-flex items-center justify-center size-9 rounded-lg border border-white/15 text-gray-200"
+          >
+            <FaBars />
           </button>
+          <p className="text-sm font-semibold text-gray-200 capitalize">{active}</p>
+          <span className="size-9" />
         </div>
 
-        <div className={`mx-auto p-6 ${isCollapsed ? "w-56/60" : "w-50/60"}`}>
+        <div
+          className={`w-full mx-auto p-4 md:p-6 lg:p-8 transition-all duration-300 ${
+            isCollapsed ? "max-w-7xl" : "max-w-6xl"
+          }`}
+        >
           {active === "overview" && <UserOverview />}
-          {active === "workout" && <UserWorkout />}
           {active === "plan" && <UserPlan />}
           {active === "progression" && <ProgressionPlan />}
           {active === "analytics" && <AdvancedAnalytics />}

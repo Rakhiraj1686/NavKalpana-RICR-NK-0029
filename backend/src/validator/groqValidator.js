@@ -17,9 +17,9 @@ export const validateAIRequest = (req, res, next) => {
   const { type } = req.body;
 
   if (!type || !allowedTypes.includes(type)) {
-    return res.status(400).json({
-      message: "HealthUP AI only accepts structured fitness requests.",
-    });
+    const error = new Error("HealthUP AI only accepts structured fitness requests.");
+    error.statusCode = 400;
+    return next(error);
   }
   next();
 };

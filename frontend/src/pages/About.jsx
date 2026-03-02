@@ -121,9 +121,9 @@ const About = () => {
                 key={index}
                 className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-lg"
               >
-                <div className="text-2xl font-bold text-purple-400 mb-2">
+                {/* <div className="text-2xl font-bold text-purple-400 mb-2">
                   0{index + 1}
-                </div>
+                </div> */}
                 <p className="text-gray-300">{step}</p>
               </div>
             ))}
@@ -181,12 +181,12 @@ const About = () => {
         </div>
       </section>
 
-      {/* Footer Notes */}
+      {/* Footer Notes
       <footer className="bg-[#020617] text-white border-t border-white/10">
         <div className="border-t border-white/10 text-center py-6 text-gray-500 text-md">
           © {new Date().getFullYear()} HealthUP • All Rights reserved.
         </div>
-      </footer>
+      </footer> */}
     </div>
   );
 };

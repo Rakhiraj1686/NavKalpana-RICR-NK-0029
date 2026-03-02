@@ -1,14 +1,11 @@
 import React from "react";
 import {
   FiHome,
-  // FiActivity,
   FiUser,
   FiBarChart2,
-  FiChevronLeft,
-  FiChevronRight,
-  FiLogOut,
   FiTrendingUp,
   FiMap,
+  FiLogOut,
 } from "react-icons/fi";
 import { MdOutlineContactSupport } from "react-icons/md";
 import { GoGoal } from "react-icons/go";
@@ -20,14 +17,13 @@ import api from "../../config/Api";
 
 const menuItems = [
   { id: "overview", label: "Overview", icon: <FiHome /> },
-  { id: "goal", label: "Goal", icon: <GoGoal /> },
-  // { id: "workout", label: "Workout Plan", icon: <FiActivity /> },
   { id: "plan", label: "Plan", icon: <FiBarChart2 /> },
   { id: "progression", label: "Progression", icon: <FiMap /> },
   { id: "analytics", label: "Analytics", icon: <FiTrendingUp /> },
   { id: "progress", label: "Progress", icon: <GiProgression /> },
   { id: "profile", label: "Profile", icon: <FiUser /> },
-  {id: "support", label:"Support", icon: <MdOutlineContactSupport/>}
+  { id: "goal", label: "Goal", icon: <GoGoal /> },
+  { id: "support", label: "Support", icon: <MdOutlineContactSupport /> },
 ];
 
 const UserSidebar = ({
@@ -54,60 +50,88 @@ const UserSidebar = ({
   };
 
   return (
-    <div className="h-full flex flex-col p-5">
-      {/* Logo / Username */}
-      <div className="flex items-center justify-between mb-5">
+    <div
+      className="
+        h-full flex flex-col
+        bg-linear-to-b from-[#030712] via-[#0f172a] to-[#020617]
+        backdrop-blur-3xl
+        border-r border-cyan-400/20
+        transition-all duration-300
+      "
+    >
+      <div className="flex items-center justify-between p-5 border-b border-white/10">
         {!isCollapsed && (
-          <div className="pt-2">
-            <h1 className="text-2xl font-bold bg-linear-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-              {user?.fullName || "Dashboard"}
-            </h1>
-          </div>
+          <h1 className="text-xl font-bold bg-linear-to-r from-purple-400 via-cyan-400 to-pink-400 bg-clip-text text-transparent">
+            HealthUP
+          </h1>
         )}
 
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="hidden md:block text-gray-400 hover:text-white cursor-pointer"
+          className="hidden md:flex items-center justify-center size-8 rounded-lg border border-white/10 hover:bg-white/10 transition cursor-pointer text-white"
         >
-          {isCollapsed ? <FiChevronRight /> : <FiChevronLeft />}
+          ☰
         </button>
       </div>
 
-      {/* Menu */}
-      <nav>
-        <div className="flex flex-col justify-between">
-          <div className="flex-1 space-y-3">
-            {menuItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => {
-                  setActive(item.id);
-                  setMobileOpen(false);
-                }}
-                className={`flex items-center gap-3 w-full px-4 py-3 rounded-xl
-              transition-all duration-200 cursor-pointer
-              ${
-                active === item.id
-                  ? "bg-linear-to-r from-purple-500/20 to-blue-500/20 text-purple-400 border border-purple-400/20"
-                  : "text-gray-400 hover:bg-white/5 hover:text-white"
-              }`}
+      <div className="flex-1 overflow-y-auto py-6 px-3 space-y-2">
+        {menuItems.map((item) => {
+          const isActive = active === item.id;
+
+          return (
+            <button
+              key={item.id}
+              onClick={() => {
+                setActive(item.id);
+                setMobileOpen(false);
+              }}
+              className={`
+                w-full flex items-center ${isCollapsed ? "justify-center" : "justify-start"} gap-4 px-4 py-3 rounded-xl
+                transition-all duration-300 group cursor-pointer border
+                ${
+                  isActive
+                    ? "bg-linear-to-r from-purple-500/20 to-cyan-500/20 border-cyan-400/30 shadow-[0_0_20px_rgba(59,130,246,0.4)]"
+                    : "border-transparent hover:bg-white/5"
+                }
+              `}
+            >
+              <span
+                className={`text-lg ${
+                  isActive
+                    ? "text-cyan-400"
+                    : "text-gray-400 group-hover:text-white"
+                }`}
               >
-                <span className="text-lg">{item.icon}</span>
-                {!isCollapsed && item.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </nav>
-      {/* Logout Button */}
-      <button
-        onClick={handleLogout}
-        className="flex items-center gap-3 w-full px-4 py-3 mt-3 rounded-xl
-            duration-200 cursor-pointer text-red-400 hover:bg-red-500/10 transition  "
-      >
-        <FiLogOut className="text-lg" />
-        {!isCollapsed && "Logout"}
-      </button>
+                {item.icon}
+              </span>
+
+              {!isCollapsed && (
+                <span
+                  className={`text-sm font-medium ${
+                    isActive
+                      ? "text-white"
+                      : "text-gray-400 group-hover:text-white"
+                  }`}
+                >
+                  {item.label}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="p-4 border-t border-white/10">
+        <button
+          onClick={handleLogout}
+          className={`w-full flex items-center ${isCollapsed ? "justify-center" : "justify-start"} gap-4 px-4 py-3 rounded-xl hover:bg-red-500/10 transition cursor-pointer`}
+        >
+          <FiLogOut className="text-red-400" />
+          {!isCollapsed && (
+            <span className="text-sm text-red-400 font-medium">Logout</span>
+          )}
+        </button>
+      </div>
     </div>
   );
 };

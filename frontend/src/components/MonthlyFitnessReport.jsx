@@ -26,7 +26,7 @@ const getValueTone = (value, positiveClass, neutralClass = "text-gray-300") => {
   return Number(value) >= 0 ? positiveClass : "text-red-300";
 };
 
-const MonthlyFitnessReport = () => {
+const MonthlyFitnessReport = ({ refreshSignal = 0 }) => {
   const [loading, setLoading] = useState(false);
   const [monthKey, setMonthKey] = useState(toMonthKey());
   const [report, setReport] = useState(null);
@@ -51,7 +51,7 @@ const MonthlyFitnessReport = () => {
 
   useEffect(() => {
     loadReport(monthKey);
-  }, []);
+  }, [monthKey, refreshSignal]);
 
   const handleDownloadPdf = async () => {
     try {

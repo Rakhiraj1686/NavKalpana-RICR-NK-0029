@@ -3,12 +3,13 @@ import User from "../models/userProfileModel.js";
 import { buildPrompt } from "../services/groqPromptBuilder.js";
 import { getAIResponse, getExtendedAIResponse } from "../services/groqServices.js";
 import cloudinary from "../config/cloudinary.js";
-import { generateAIPlan } from "../services/aiPlanService.js";
+import { generatePersonalizedAIPlan } from "../services/aiPlanService.js";
 import {
   runWeeklyPlanAdjustmentForUser,
 } from "../services/planAdjustmentService.js";
 import Ticket from "../models/ticketModel.js";
 import Progress from "../models/userProgressModel.js";
+import UserGoalLog from "../models/userGoal.js";
 import {
   calculateBMR,
   calculateMaintenanceCalories,
@@ -76,6 +77,7 @@ export const UserUpdateProfile = async (req, res, next) => {
       weight,
       biologicalSex,
       foodPreference,
+      workoutPreference,
       activityLevel,
       experienceLevel,
       goal,
@@ -138,6 +140,7 @@ export const UserUpdateProfile = async (req, res, next) => {
     currentUser.activityLevel = activityLevel;
     currentUser.experienceLevel = experienceLevel;
     currentUser.foodPreference = foodPreference || currentUser.foodPreference;
+    currentUser.workoutPreference = workoutPreference || currentUser.workoutPreference;
     currentUser.goal = goal || currentUser.goal || "maintain";
 
     currentUser.bmi = bmi;
@@ -147,7 +150,7 @@ export const UserUpdateProfile = async (req, res, next) => {
     currentUser.macros = macros;
 
     // Generate AI Plan
-    const plan = generateAIPlan(currentUser);
+    const plan = await generatePersonalizedAIPlan(currentUser);
     currentUser.aiPlan = plan;
 
     currentUser.profileCompleted = true;
@@ -169,7 +172,9 @@ export const UserChangePhoto = async (req, res, next) => {
     const photo = req.file;
 
     if (!req.file) {
-      return res.status(400).json({ message: "No file uploaded" });
+      const error = new Error("No file uploaded");
+      error.statusCode = 400;
+      return next(error);
     }
 
     if (currentUser.photo.publicID) {
@@ -236,10 +241,26 @@ export const UserCompleteGoal = async (req, res, next) => {
       error.statusCode = 400;
       return next(error);
     }
+
+    const historyEntry = await UserGoalLog.create({
+      user: currentUser._id,
+      weekStartDate: getWeekStartDate(new Date()),
+      primaryGoal: currentUser.primaryGoal,
+      calorieTarget: currentUser.calorieTarget,
+      goalWeight: currentUser.goalWeight,
+      goalStatus: "completed",
+    });
+
     currentUser.goalStatus = "completed";
 
     await currentUser.save();
-    res.status(200).json({ message: "Goal completed successfully." });
+    res.status(200).json({
+      message: "Goal completed successfully.",
+      historyEntry,
+      data: {
+        goalStatus: currentUser.goalStatus,
+      },
+    });
   } catch (error) {
     next(error);
   }
@@ -248,9 +269,15 @@ export const UserCompleteGoal = async (req, res, next) => {
 export const GetUserGoal = async (req, res, next) => {
   try {
     const currentUser = req.user;
-    const user = await User.findById(currentUser._id).select(
-      "primaryGoal calorieTarget goalWeight goalStatus workoutsPerWeek weight",
-    );
+    const [user, goalHistory] = await Promise.all([
+      User.findById(currentUser._id).select(
+        "primaryGoal calorieTarget goalWeight goalStatus workoutsPerWeek weight",
+      ),
+      UserGoalLog.find({ user: currentUser._id, goalStatus: "completed" })
+        .sort({ createdAt: -1 })
+        .select("primaryGoal calorieTarget goalWeight weekStartDate createdAt")
+        .limit(20),
+    ]);
 
     res.status(200).json({
       success: true,
@@ -261,6 +288,7 @@ export const GetUserGoal = async (req, res, next) => {
         goalStatus: user.goalStatus,
         workoutsPerWeek: user.workoutsPerWeek || 5,
         currentWeight: parseFloat(user.weight) || 0,
+        goalHistory,
       },
       message: "Goal fetched successfully",
     });
@@ -276,7 +304,7 @@ export const GetUserGoal = async (req, res, next) => {
   }
 };
 
-export const UserChatWithAI = async (req, res) => {
+export const UserChatWithAI = async (req, res, next) => {
   try {
     // req.body.userProfile = req.user.profile;
     const prompt = buildPrompt(req.body);
@@ -289,10 +317,9 @@ export const UserChatWithAI = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-
-    res.status(500).json({
-      message: "AI processing error",
-    });
+    error.statusCode = 500;
+    error.message = "AI processing error";
+    next(error);
   }
 };
 
@@ -341,7 +368,9 @@ export const generatePlan = async (req, res, next) => {
     const user = await User.findById(req.user._id);
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      const error = new Error("User not found");
+      error.statusCode = 404;
+      return next(error);
     }
 
     // Weekly evaluation for intelligent adjustments (optional)
@@ -392,7 +421,7 @@ export const generatePlan = async (req, res, next) => {
         }
       : null;
 
-    const newPlan = generateAIPlan(adjustedUser, normalizedProgressSummary);
+    const newPlan = await generatePersonalizedAIPlan(adjustedUser, normalizedProgressSummary);
     console.log("Generate Plan", newPlan);
 
     adjustedUser.aiPlan = newPlan;
@@ -428,11 +457,15 @@ export const createTicket = async (req, res, next) => {
     const { type, description } = req.body;
 
     if (!type || !description) {
-      return res.status(400).json({ message: "All fields required" });
+      const error = new Error("All fields required");
+      error.statusCode = 400;
+      return next(error);
     }
 
     if (!req.user) {
-      return res.status(401).json({ message: "User not authenticated" });
+      const error = new Error("User not authenticated");
+      error.statusCode = 401;
+      return next(error);
     }
 
     const ticket = await Ticket.create({
@@ -469,7 +502,7 @@ export const getMyTickets = async (req, res, next) => {
   }
 };
 
-export const createWeeklyProgress = async (req, res) => {
+export const createWeeklyProgress = async (req, res, next) => {
   try {
     const workoutAdherencePercent = Number(req.body.workoutAdherencePercent);
     const dietAdherencePercent = Number(req.body.dietAdherencePercent);
@@ -480,9 +513,9 @@ export const createWeeklyProgress = async (req, res) => {
       Number.isNaN(dietAdherencePercent) ||
       Number.isNaN(habitScore)
     ) {
-      return res
-        .status(400)
-        .json({ message: "All progress fields are required" });
+      const error = new Error("All progress fields are required");
+      error.statusCode = 400;
+      return next(error);
     }
 
     // Use today's date for daily progress tracking
@@ -527,11 +560,11 @@ export const createWeeklyProgress = async (req, res) => {
       })),
     });
   } catch (error) {
-    res.status(500).json({ message: "Error saving progress" });
+    next(error);
   }
 };
 
-export const getProgressGraph = async (req, res) => {
+export const getProgressGraph = async (req, res, next) => {
   try {
     const logs = await Progress.find({
       user: req.user._id,
@@ -554,7 +587,7 @@ export const getProgressGraph = async (req, res) => {
       graphData,
     });
   } catch (error) {
-    res.status(500).json({ message: "Error fetching graph data" });
+    next(error);
   }
 };
 // Weekly Plan Adjustment Evaluation
@@ -563,7 +596,9 @@ export const evaluateAndAdjustPlan = async (req, res, next) => {
     const user = await User.findById(req.user._id);
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      const error = new Error("User not found");
+      error.statusCode = 404;
+      return next(error);
     }
 
     // Manual API call that executes the same weekly rule engine used by automation.
@@ -602,7 +637,9 @@ export const evaluateAndAdjustPlan = async (req, res, next) => {
 
       const refreshedUser = await User.findById(req.user._id);
       if (!refreshedUser) {
-        return res.status(404).json({ message: "User not found" });
+        const error = new Error("User not found");
+        error.statusCode = 404;
+        return next(error);
       }
 
       // Regenerate plan with adjusted parameters
@@ -637,7 +674,7 @@ export const evaluateAndAdjustPlan = async (req, res, next) => {
           }
         : null;
 
-      const newPlan = generateAIPlan(refreshedUser, normalizedProgressSummary);
+      const newPlan = await generatePersonalizedAIPlan(refreshedUser, normalizedProgressSummary);
 
       refreshedUser.aiPlan = newPlan;
       refreshedUser.lastPlanAdjustment = {
@@ -669,7 +706,9 @@ export const getPremiumCoachingLayer = async (req, res, next) => {
   try {
     const user = await User.findById(req.user._id);
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      const error = new Error("User not found");
+      error.statusCode = 404;
+      return next(error);
     }
 
     const data = await getPremiumCoachingLayerData(user, req.body || {});
@@ -683,7 +722,9 @@ export const getAdvancedMacroCustomization = async (req, res, next) => {
   try {
     const user = await User.findById(req.user._id);
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      const error = new Error("User not found");
+      error.statusCode = 404;
+      return next(error);
     }
 
     // Premium Coaching Layer - Advanced macro customization endpoint.
@@ -702,7 +743,9 @@ export const getMealSwapRecommendations = async (req, res, next) => {
   try {
     const user = await User.findById(req.user._id);
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      const error = new Error("User not found");
+      error.statusCode = 404;
+      return next(error);
     }
 
     // Premium Coaching Layer - Meal swap engine endpoint.
@@ -722,7 +765,9 @@ export const getPersonalizedMealAdjustments = async (req, res, next) => {
   try {
     const user = await User.findById(req.user._id);
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      const error = new Error("User not found");
+      error.statusCode = 404;
+      return next(error);
     }
 
     const lookbackDays = Math.min(Math.max(Number(req.body?.days || 14), 7), 30);
@@ -783,7 +828,9 @@ export const premiumExtendedChat = async (req, res, next) => {
   try {
     const { message, context } = req.body;
     if (!message) {
-      return res.status(400).json({ message: "message is required" });
+      const error = new Error("message is required");
+      error.statusCode = 400;
+      return next(error);
     }
 
     const user = await User.findById(req.user._id).select(

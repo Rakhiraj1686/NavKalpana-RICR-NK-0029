@@ -44,6 +44,13 @@ const mealLibrary = {
 
 const getMealPool = (foodPreference = "") => {
   const normalized = String(foodPreference || "").toLowerCase();
+  if (normalized === "all") {
+    return {
+      breakfast: [...mealLibrary.vegetarian.breakfast, ...mealLibrary.nonvegetarian.breakfast],
+      lunch: [...mealLibrary.vegetarian.lunch, ...mealLibrary.nonvegetarian.lunch],
+      dinner: [...mealLibrary.vegetarian.dinner, ...mealLibrary.nonvegetarian.dinner],
+    };
+  }
   if (normalized === "vegetarian" || normalized === "vegan") {
     return mealLibrary.vegetarian;
   }

@@ -24,7 +24,9 @@ export const logWeightEntry = async (req, res, next) => {
     const { date, timezone, goalType, weightKg } = req.body;
 
     if (weightKg === undefined || weightKg === null) {
-      return res.status(400).json({ message: "weightKg is required" });
+      const error = new Error("weightKg is required");
+      error.statusCode = 400;
+      return next(error);
     }
 
     const record = await logWeight({
@@ -46,7 +48,9 @@ export const logWorkoutCompletion = async (req, res, next) => {
     const { planWorkoutId, scheduledDate, status, durationMin, effortRpe } = req.body;
 
     if (!status) {
-      return res.status(400).json({ message: "status is required" });
+      const error = new Error("status is required");
+      error.statusCode = 400;
+      return next(error);
     }
 
     const data = await trackWorkoutCompletion({
@@ -415,7 +419,9 @@ export const getWeekPlan = async (req, res, next) => {
   try {
     const week = Number(req.params.week);
     if (!week || week < 1 || week > 8) {
-      return res.status(400).json({ message: "Week must be between 1 and 8" });
+      const error = new Error("Week must be between 1 and 8");
+      error.statusCode = 400;
+      return next(error);
     }
     const data = await getWeekRecommendations(req.user._id, week);
     res.status(200).json({ success: true, data });

@@ -1,3 +1,5 @@
+import groq from "../config/groq.js";
+
 const pickRandom = (items = [], count = 1) => {
   const copied = [...items];
   const selected = [];
@@ -57,6 +59,13 @@ const getMealPool = (foodPreference = "") => {
   };
 
   const normalized = String(foodPreference || "").toLowerCase();
+  if (normalized === "all") {
+    return {
+      breakfast: [...vegetarianPool.breakfast, ...nonVegPool.breakfast],
+      lunch: [...vegetarianPool.lunch, ...nonVegPool.lunch],
+      dinner: [...vegetarianPool.dinner, ...nonVegPool.dinner],
+    };
+  }
   if (normalized === "vegetarian" || normalized === "vegan") {
     return vegetarianPool;
   }
@@ -106,13 +115,13 @@ const buildMeals = ({ calories, macros, foodPreference }) => {
   ];
 };
 
-const getWorkoutTemplate = (level = "beginner") => {
+const getWorkoutTemplate = (level = "beginner", workoutPreference = "") => {
   const beginner = [
-    { focus: "Upper Body", exercises: ["Push-ups", "Rows", "Shoulder Press"] },
-    { focus: "Lower Body", exercises: ["Squats", "Lunges", "Glute Bridge"] },
+    { focus: "Strength Training (Upper Body)", exercises: ["Push-ups", "Rows", "Shoulder Press"] },
+    { focus: "Strength Training (Lower Body)", exercises: ["Squats", "Lunges", "Glute Bridge"] },
     { focus: "Core + Mobility", exercises: ["Plank", "Dead Bug", "Stretching"] },
     { focus: "Cardio", exercises: ["Brisk Walk", "Cycling", "Step-ups"] },
-    { focus: "Full Body", exercises: ["Bodyweight Circuit", "Burpees", "Mountain Climbers"] },
+    { focus: "Strength Training (Full Body)", exercises: ["Bodyweight Circuit", "Burpees", "Mountain Climbers"] },
   ];
 
   const intermediate = [
@@ -131,13 +140,63 @@ const getWorkoutTemplate = (level = "beginner") => {
     { focus: "Athletic Conditioning", exercises: ["Sprint Intervals", "Sled Push", "Battle Rope"] },
   ];
 
+  const workoutTypeTemplates = {
+    strength_training: [
+      { focus: "Strength Training - Push", exercises: ["Bench Press", "Overhead Press", "Dips"] },
+      { focus: "Strength Training - Pull", exercises: ["Rows", "Pull-down", "Deadlift"] },
+      { focus: "Strength Training - Legs", exercises: ["Squat", "Lunges", "Leg Press"] },
+      { focus: "Strength Training - Full Body", exercises: ["Thrusters", "RDL", "Push-ups"] },
+      { focus: "Strength Training - Core", exercises: ["Plank", "Hanging Knee Raise", "Pallof Press"] },
+    ],
+    endurance_training: [
+      { focus: "Endurance Training - Base Run", exercises: ["Steady Run", "Breathing Drill", "Cooldown Walk"] },
+      { focus: "Endurance Training - Tempo", exercises: ["Tempo Jog", "Stride Intervals", "Recovery Walk"] },
+      { focus: "Endurance Training - Cycling", exercises: ["Long Ride", "Cadence Drill", "Easy Spin"] },
+      { focus: "Endurance Training - Mixed Cardio", exercises: ["Rowing", "Elliptical", "Incline Walk"] },
+      { focus: "Endurance Training - Recovery", exercises: ["Zone 2 Walk", "Mobility", "Breathwork"] },
+    ],
+    functional_training: [
+      { focus: "Functional Training - Movement", exercises: ["Farmer Carry", "Goblet Squat", "Step-up"] },
+      { focus: "Functional Training - Stability", exercises: ["Single-leg RDL", "Split Squat", "Band Row"] },
+      { focus: "Functional Training - Core", exercises: ["Dead Bug", "Side Plank", "Bird Dog"] },
+      { focus: "Functional Training - Power", exercises: ["Kettlebell Swing", "Med Ball Slam", "Jump Squat"] },
+      { focus: "Functional Training - Agility", exercises: ["Ladder Drill", "Skater Hops", "Shuttle Runs"] },
+    ],
+    flexibility_mobility_workout: [
+      { focus: "Flexibility / Mobility - Upper Body", exercises: ["Thoracic Rotations", "Band Stretch", "Shoulder CARs"] },
+      { focus: "Flexibility / Mobility - Lower Body", exercises: ["Hip Openers", "Hamstring Stretch", "Ankle Mobility"] },
+      { focus: "Flexibility / Mobility - Spine", exercises: ["Cat-Cow", "Child Pose", "Cobra Stretch"] },
+      { focus: "Flexibility / Mobility - Flow", exercises: ["Sun Salutations", "Deep Squat Hold", "World's Greatest Stretch"] },
+      { focus: "Flexibility / Mobility - Recovery", exercises: ["Foam Roll", "Breathing", "Gentle Stretch"] },
+    ],
+    hiit: [
+      { focus: "HIIT - Cardio Blast", exercises: ["Sprint Intervals", "Jump Rope", "Burpees"] },
+      { focus: "HIIT - Full Body", exercises: ["Mountain Climbers", "Thrusters", "Push-ups"] },
+      { focus: "HIIT - Lower Body", exercises: ["Jump Squats", "Lunges", "High Knees"] },
+      { focus: "HIIT - Core", exercises: ["Plank Jacks", "Russian Twist", "Bicycle Crunches"] },
+      { focus: "HIIT - Conditioning", exercises: ["Battle Rope", "Row Sprints", "Box Steps"] },
+    ],
+    cardio: [
+      { focus: "Cardio - Walk/Run", exercises: ["Brisk Walk", "Light Jog", "Cooldown Walk"] },
+      { focus: "Cardio - Cycling", exercises: ["Steady Cycle", "Cadence Drill", "Recovery Spin"] },
+      { focus: "Cardio - Rowing", exercises: ["Row Intervals", "Easy Row", "Stretch"] },
+      { focus: "Cardio - Low Impact", exercises: ["Elliptical", "Incline Walk", "March in Place"] },
+      { focus: "Cardio - Mixed Session", exercises: ["Step-ups", "Jump Rope", "Shadow Boxing"] },
+    ],
+  };
+
+  const normalizedPreference = String(workoutPreference || "").toLowerCase();
+  if (workoutTypeTemplates[normalizedPreference]) {
+    return workoutTypeTemplates[normalizedPreference];
+  }
+
   const normalized = String(level || "").toLowerCase();
   if (normalized === "advanced") return advanced;
   if (normalized === "intermediate") return intermediate;
   return beginner;
 };
 
-const buildWorkoutDays = ({ level, workoutsPerWeek, progressAdjustment }) => {
+const buildWorkoutDays = ({ level, workoutPreference, workoutsPerWeek, progressAdjustment }) => {
   const dayNames = [
     "Monday",
     "Tuesday",
@@ -148,7 +207,7 @@ const buildWorkoutDays = ({ level, workoutsPerWeek, progressAdjustment }) => {
     "Sunday",
   ];
 
-  const template = getWorkoutTemplate(level);
+  const template = getWorkoutTemplate(level, workoutPreference);
   const targetWorkoutDays = Math.max(3, Math.min(6, Number(workoutsPerWeek || 5) + progressAdjustment));
 
   return dayNames.map((dayName, index) => {
@@ -236,6 +295,7 @@ export const generateAIPlan = (user, progressSummary = null) => {
   const workoutsPerWeek = user.workoutsPerWeek || 5;
   const workoutDays = buildWorkoutDays({
     level,
+    workoutPreference: user.workoutPreference,
     workoutsPerWeek,
     progressAdjustment: workoutAdjustment,
   });
@@ -254,4 +314,168 @@ export const generateAIPlan = (user, progressSummary = null) => {
     },
     generatedAt: new Date(),
   };
+};
+
+const parseJsonFromText = (text = "") => {
+  const raw = String(text || "").trim();
+  if (!raw) return null;
+
+  try {
+    return JSON.parse(raw);
+  } catch {
+    const fencedMatch = raw.match(/```json\s*([\s\S]*?)\s*```/i) || raw.match(/```\s*([\s\S]*?)\s*```/i);
+    if (fencedMatch?.[1]) {
+      try {
+        return JSON.parse(fencedMatch[1].trim());
+      } catch {
+        return null;
+      }
+    }
+  }
+
+  return null;
+};
+
+const normalizePlanFromAI = (candidate, fallbackPlan) => {
+  if (!candidate || typeof candidate !== "object") {
+    return fallbackPlan;
+  }
+
+  const calories = Number(candidate.calories);
+  const macros = {
+    protein: Number(candidate?.macros?.protein),
+    carbs: Number(candidate?.macros?.carbs),
+    fats: Number(candidate?.macros?.fats),
+  };
+
+  const normalizedMeals = Array.isArray(candidate.meals)
+    ? candidate.meals
+        .map((meal) => ({
+          mealName: String(meal?.mealName || "").trim(),
+          time: String(meal?.time || "").trim(),
+          calories: Number(meal?.calories),
+          items: Array.isArray(meal?.items)
+            ? meal.items.map((item) => String(item || "").trim()).filter(Boolean)
+            : [],
+          macros: {
+            protein: Number(meal?.macros?.protein),
+            carbs: Number(meal?.macros?.carbs),
+            fats: Number(meal?.macros?.fats),
+          },
+        }))
+        .filter((meal) => meal.mealName && meal.items.length > 0)
+    : [];
+
+  const normalizedWorkoutDays = Array.isArray(candidate.workoutDays)
+    ? candidate.workoutDays
+        .map((day) => ({
+          dayName: String(day?.dayName || "").trim(),
+          focus: String(day?.focus || "").trim(),
+          duration: String(day?.duration || "").trim(),
+          exercises: Array.isArray(day?.exercises)
+            ? day.exercises
+                .map((exercise) => ({
+                  name: String(exercise?.name || "").trim(),
+                  sets: Number(exercise?.sets) || 3,
+                  reps: String(exercise?.reps || "8-12"),
+                  rest: String(exercise?.rest || "60 sec"),
+                  formGuide: String(
+                    exercise?.formGuide || "Controlled movement with proper form",
+                  ),
+                }))
+                .filter((exercise) => exercise.name)
+            : [],
+        }))
+        .filter((day) => day.dayName && day.focus)
+    : [];
+
+  const validCalories = Number.isFinite(calories) && calories > 0;
+  const validMacros =
+    Number.isFinite(macros.protein) &&
+    Number.isFinite(macros.carbs) &&
+    Number.isFinite(macros.fats) &&
+    macros.protein >= 0 &&
+    macros.carbs >= 0 &&
+    macros.fats >= 0;
+
+  return {
+    ...fallbackPlan,
+    calories: validCalories ? Math.round(calories) : fallbackPlan.calories,
+    macros: validMacros
+      ? {
+          protein: Math.round(macros.protein),
+          carbs: Math.round(macros.carbs),
+          fats: Math.round(macros.fats),
+        }
+      : fallbackPlan.macros,
+    meals: normalizedMeals.length > 0 ? normalizedMeals : fallbackPlan.meals,
+    workoutDays:
+      normalizedWorkoutDays.length > 0 ? normalizedWorkoutDays : fallbackPlan.workoutDays,
+    workoutLevel:
+      String(candidate.workoutLevel || "").trim() || fallbackPlan.workoutLevel,
+    progressInsights: {
+      ...(fallbackPlan.progressInsights || {}),
+      planMode: "ai_personalized",
+    },
+    generatedAt: new Date(),
+  };
+};
+
+export const generatePersonalizedAIPlan = async (user, progressSummary = null) => {
+  const fallbackPlan = generateAIPlan(user, progressSummary);
+
+  try {
+    const promptPayload = {
+      profile: {
+        age: user?.age,
+        biologicalSex: user?.biologicalSex,
+        height: user?.height,
+        weight: user?.weight,
+        goal: user?.goal || user?.primaryGoal,
+        experienceLevel: user?.experienceLevel,
+        foodPreference: user?.foodPreference,
+        workoutPreference: user?.workoutPreference,
+        activityLevel: user?.activityLevel,
+        targetCalories: user?.targetCalories,
+        calorieTarget: user?.calorieTarget,
+        workoutsPerWeek: user?.workoutsPerWeek,
+      },
+      progressSummary,
+    };
+
+    const completion = await groq.chat.completions.create({
+      model: "llama-3.1-8b-instant",
+      temperature: 0.4,
+      max_completion_tokens: 1400,
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are an expert fitness planning AI. Return ONLY valid JSON. Build a personalized 7-day diet + workout plan based on profile and progress. JSON shape: { calories:number, macros:{protein:number,carbs:number,fats:number}, meals:[{mealName:string,time:string,calories:number,items:string[],macros:{protein:number,carbs:number,fats:number}}], workoutLevel:string, workoutDays:[{dayName:string,focus:string,duration:string,exercises:[{name:string,sets:number,reps:string,rest:string,formGuide:string}]}] }",
+        },
+        {
+          role: "user",
+          content: JSON.stringify(promptPayload),
+        },
+      ],
+    });
+
+    const aiText = completion?.choices?.[0]?.message?.content || "";
+    const aiJson = parseJsonFromText(aiText);
+    const normalized = normalizePlanFromAI(aiJson, fallbackPlan);
+
+    return {
+      ...normalized,
+      aiSource: "groq",
+    };
+  } catch {
+    return {
+      ...fallbackPlan,
+      progressInsights: {
+        ...(fallbackPlan.progressInsights || {}),
+        planMode: "rule_fallback",
+      },
+      aiSource: "fallback",
+    };
+  }
 };

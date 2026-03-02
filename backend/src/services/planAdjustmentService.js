@@ -218,7 +218,7 @@ export const applyPlanAdjustments = (user, adjustments) => {
     return user;
   }
 
-  const updatedUser = { ...user.toObject ? user.toObject() : user };
+  const updatedUser = user;
 
   // Adjust calories (with safety bounds)
   if (adjustments.calorieAdjust !== 0) {

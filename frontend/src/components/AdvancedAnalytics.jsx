@@ -46,6 +46,34 @@ const AdvancedAnalytics = () => {
     return Number(value).toFixed(decimals);
   };
 
+  const getVelocityInsight = (velocity) => {
+    const goalText = String(user?.primaryGoal || user?.goal || "").toLowerCase();
+    const weightVelocity = Number(velocity?.weightVelocity);
+    const adherenceVelocity = Number(velocity?.adherenceVelocity);
+
+    const improvingAdherence = Number.isFinite(adherenceVelocity) && adherenceVelocity >= 0;
+
+    if (goalText.includes("weight") && goalText.includes("loss")) {
+      if (Number.isFinite(weightVelocity) && weightVelocity < 0 && improvingAdherence) {
+        return { text: "On track for fat loss", tone: "text-green-400" };
+      }
+      return { text: "Needs attention for fat loss", tone: "text-yellow-400" };
+    }
+
+    if (goalText.includes("muscle") && goalText.includes("gain")) {
+      if (Number.isFinite(weightVelocity) && weightVelocity > 0 && improvingAdherence) {
+        return { text: "On track for muscle gain", tone: "text-green-400" };
+      }
+      return { text: "Needs attention for muscle gain", tone: "text-yellow-400" };
+    }
+
+    if (improvingAdherence) {
+      return { text: "Habits improving steadily", tone: "text-green-400" };
+    }
+
+    return { text: "Build consistency for better momentum", tone: "text-yellow-400" };
+  };
+
   // 1. MULTI-WEEK HABIT TRENDS
   const HabitTrends = () => (
     <div className="space-y-6">
@@ -198,6 +226,19 @@ const AdvancedAnalytics = () => {
                 </p>
               </div>
             ))}
+          </div>
+        )}
+
+        {analyticsData?.velocityAnalysis && analyticsData.velocityAnalysis.length > 0 && (
+          <div className="mt-4 bg-white/5 border border-white/10 rounded-xl p-4">
+            {analyticsData.velocityAnalysis.slice(-1).map((vel) => {
+              const insight = getVelocityInsight(vel);
+              return (
+                <p key={`insight-${vel.week}`} className={`text-sm font-semibold ${insight.tone}`}>
+                  Velocity Insight: {insight.text}
+                </p>
+              );
+            })}
           </div>
         )}
       </div>

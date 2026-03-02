@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 
 const UserGoal = () => {
   const { user, setUser } = useAuth();
+  const [goalHistory, setGoalHistory] = useState([]);
   const [formData, setFormData] = useState({
     primaryGoal: "",
     calorieTarget: "",
@@ -64,7 +65,13 @@ const UserGoal = () => {
         goalStatus: "completed",
       });
       toast.success(res.data.message);
-      setUser((prev) => ({ ...prev, ...(user?.goalStatus === "completed") }));
+      setUser((prev) => ({
+        ...prev,
+        goalStatus: res?.data?.data?.goalStatus || "completed",
+      }));
+      if (res?.data?.historyEntry) {
+        setGoalHistory((prev) => [res.data.historyEntry, ...prev]);
+      }
     } catch {
       toast.error("Failed to complete goal");
     }
@@ -74,9 +81,8 @@ const UserGoal = () => {
     const fetchGoal = async () => {
       try {
         const res = await api.get("/user/goal");
-        console.log("Goal response:", res.data);
-        toast.success(res.data.message);
         setUser((prev) => ({ ...prev, ...res.data.data }));
+        setGoalHistory(res?.data?.data?.goalHistory || []);
       } catch {
         console.log("Failed to fetch goal");
       }
@@ -251,6 +257,45 @@ const UserGoal = () => {
             </form>
           </div>
         )}
+
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xl font-bold text-cyan-300">Completed Goal History</h3>
+            <span className="text-xs px-2 py-1 rounded-full bg-cyan-500/20 text-cyan-300">
+              {goalHistory.length} completed
+            </span>
+          </div>
+
+          {goalHistory.length === 0 ? (
+            <p className="text-gray-400 text-sm">
+              No completed goals yet. Complete your first goal to build history.
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {goalHistory.map((item) => (
+                <div
+                  key={item._id || `${item.primaryGoal}-${item.createdAt}`}
+                  className="bg-white/5 border border-white/10 rounded-xl p-4"
+                >
+                  <div className="flex items-center justify-between gap-3 mb-2">
+                    <p className="text-white font-semibold capitalize">{item.primaryGoal}</p>
+                    <span className="text-xs text-gray-300">
+                      {new Date(item.createdAt).toLocaleDateString("en-IN", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </span>
+                  </div>
+                  <div className="text-sm text-gray-300 flex flex-wrap gap-4">
+                    <p>Target Weight: {item.goalWeight ? `${item.goalWeight} kg` : "--"}</p>
+                    <p>Calories: {item.calorieTarget ? `${item.calorieTarget} kcal` : "--"}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -48,6 +48,7 @@ const ProgressGraph = () => {
     armsCm: "",
     thighsCm: "",
   });
+  const [reportRefreshSignal, setReportRefreshSignal] = useState(0);
 
   const weekLabel = useMemo(() => getWeekLabel(), []);
 
@@ -93,6 +94,7 @@ const ProgressGraph = () => {
         armsCm: "",
         thighsCm: "",
       }));
+      setReportRefreshSignal((prev) => prev + 1);
       toast.success("Daily progress saved successfully");
     } catch (error) {
       toast.error(error?.response?.data?.message || "Failed to save progress");
@@ -144,7 +146,7 @@ const ProgressGraph = () => {
 
       <InsightPanel insight={dashboard?.insight} />
 
-      <MonthlyFitnessReport />
+      <MonthlyFitnessReport refreshSignal={reportRefreshSignal} />
 
       <form
         onSubmit={handleSave}
@@ -293,15 +295,21 @@ const ProgressGraph = () => {
         </div>
       </form>
 
-      <div className="mb-6 sm:mb-8 overflow-x-auto">
-        <h3 className="text-xs sm:text-sm text-gray-300 mb-2 sm:mb-4">
-          Daily Progress Tracking
-        </h3>
-        <div className="min-h-62.5 sm:min-h-75">
-          <ResponsiveContainer width="100%" height={250} minWidth={300}>
+      <div className="mb-6 sm:mb-8 rounded-2xl border border-white/10 bg-linear-to-br from-white/10 to-white/5 p-4 sm:p-6 shadow-xl">
+        <div className="flex items-center justify-between mb-3 sm:mb-4">
+          <h3 className="text-sm sm:text-base font-semibold text-white">
+            Daily Progress Tracking
+          </h3>
+          <span className="text-[11px] sm:text-xs text-gray-400">
+            Adherence trend (0-100%)
+          </span>
+        </div>
+
+        <div className="h-72 sm:h-80 w-full">
+          <ResponsiveContainer width="100%" height="100%">
             <AreaChart
               data={graphData}
-              margin={{ top: 10, right: 10, left: -20, bottom: 10 }}
+              margin={{ top: 10, right: 8, left: 0, bottom: 8 }}
             >
               <defs>
                 <linearGradient
@@ -323,20 +331,19 @@ const ProgressGraph = () => {
                   <stop offset="95%" stopColor="#10b981" stopOpacity={0.1} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#444" />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.12)" />
               <XAxis
                 dataKey="week"
                 stroke="#ccc"
                 tick={{ fontSize: 11 }}
-                angle={-45}
-                textAnchor="end"
-                height={80}
+                tickMargin={8}
+                minTickGap={24}
               />
               <YAxis
                 stroke="#ccc"
                 domain={[0, 100]}
                 tick={{ fontSize: 11 }}
-                width={40}
+                width={34}
               />
               <Tooltip
                 formatter={(value) => `${value}%`}
@@ -346,9 +353,10 @@ const ProgressGraph = () => {
                   border: "1px solid #444",
                   borderRadius: "8px",
                   fontSize: "12px",
+                  boxShadow: "0 8px 24px rgba(0,0,0,0.35)",
                 }}
               />
-              <Legend wrapperStyle={{ paddingTop: "20px", fontSize: "12px" }} />
+              <Legend wrapperStyle={{ paddingTop: "12px", fontSize: "12px" }} />
 
               <Area
                 type="monotone"
@@ -360,6 +368,7 @@ const ProgressGraph = () => {
                 connectNulls
                 isAnimationActive={true}
                 strokeWidth={2}
+                activeDot={{ r: 5 }}
               />
               <Area
                 type="monotone"
@@ -371,6 +380,7 @@ const ProgressGraph = () => {
                 connectNulls
                 isAnimationActive={true}
                 strokeWidth={2}
+                activeDot={{ r: 5 }}
               />
               <Area
                 type="monotone"
@@ -382,6 +392,7 @@ const ProgressGraph = () => {
                 connectNulls
                 isAnimationActive={true}
                 strokeWidth={2}
+                activeDot={{ r: 5 }}
               />
             </AreaChart>
           </ResponsiveContainer>

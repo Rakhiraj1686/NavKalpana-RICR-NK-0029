@@ -149,14 +149,17 @@ const PlanAdjustmentPanel = ({ onAdjustmentApplied }) => {
   const handleEvaluatePlan = async () => {
     setLoading(true);
     try {
-      const [evaluationRes, dashboardRes] = await Promise.all([
-        api.post("/user/plan/evaluate"),
-        api.get("/api/v1/progress/dashboard"),
-      ]);
+      const evaluationRes = await api.post("/user/plan/evaluate");
 
       const evaluationData = evaluationRes.data;
       setAdjustmentData(evaluationData);
-      setDashboardData(dashboardRes.data?.data || null);
+
+      try {
+        const dashboardRes = await api.get("/api/v1/progress/dashboard");
+        setDashboardData(dashboardRes.data?.data || null);
+      } catch {
+        toast.error("Plan evaluated, but failed to refresh progress snapshot");
+      }
 
       if (typeof onAdjustmentApplied === "function") {
         onAdjustmentApplied(evaluationData);
@@ -166,11 +169,11 @@ const PlanAdjustmentPanel = ({ onAdjustmentApplied }) => {
         toast.success(`Plan evaluated! ${evaluationData.triggers.length} adjustment(s) found 🎯`);
         setExpanded(true);
       } else {
-        toast.info("Your plan is optimal for your current progress! 💪");
+        toast("Your plan is optimal for your current progress! 💪");
         setExpanded(true);
       }
     } catch (err) {
-      toast.error(err?.response?.data?.message || "Failed to evaluate plan");
+      toast.error(err?.response?.data?.message || err?.message || "Failed to evaluate plan");
     } finally {
       setLoading(false);
     }
