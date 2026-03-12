@@ -17,7 +17,7 @@ import {
 import { getAllAdvancedAnalytics } from "../services/advancedAnalyticsService.js";
 import { generate8WeekPlan, getWeekRecommendations } from "../services/progressionPlanService.js";
 import DailyProgress from "../models/DailyProgress.js";
-import { getWeekKey, normalizeDate } from "../utils/progressUtils.js";
+import { normalizeDate } from "../utils/progressUtils.js";
 
 export const logWeightEntry = async (req, res, next) => {
   try {
@@ -81,6 +81,7 @@ export const logDailyCheckInEntry = async (req, res, next) => {
       proteinG,
       steps,
       dietAdherencePercent,
+      habitAdherencePercent,
       energyLevel,
       waistCm,
       chestCm,
@@ -97,6 +98,7 @@ export const logDailyCheckInEntry = async (req, res, next) => {
       proteinG,
       steps,
       dietAdherencePercent,
+      habitAdherencePercent,
       energyLevel,
       waistCm,
       chestCm,
@@ -353,41 +355,47 @@ export const getWeeklyOverviewGraph = async (req, res, next) => {
       date: { $gte: startDate },
     })
       .sort({ date: 1 })
-      .select("date adherenceScore workoutsPlanned workoutsCompleted");
+      .select("date adherenceScore dietAdherencePercent habitAdherencePercent workoutsPlanned workoutsCompleted");
 
-    const weeklyMap = new Map();
+    const dailyMap = new Map();
 
     rows.forEach((row) => {
       const date = normalizeDate(row.date);
-      const weekKey = getWeekKey(date);
+      const isoDate = date.toISOString().slice(0, 10);
+      const dateLabel = date.toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "short",
+      });
 
-      if (!weeklyMap.has(weekKey)) {
-        weeklyMap.set(weekKey, {
-          week: weekKey,
+      if (!dailyMap.has(isoDate)) {
+        dailyMap.set(isoDate, {
+          date: isoDate,
+          dateLabel,
           workout: 0,
-          diet: row.adherenceScore || 0,
-          habit: row.adherenceScore || 0,
+          diet: 0,
+          habit: 0,
           points: 0,
         });
       }
 
-      const item = weeklyMap.get(weekKey);
+      const item = dailyMap.get(isoDate);
       item.points += 1;
-      item.diet += row.adherenceScore || 0;
-      item.habit += row.adherenceScore || 0;
+      item.diet += row.dietAdherencePercent ?? row.adherenceScore ?? 0;
+      item.habit += row.habitAdherencePercent ?? row.adherenceScore ?? 0;
       item.workout += row.workoutsPlanned
         ? ((row.workoutsCompleted || 0) / row.workoutsPlanned) * 100
         : 0;
     });
 
-    const graphData = Array.from(weeklyMap.values())
+    const graphData = Array.from(dailyMap.values())
       .map((entry) => ({
-        week: entry.week,
+        date: entry.date,
+        dateLabel: entry.dateLabel,
         workout: Number((entry.workout / Math.max(entry.points, 1)).toFixed(2)),
         diet: Number((entry.diet / Math.max(entry.points, 1)).toFixed(2)),
         habit: Number((entry.habit / Math.max(entry.points, 1)).toFixed(2)),
       }))
-      .sort((a, b) => a.week.localeCompare(b.week));
+      .sort((a, b) => a.date.localeCompare(b.date));
 
     res.status(200).json({ success: true, graphData });
   } catch (error) {

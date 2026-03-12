@@ -21,9 +21,43 @@ const UserDashboard = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const sectionTitles = {
+    overview: "Overview",
+    plan: "Plan",
+    progression: "Progression",
+    analytics: "Analytics",
+    progress: "Progress",
+    profile: "Profile",
+    goal: "Goal",
+    support: "Support",
+  };
+
   useEffect(() => {
     if (!isLogin) navigate("/login");
   }, [isLogin, navigate]);
+
+  useEffect(() => {
+    if (!mobileOpen) return;
+
+    const handleEscape = (event) => {
+      if (event.key === "Escape") setMobileOpen(false);
+    };
+
+    const handleResize = () => {
+      if (window.innerWidth >= 768) setMobileOpen(false);
+    };
+
+    // Prevent background scroll when the mobile drawer is open.
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", handleEscape);
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", handleEscape);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [mobileOpen]);
 
   const handleOpenMobileMenu = () => {
     setIsCollapsed(false);
@@ -31,24 +65,25 @@ const UserDashboard = () => {
   };
 
   return (
-    <div className="fixed inset-x-0 top-12 md:top-15 bottom-0 flex md:gap-4 overflow-hidden bg-linear-to-br from-[#020617] to-[#0f172a] text-white">
+    <div className="fixed inset-x-0 top-12 bottom-0 flex overflow-hidden bg-linear-to-br from-[#020617] to-[#0f172a] text-white md:gap-4 md:top-15">
       {/* Mobile overlay */}
       {mobileOpen && (
         <div
           className="fixed inset-0 bg-black/60 md:hidden z-40"
           onClick={() => setMobileOpen(false)}
+          aria-hidden="true"
         />
       )}
 
       {/* Sidebar */}
       <aside
         className={`
-          fixed md:static z-50 h-full
+          fixed left-0 top-0 z-50 h-full
           bg-[#020617] border-r border-white/10
-          transition-all duration-300 ease-out
-          ${mobileOpen ? "left-0" : "-left-full"}
-          md:left-0
-          w-96 md:w-auto
+          transition-transform duration-300 ease-out
+          ${mobileOpen ? "translate-x-0" : "-translate-x-full"}
+          md:static md:translate-x-0
+          w-[82vw] max-w-[320px] md:max-w-none md:w-auto
           ${isCollapsed ? "md:w-20" : "md:w-96"}
         `}
       >
@@ -68,10 +103,11 @@ const UserDashboard = () => {
           <button
             onClick={handleOpenMobileMenu}
             className="inline-flex items-center justify-center size-9 rounded-lg border border-white/15 text-gray-200"
+            aria-label="Open sidebar"
           >
             <FaBars />
           </button>
-          <p className="text-sm font-semibold text-gray-200 capitalize">{active}</p>
+          <p className="text-sm font-semibold text-gray-200">{sectionTitles[active] || "Overview"}</p>
           <span className="size-9" />
         </div>
 

@@ -365,6 +365,11 @@ export const RegeneratePlan = async (req, res, next) => {
 
 export const generatePlan = async (req, res, next) => {
   try {
+    const requestedPlanType = String(req.body?.planType || "all").toLowerCase();
+    const planType = ["diet", "workout", "all"].includes(requestedPlanType)
+      ? requestedPlanType
+      : "all";
+
     const user = await User.findById(req.user._id);
 
     if (!user) {
@@ -424,7 +429,25 @@ export const generatePlan = async (req, res, next) => {
     const newPlan = await generatePersonalizedAIPlan(adjustedUser, normalizedProgressSummary);
     console.log("Generate Plan", newPlan);
 
-    adjustedUser.aiPlan = newPlan;
+    const currentPlan = adjustedUser.aiPlan || {};
+    let updatedPlan = newPlan;
+
+    if (planType === "diet") {
+      updatedPlan = {
+        ...currentPlan,
+        calories: newPlan.calories,
+        macros: newPlan.macros,
+        meals: newPlan.meals,
+      };
+    } else if (planType === "workout") {
+      updatedPlan = {
+        ...currentPlan,
+        workoutLevel: newPlan.workoutLevel,
+        workoutDays: newPlan.workoutDays,
+      };
+    }
+
+    adjustedUser.aiPlan = updatedPlan;
     
     // Preserve an explicit before/after summary for UI visibility when changes happen.
     if (adjustmentResult?.adjustments) {
@@ -439,9 +462,17 @@ export const generatePlan = async (req, res, next) => {
     
     await adjustedUser.save();
 
+    const successMessage =
+      planType === "diet"
+        ? "AI diet plan generated successfully"
+        : planType === "workout"
+          ? "AI workout plan generated successfully"
+          : "AI Plan regenerated successfully";
+
     res.status(200).json({
-      message: "AI Plan regenerated successfully",
-      aiPlan: newPlan,
+      message: successMessage,
+      aiPlan: updatedPlan,
+      planType,
       adjustments: adjustmentResult.adjustments || null,
       triggers: adjustmentResult.triggers || [],
     });

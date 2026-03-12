@@ -27,16 +27,49 @@ const getMealPool = (foodPreference = "") => {
       ["Oats + Peanut Butter", "Greek Yogurt", "Fruit"],
       ["Besan Chilla", "Paneer", "Green Tea"],
       ["Poha", "Boiled Sprouts", "Buttermilk"],
+      ["Ragi Dosa", "Coconut Chutney", "Herbal Tea"],
+      ["Paneer Sandwich", "Apple", "Lemon Water"],
+      ["Upma", "Roasted Chana", "Curd"],
     ],
     lunch: [
       ["Dal", "Brown Rice", "Salad"],
       ["Paneer Bhurji", "Roti", "Cucumber Salad"],
       ["Rajma", "Rice", "Curd"],
+      ["Chole", "Jeera Rice", "Kachumber Salad"],
+      ["Mixed Veg", "Millet Roti", "Curd"],
+      ["Soya Chunk Curry", "Roti", "Salad"],
     ],
     dinner: [
       ["Tofu Stir Fry", "Quinoa", "Soup"],
       ["Paneer Tikka", "Millet Roti", "Salad"],
       ["Moong Khichdi", "Curd", "Sauteed Veg"],
+      ["Lentil Soup", "Veg Stir Fry", "Toasted Seeds"],
+      ["Palak Paneer", "Roti", "Salad"],
+      ["Vegetable Oats", "Curd", "Steamed Broccoli"],
+    ],
+  };
+
+  const veganPool = {
+    breakfast: [
+      ["Overnight Oats", "Chia Seeds", "Banana"],
+      ["Tofu Scramble", "Whole Wheat Toast", "Fruit"],
+      ["Poha", "Peanuts", "Lemon Water"],
+      ["Smoothie Bowl", "Pumpkin Seeds", "Berries"],
+      ["Millet Porridge", "Almond Butter", "Papaya"],
+    ],
+    lunch: [
+      ["Dal", "Brown Rice", "Salad"],
+      ["Chickpea Curry", "Roti", "Cucumber Salad"],
+      ["Tofu Bhurji", "Millet Roti", "Veg Salad"],
+      ["Quinoa Bowl", "Beans", "Sauteed Veg"],
+      ["Rajma", "Rice", "Beetroot Salad"],
+    ],
+    dinner: [
+      ["Tofu Stir Fry", "Quinoa", "Soup"],
+      ["Lentil Khichdi", "Sauteed Veg", "Sprouts"],
+      ["Vegetable Soup", "Grilled Tofu", "Salad"],
+      ["Chickpea Salad", "Roasted Sweet Potato", "Broccoli"],
+      ["Soya Curry", "Roti", "Mixed Greens"],
     ],
   };
 
@@ -45,30 +78,51 @@ const getMealPool = (foodPreference = "") => {
       ["Egg Omelette", "Whole Wheat Toast", "Fruit"],
       ["Oats", "Boiled Eggs", "Green Tea"],
       ["Chicken Sandwich", "Curd"],
+      ["Egg Bhurji", "Roti", "Orange"],
+      ["Greek Yogurt", "Nuts", "Boiled Eggs"],
+      ["Chicken Sausage", "Multigrain Toast", "Fruit"],
     ],
     lunch: [
       ["Grilled Chicken", "Brown Rice", "Salad"],
       ["Fish Curry", "Rice", "Steamed Veg"],
       ["Chicken Bowl", "Quinoa", "Yogurt"],
+      ["Egg Curry", "Roti", "Kachumber Salad"],
+      ["Chicken Keema", "Millet Roti", "Cucumber"],
+      ["Tuna Salad Bowl", "Sweet Corn", "Lemon Dressing"],
     ],
     dinner: [
       ["Baked Fish", "Sweet Potato", "Salad"],
       ["Chicken Stir Fry", "Millet", "Soup"],
       ["Egg Curry", "Roti", "Veg Mix"],
+      ["Grilled Chicken", "Sauteed Veg", "Soup"],
+      ["Fish Tikka", "Quinoa", "Salad"],
+      ["Egg White Omelette", "Stir Fry Veg", "Lentil Soup"],
     ],
   };
 
-  const normalized = String(foodPreference || "").toLowerCase();
-  if (normalized === "all") {
+  const normalized = String(foodPreference || "").toLowerCase().trim();
+  const isAll = ["all", "mixed", "any", "both"].includes(normalized);
+  const isVeg = ["vegetarian", "veg", "eggetarian"].includes(normalized);
+  const isVegan = ["vegan", "plant_based", "plant-based"].includes(normalized);
+  const isNonVeg = ["non_vegetarian", "non-vegetarian", "non veg", "nonveg", "nv"].includes(normalized);
+
+  if (isAll) {
     return {
-      breakfast: [...vegetarianPool.breakfast, ...nonVegPool.breakfast],
-      lunch: [...vegetarianPool.lunch, ...nonVegPool.lunch],
-      dinner: [...vegetarianPool.dinner, ...nonVegPool.dinner],
+      breakfast: [...vegetarianPool.breakfast, ...veganPool.breakfast, ...nonVegPool.breakfast],
+      lunch: [...vegetarianPool.lunch, ...veganPool.lunch, ...nonVegPool.lunch],
+      dinner: [...vegetarianPool.dinner, ...veganPool.dinner, ...nonVegPool.dinner],
     };
   }
-  if (normalized === "vegetarian" || normalized === "vegan") {
+  if (isVegan) {
+    return veganPool;
+  }
+  if (isVeg) {
     return vegetarianPool;
   }
+  if (isNonVeg) {
+    return nonVegPool;
+  }
+
   return nonVegPool;
 };
 

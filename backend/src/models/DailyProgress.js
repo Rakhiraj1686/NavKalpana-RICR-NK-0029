@@ -51,6 +51,12 @@ const dailyProgressSchema = new mongoose.Schema(
       max: 100,
       default: 0,
     },
+    habitAdherencePercent: {
+      type: Number,
+      min: 0,
+      max: 100,
+      default: 0,
+    },
     proteinG: {
       type: Number,
       min: 0,

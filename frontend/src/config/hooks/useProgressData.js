@@ -81,10 +81,12 @@ export const useProgressData = () => {
   }, [load]);
 
   const submitDailyProgress = async ({
+    entryDate,
     weightKg,
     workoutStatus = "completed",
     caloriesIn,
     dietAdherencePercent,
+    habitAdherencePercent,
     energyLevel,
     waistCm,
     chestCm,
@@ -96,9 +98,15 @@ export const useProgressData = () => {
       setSaving(true);
       setError("");
 
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const selectedDate = entryDate
+        ? new Date(`${entryDate}T12:00:00`).toISOString()
+        : new Date().toISOString();
+
       if (weightKg !== undefined && weightKg !== null && weightKg !== "") {
         await logWeight({
-          date: new Date().toISOString(),
+          date: selectedDate,
+          timezone,
           weightKg: Number(weightKg),
         });
       }
@@ -106,7 +114,7 @@ export const useProgressData = () => {
       if (workoutStatus) {
         await logWorkout({
           status: workoutStatus,
-          scheduledDate: new Date().toISOString(),
+          scheduledDate: selectedDate,
           planWorkoutId: `manual-${Date.now()}`,
         });
       }
@@ -116,6 +124,9 @@ export const useProgressData = () => {
         (dietAdherencePercent !== undefined &&
           dietAdherencePercent !== null &&
           dietAdherencePercent !== "") ||
+        (habitAdherencePercent !== undefined &&
+          habitAdherencePercent !== null &&
+          habitAdherencePercent !== "") ||
         !!energyLevel ||
         (waistCm !== undefined && waistCm !== null && waistCm !== "") ||
         (chestCm !== undefined && chestCm !== null && chestCm !== "") ||
@@ -125,7 +136,8 @@ export const useProgressData = () => {
 
       if (hasCheckinData) {
         await logDailyCheckin({
-          date: new Date().toISOString(),
+          date: selectedDate,
+          timezone,
           caloriesIn:
             caloriesIn !== undefined && caloriesIn !== null && caloriesIn !== ""
               ? Number(caloriesIn)
@@ -135,6 +147,12 @@ export const useProgressData = () => {
             dietAdherencePercent !== null &&
             dietAdherencePercent !== ""
               ? Number(dietAdherencePercent)
+              : undefined,
+          habitAdherencePercent:
+            habitAdherencePercent !== undefined &&
+            habitAdherencePercent !== null &&
+            habitAdherencePercent !== ""
+              ? Number(habitAdherencePercent)
               : undefined,
           energyLevel,
           waistCm:

@@ -57,10 +57,8 @@ const Login = () => {
 
   return (
     <>
-      <div className="min-h-screen py-28 flex items-center justify-center bg-linear-to-br from-[#020617] to-[#0f172a] px-4 relative overflow-hidden">
-        {/* Background Glow */}
-        <div className="absolute w-100 h-100 bg-purple-600/20 rounded-full blur-[120px] -top-20 -left-20" />
-        <div className="absolute w-87.5 h-87.5 bg-blue-600/20 rounded-full blur-[120px] -bottom-20 -right-20" />
+      <div className="min-h-screen py-28 flex items-center justify-center bg-[#030712] px-4 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_25%,rgba(168,85,247,0.25),transparent_40%),radial-gradient(circle_at_75%_75%,rgba(59,130,246,0.25),transparent_40%)]" />
 
         <div className="w-full max-w-md relative z-10">
           {/* Header */}
@@ -77,7 +75,7 @@ const Login = () => {
           </div>
 
           {/* Login Card */}
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-8">
+          <div className="bg-white/5 backdrop-blur-2xl border border-cyan-400/20 rounded-3xl shadow-[0_0_35px_rgba(59,130,246,0.3)] p-8">
             <form
               onSubmit={handleSubmit}
               onReset={handleClear}
@@ -100,7 +98,7 @@ const Login = () => {
                     disabled={isLoading}
                     required
                     placeholder="Enter your email or phone"
-                    className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:ring-2 focus:ring-purple-500 outline-none transition"
+                    className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/5 border border-cyan-400/20 text-white focus:ring-2 focus:ring-cyan-400/60 outline-none transition"
                   />
                 </div>
               </div>
@@ -122,7 +120,7 @@ const Login = () => {
                     disabled={isLoading}
                     required
                     placeholder="Enter password"
-                    className="w-full pl-10 pr-10 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:ring-2 focus:ring-purple-500 outline-none transition"
+                    className="w-full pl-10 pr-10 py-3 rounded-xl bg-white/5 border border-cyan-400/20 text-white focus:ring-2 focus:ring-cyan-400/60 outline-none transition"
                   />
 
                   <button
@@ -142,7 +140,7 @@ const Login = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex items-center justify-center gap-2 bg-linear-to-r from-purple-500 to-blue-500 py-3 rounded-xl font-semibold hover:scale-105 transition shadow-lg cursor-pointer"
+                className="w-full flex items-center justify-center gap-2 bg-linear-to-r from-purple-500 to-cyan-500 py-3 rounded-full font-semibold hover:scale-105 transition duration-300 shadow-[0_0_25px_rgba(168,85,247,0.6)] cursor-pointer"
               >
                 <FiLogIn />
                 {isLoading ? "Signing in..." : "Sign In"}
@@ -156,7 +154,7 @@ const Login = () => {
                     e.preventDefault();
                     setIsForgetPasswordModal(true);
                   }}
-                  className="text-sm text-gray-400 hover:text-purple-400"
+                  className="text-sm text-gray-400 hover:text-cyan-300"
                 >
                   Forgot Password?
                 </button>
@@ -166,7 +164,7 @@ const Login = () => {
               <div className="flex justify-between text-sm text-gray-400">
                 <span>Don’t have an account?</span>
 
-                <Link to="/signup" className="text-purple-400 hover:underline">
+                <Link to="/signup" className="text-cyan-300 hover:underline">
                   Sign Up
                 </Link>
               </div>
@@ -184,7 +182,7 @@ const Login = () => {
           />
         )}
       </div>
-      <footer className="bg-[#020617] text-white border-t border-white/10">
+      <footer className="bg-[#030712] text-white border-t border-cyan-400/20">
         {/* Footer */}
         <div className="border-t border-white/10 text-center py-6 text-gray-500 text-md">
           © {new Date().getFullYear()} HealthUP • All Rights reserved.

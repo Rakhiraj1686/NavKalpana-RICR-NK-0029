@@ -1,6 +1,6 @@
 import {
-  AreaChart,
-  Area,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   Tooltip,
@@ -17,17 +17,75 @@ import InsightPanel from "../InsightPanel.jsx";
 import BadgeShelf from "../BadgeShelf.jsx";
 import MonthlyFitnessReport from "../MonthlyFitnessReport.jsx";
 
-const getWeekLabel = () => {
-  const current = new Date();
-  const day = current.getDay();
-  const diffToMonday = day === 0 ? -6 : 1 - day;
-  const weekStart = new Date(current);
-  weekStart.setDate(current.getDate() + diffToMonday);
+const getTodayLocalDate = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
 
-  return weekStart.toLocaleDateString("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
+const clampPercent = (value, fallback = 0) => {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return fallback;
+  return Math.min(100, Math.max(0, numeric));
+};
+
+const smoothAnalogSeries = (data) => {
+  if (!Array.isArray(data) || data.length === 0) return [];
+
+  const normalized = data.map((point, index) => {
+    const prev = index > 0 ? data[index - 1] : point;
+    return {
+      ...point,
+      workout: clampPercent(point.workout, clampPercent(prev?.workout, 0)),
+      diet: clampPercent(point.diet, clampPercent(prev?.diet, 0)),
+      habit: clampPercent(point.habit, clampPercent(prev?.habit, 0)),
+    };
+  });
+
+  return normalized.map((point, index) => {
+    const prev = normalized[index - 1] || point;
+    const next = normalized[index + 1] || point;
+
+    const smoothValue = (key) =>
+      Math.round((prev[key] * 0.25 + point[key] * 0.5 + next[key] * 0.25) * 10) /
+      10;
+
+    return {
+      ...point,
+      workout: smoothValue("workout"),
+      diet: smoothValue("diet"),
+      habit: smoothValue("habit"),
+    };
+  });
+};
+
+const buildGrowthSummary = (data) => {
+  if (!Array.isArray(data) || data.length < 2) return null;
+
+  const first = data[0];
+  const last = data[data.length - 1];
+  const metrics = [
+    { key: "workout", label: "Workout" },
+    { key: "diet", label: "Diet" },
+    { key: "habit", label: "Habit" },
+  ];
+
+  return metrics.map(({ key, label }) => {
+    const start = clampPercent(first[key], 0);
+    const end = clampPercent(last[key], 0);
+    const delta = Math.round((end - start) * 10) / 10;
+    const direction = delta > 0 ? "up" : delta < 0 ? "down" : "flat";
+
+    return {
+      key,
+      label,
+      start,
+      end,
+      delta,
+      direction,
+    };
   });
 };
 
@@ -37,10 +95,12 @@ const ProgressGraph = () => {
     useProgressData();
 
   const [formData, setFormData] = useState({
+    entryDate: getTodayLocalDate(),
     weightKg: "",
     workoutStatus: "completed",
     caloriesIn: "",
     dietAdherencePercent: "",
+    habitAdherencePercent: "",
     energyLevel: "normal",
     waistCm: "",
     chestCm: "",
@@ -50,7 +110,13 @@ const ProgressGraph = () => {
   });
   const [reportRefreshSignal, setReportRefreshSignal] = useState(0);
 
-  const weekLabel = useMemo(() => getWeekLabel(), []);
+  const smoothedRealGraphData = useMemo(
+    () => smoothAnalogSeries(graphData),
+    [graphData],
+  );
+  const hasRealGraphData = smoothedRealGraphData.length > 0;
+  const chartData = smoothedRealGraphData;
+  const growthSummary = useMemo(() => buildGrowthSummary(chartData), [chartData]);
 
   // Get calorie and habit targets from goal data
   const profileCalories = Number(user?.aiPlan?.calories);
@@ -72,10 +138,12 @@ const ProgressGraph = () => {
     event.preventDefault();
     try {
       await submitDailyProgress({
+        entryDate: formData.entryDate,
         weightKg: formData.weightKg,
         workoutStatus: formData.workoutStatus,
         caloriesIn: formData.caloriesIn,
         dietAdherencePercent: formData.dietAdherencePercent,
+        habitAdherencePercent: formData.habitAdherencePercent,
         energyLevel: formData.energyLevel,
         waistCm: formData.waistCm,
         chestCm: formData.chestCm,
@@ -85,9 +153,11 @@ const ProgressGraph = () => {
       });
       setFormData((prev) => ({
         ...prev,
+        entryDate: prev.entryDate,
         weightKg: "",
         caloriesIn: "",
         dietAdherencePercent: "",
+        habitAdherencePercent: "",
         waistCm: "",
         chestCm: "",
         hipsCm: "",
@@ -153,6 +223,18 @@ const ProgressGraph = () => {
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8 bg-white/5 border border-white/10 rounded-xl p-3 sm:p-4"
       >
         <label className="text-xs sm:text-sm text-gray-200 flex flex-col gap-2">
+          Entry Date
+          <input
+            type="date"
+            name="entryDate"
+            value={formData.entryDate}
+            onChange={handleChange}
+            className="bg-[#0F172A] border border-white/10 rounded-md px-2 sm:px-3 py-2 text-sm"
+            required
+          />
+        </label>
+
+        <label className="text-xs sm:text-sm text-gray-200 flex flex-col gap-2">
           Current Weight (kg)
           <input
             type="number"
@@ -201,6 +283,19 @@ const ProgressGraph = () => {
             max="100"
             name="dietAdherencePercent"
             value={formData.dietAdherencePercent}
+            onChange={handleChange}
+            className="bg-[#0F172A] border border-white/10 rounded-md px-2 sm:px-3 py-2 text-sm"
+          />
+        </label>
+
+        <label className="text-xs sm:text-sm text-gray-200 flex flex-col gap-2">
+          Habit Adherence (%)
+          <input
+            type="number"
+            min="0"
+            max="100"
+            name="habitAdherencePercent"
+            value={formData.habitAdherencePercent}
             onChange={handleChange}
             className="bg-[#0F172A] border border-white/10 rounded-md px-2 sm:px-3 py-2 text-sm"
           />
@@ -283,7 +378,7 @@ const ProgressGraph = () => {
 
         <div className="sm:col-span-2 lg:col-span-1 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mt-3 sm:mt-0">
           <p className="text-gray-300 text-xs sm:text-sm">
-            Week starts: {weekLabel}
+            Selected Date: {formData.entryDate}
           </p>
           <button
             type="submit"
@@ -295,115 +390,128 @@ const ProgressGraph = () => {
         </div>
       </form>
 
-      <div className="mb-6 sm:mb-8 rounded-2xl border border-white/10 bg-linear-to-br from-white/10 to-white/5 p-4 sm:p-6 shadow-xl">
+      <div className="mb-6 sm:mb-8 rounded-2xl border border-cyan-400/20 bg-linear-to-br from-[#0B1228]/95 to-[#111A34]/95 p-4 sm:p-6 shadow-[0_0_30px_rgba(59,130,246,0.18)]">
         <div className="flex items-center justify-between mb-3 sm:mb-4">
           <h3 className="text-sm sm:text-base font-semibold text-white">
             Daily Progress Tracking
           </h3>
           <span className="text-[11px] sm:text-xs text-gray-400">
-            Adherence trend (0-100%)
+            Analog trend view (0-100%)
           </span>
         </div>
 
         <div className="h-72 sm:h-80 w-full">
+          <div className="mb-4 grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
+            {(growthSummary || []).map((item) => (
+              <div
+                key={item.key}
+                className="rounded-xl border border-cyan-400/20 bg-white/5 px-3 py-2"
+              >
+                <p className="text-[11px] text-gray-400">{item.label} Growth</p>
+                <div className="flex items-center justify-between mt-1.5">
+                  <p className="text-sm text-gray-300">
+                    {item.start}% to {item.end}%
+                  </p>
+                  <p
+                    className={`text-sm font-semibold ${
+                      item.direction === "up"
+                        ? "text-emerald-400"
+                        : item.direction === "down"
+                          ? "text-rose-400"
+                          : "text-cyan-300"
+                    }`}
+                  >
+                    {item.delta > 0 ? `+${item.delta}` : item.delta}%
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart
-              data={graphData}
+            <LineChart
+              data={chartData}
               margin={{ top: 10, right: 8, left: 0, bottom: 8 }}
             >
-              <defs>
-                <linearGradient
-                  id="workoutGradient"
-                  x1="0"
-                  y1="0"
-                  x2="0"
-                  y2="1"
-                >
-                  <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8} />
-                  <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.1} />
-                </linearGradient>
-                <linearGradient id="dietGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8} />
-                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.1} />
-                </linearGradient>
-                <linearGradient id="habitGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.8} />
-                  <stop offset="95%" stopColor="#10b981" stopOpacity={0.1} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.12)" />
+              <CartesianGrid
+                strokeDasharray="2 6"
+                stroke="rgba(148,163,184,0.25)"
+                vertical={false}
+              />
               <XAxis
-                dataKey="week"
-                stroke="#ccc"
-                tick={{ fontSize: 11 }}
+                dataKey="dateLabel"
+                stroke="#94a3b8"
+                tick={{ fontSize: 11, fill: "#cbd5e1" }}
                 tickMargin={8}
                 minTickGap={24}
               />
               <YAxis
-                stroke="#ccc"
+                stroke="#94a3b8"
                 domain={[0, 100]}
-                tick={{ fontSize: 11 }}
+                tick={{ fontSize: 11, fill: "#cbd5e1" }}
                 width={34}
               />
               <Tooltip
                 formatter={(value) => `${value}%`}
                 labelFormatter={(label) => `Date: ${label}`}
                 contentStyle={{
-                  backgroundColor: "#0F172A",
-                  border: "1px solid #444",
-                  borderRadius: "8px",
+                  backgroundColor: "#0B1228",
+                  border: "1px solid rgba(59,130,246,0.4)",
+                  borderRadius: "12px",
+                  color: "#e2e8f0",
                   fontSize: "12px",
                   boxShadow: "0 8px 24px rgba(0,0,0,0.35)",
                 }}
               />
               <Legend wrapperStyle={{ paddingTop: "12px", fontSize: "12px" }} />
 
-              <Area
-                type="monotone"
+              <Line
+                type="natural"
                 dataKey="workout"
                 stroke="#8b5cf6"
-                fillOpacity={1}
-                fill="url(#workoutGradient)"
                 name="Workout Adherence"
                 connectNulls
                 isAnimationActive={true}
-                strokeWidth={2}
-                activeDot={{ r: 5 }}
+                strokeWidth={3}
+                dot={{ r: 2, fill: "#a78bfa", strokeWidth: 0 }}
+                activeDot={{ r: 5, fill: "#c4b5fd", stroke: "#a78bfa", strokeWidth: 2 }}
               />
-              <Area
-                type="monotone"
+              <Line
+                type="natural"
                 dataKey="diet"
-                stroke="#3b82f6"
-                fillOpacity={1}
-                fill="url(#dietGradient)"
+                stroke="#38bdf8"
                 name="Diet Adherence"
                 connectNulls
                 isAnimationActive={true}
-                strokeWidth={2}
-                activeDot={{ r: 5 }}
+                strokeWidth={3}
+                dot={{ r: 2, fill: "#38bdf8", strokeWidth: 0 }}
+                activeDot={{ r: 5, fill: "#67e8f9", stroke: "#38bdf8", strokeWidth: 2 }}
               />
-              <Area
-                type="monotone"
+              <Line
+                type="natural"
                 dataKey="habit"
                 stroke="#10b981"
-                fillOpacity={1}
-                fill="url(#habitGradient)"
                 name="Habit Score"
                 connectNulls
                 isAnimationActive={true}
-                strokeWidth={2}
-                activeDot={{ r: 5 }}
+                strokeWidth={3}
+                dot={{ r: 2, fill: "#34d399", strokeWidth: 0 }}
+                activeDot={{ r: 5, fill: "#6ee7b7", stroke: "#34d399", strokeWidth: 2 }}
               />
-            </AreaChart>
+            </LineChart>
           </ResponsiveContainer>
         </div>
       </div>
 
       <BadgeShelf badges={dashboard?.badges || []} />
 
-      {!loading && graphData.length === 0 && (
+      {hasRealGraphData ? (
         <p className="text-xs sm:text-sm text-gray-400 mt-4">
-          No progress points yet. Save daily progress to build your graph.
+          To validate the real analog trend, fill daily data for 3-7 days, then check the growth cards above for exact increase or decrease.
+        </p>
+      ) : (
+        <p className="text-xs sm:text-sm text-cyan-300 mt-4">
+          No real progress points are available yet. Select an Entry Date and save data for a few days to display the graph.
         </p>
       )}
     </div>

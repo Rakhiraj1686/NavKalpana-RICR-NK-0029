@@ -25,11 +25,16 @@ const evaluateAdherence = ({
   workoutsPlanned = 0,
   workoutsCompleted = 0,
   dietAdherencePercent = 0,
+  habitAdherencePercent = 0,
 }) => {
   const workoutAdherence = workoutsPlanned
     ? clampPercent((workoutsCompleted / workoutsPlanned) * 100)
     : 0;
-  return clampPercent(workoutAdherence * 0.6 + Number(dietAdherencePercent || 0) * 0.4);
+  return clampPercent(
+    workoutAdherence * 0.5 +
+      Number(dietAdherencePercent || 0) * 0.25 +
+      Number(habitAdherencePercent || 0) * 0.25,
+  );
 };
 
 const ensureBadge = async (userId, badgeCode) => {
@@ -72,6 +77,7 @@ export const logDailyCheckIn = async ({
   proteinG,
   steps,
   dietAdherencePercent,
+  habitAdherencePercent,
   energyLevel,
   waistCm,
   chestCm,
@@ -102,6 +108,13 @@ export const logDailyCheckIn = async ({
     dietAdherencePercent !== ""
   ) {
     updateSet.dietAdherencePercent = Number(dietAdherencePercent);
+  }
+  if (
+    habitAdherencePercent !== undefined &&
+    habitAdherencePercent !== null &&
+    habitAdherencePercent !== ""
+  ) {
+    updateSet.habitAdherencePercent = Number(habitAdherencePercent);
   }
   if (energyLevel) {
     updateSet.energyLevel = energyLevel;
@@ -135,6 +148,7 @@ export const logDailyCheckIn = async ({
     workoutsPlanned: updatedDaily.workoutsPlanned,
     workoutsCompleted: updatedDaily.workoutsCompleted,
     dietAdherencePercent: updatedDaily.dietAdherencePercent,
+    habitAdherencePercent: updatedDaily.habitAdherencePercent,
   });
   await updatedDaily.save();
 
@@ -190,6 +204,7 @@ export const trackWorkoutCompletion = async ({
     workoutsPlanned: updatedDaily.workoutsPlanned,
     workoutsCompleted: updatedDaily.workoutsCompleted,
     dietAdherencePercent: updatedDaily.dietAdherencePercent,
+    habitAdherencePercent: updatedDaily.habitAdherencePercent,
   });
   await updatedDaily.save();
 

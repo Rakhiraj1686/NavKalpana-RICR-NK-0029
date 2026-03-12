@@ -7,7 +7,7 @@ import PlanAdjustmentPanel from "./PlanAdjustmentPanel";
 const UserPlan = () => {
   const { user, setUser } = useAuth();
   const [activeTab, setActiveTab] = useState("diet");
-  const [regenerating, setRegenerating] = useState(false);
+  const [generatingType, setGeneratingType] = useState(null);
 
   const emptyDietPlan = {
     calories: 0,
@@ -63,16 +63,24 @@ const UserPlan = () => {
     }
   }, [user?.aiPlan]);
 
-  const handleRegeneratePlan = async () => {
+  const handleGeneratePlan = async (planType = "all") => {
     if (!user?.primaryGoal && !user?.goal) {
       toast.error("Please set your fitness goal first!");
       return;
     }
 
-    setRegenerating(true);
+    setGeneratingType(planType);
     try {
-      const res = await api.post("/user/generatePlan");
-      toast.success("Plan regenerated successfully! 🎉");
+      const res = await api.post("/user/generatePlan", { planType });
+
+      if (planType === "diet") {
+        toast.success("AI diet plan generated successfully! 🎉");
+      } else if (planType === "workout") {
+        toast.success("AI workout plan generated successfully! 🎉");
+      } else {
+        toast.success("AI plan regenerated successfully! 🎉");
+      }
+
       if (res.data.aiPlan) {
         applyAIPlanToState(res.data.aiPlan);
 
@@ -85,9 +93,9 @@ const UserPlan = () => {
         sessionStorage.setItem("HealthUP", JSON.stringify(updatedUser));
       }
     } catch (err) {
-      toast.error(err?.response?.data?.message || "Failed to regenerate plan");
+      toast.error(err?.response?.data?.message || "Failed to generate AI plan");
     } finally {
-      setRegenerating(false);
+      setGeneratingType(null);
     }
   };
 
@@ -111,13 +119,31 @@ const UserPlan = () => {
               goals. Stay consistent and watch the results!
             </p>
 
-            <button
-              onClick={handleRegeneratePlan}
-              disabled={regenerating}
-              className="px-6 py-2.5 bg-linear-to-r from-purple-500 to-blue-500 text-white font-semibold rounded-xl transition duration-300 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-            >
-              {regenerating ? " Regenerating..." : " Regenerate AI Plan"}
-            </button>
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={() => handleGeneratePlan("diet")}
+                disabled={Boolean(generatingType)}
+                className="px-5 py-2.5 bg-linear-to-r from-emerald-500 to-cyan-500 text-white font-semibold rounded-xl transition duration-300 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              >
+                {generatingType === "diet" ? " Generating Diet..." : " Generate Diet Plan"}
+              </button>
+
+              <button
+                onClick={() => handleGeneratePlan("workout")}
+                disabled={Boolean(generatingType)}
+                className="px-5 py-2.5 bg-linear-to-r from-purple-500 to-indigo-500 text-white font-semibold rounded-xl transition duration-300 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              >
+                {generatingType === "workout" ? " Generating Workout..." : " Generate Workout Plan"}
+              </button>
+
+              <button
+                onClick={() => handleGeneratePlan("all")}
+                disabled={Boolean(generatingType)}
+                className="px-5 py-2.5 bg-linear-to-r from-purple-500 to-blue-500 text-white font-semibold rounded-xl transition duration-300 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              >
+                {generatingType === "all" ? " Regenerating..." : " Regenerate Full AI Plan"}
+              </button>
+            </div>
           </div>
         </div>
 

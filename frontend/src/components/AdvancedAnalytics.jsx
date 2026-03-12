@@ -74,6 +74,29 @@ const AdvancedAnalytics = () => {
     return { text: "Build consistency for better momentum", tone: "text-yellow-400" };
   };
 
+  const getRoadmapStatus = (roadmap) => {
+    const goalText = String(user?.primaryGoal || user?.goal || "").toLowerCase();
+    const velocity = Number(roadmap?.weeklyVelocity);
+
+    if (!Number.isFinite(velocity)) {
+      return { label: "Insufficient Data", tone: "text-yellow-300", chip: "bg-yellow-500/20 border-yellow-400/40" };
+    }
+
+    if (goalText.includes("weight") && goalText.includes("loss")) {
+      return velocity < 0
+        ? { label: "On Track", tone: "text-emerald-300", chip: "bg-emerald-500/20 border-emerald-400/40" }
+        : { label: "Needs Attention", tone: "text-rose-300", chip: "bg-rose-500/20 border-rose-400/40" };
+    }
+
+    if (goalText.includes("muscle") && goalText.includes("gain")) {
+      return velocity > 0
+        ? { label: "On Track", tone: "text-emerald-300", chip: "bg-emerald-500/20 border-emerald-400/40" }
+        : { label: "Needs Attention", tone: "text-rose-300", chip: "bg-rose-500/20 border-rose-400/40" };
+    }
+
+    return { label: "Monitoring", tone: "text-cyan-300", chip: "bg-cyan-500/20 border-cyan-400/40" };
+  };
+
   // 1. MULTI-WEEK HABIT TRENDS
   const HabitTrends = () => (
     <div className="space-y-6">
@@ -430,6 +453,16 @@ const AdvancedAnalytics = () => {
         <div className="flex items-center gap-3 mb-4">
           <FiTarget className="text-2xl text-purple-400" />
           <h3 className="text-lg font-bold text-white">Goal Achievement Roadmap</h3>
+          {analyticsData?.roadmap && (() => {
+            const status = getRoadmapStatus(analyticsData.roadmap);
+            return (
+              <span
+                className={`ml-auto text-xs px-3 py-1 rounded-full border ${status.chip} ${status.tone}`}
+              >
+                {status.label}
+              </span>
+            );
+          })()}
         </div>
 
         {analyticsData?.roadmap && (
@@ -464,6 +497,12 @@ const AdvancedAnalytics = () => {
 
             {/* Milestones */}
             <div className="space-y-2">
+              <div className="mb-3 rounded-xl border border-cyan-400/20 bg-cyan-500/10 px-4 py-3">
+                <p className="text-xs text-cyan-200">
+                  How to read: Weekly Velocity shows your current pace. Weeks to Goal is the estimated duration at the same pace.
+                  Each milestone predicts expected weight for that week.
+                </p>
+              </div>
               <p className="text-gray-400 text-sm font-semibold mb-4">Projected Milestones</p>
               {analyticsData.roadmap.roadmap && analyticsData.roadmap.roadmap.map((milestone, idx) => (
                 <div
@@ -478,15 +517,15 @@ const AdvancedAnalytics = () => {
                 >
                   <div className="flex-1">
                     <p className="text-white font-semibold">
-                      Week {milestone.week} ({Math.ceil(milestone.daysFromNow / 7)} weeks)
+                      Week {milestone.week} ({Math.ceil(milestone.daysFromNow / 7)} weeks from now)
                     </p>
                     <p className="text-gray-300 text-sm">
-                      Projected: {formatValue(milestone.projectedWeight)} kg
+                      By this week, expected weight is {formatValue(milestone.projectedWeight)} kg.
                       {milestone.status === "goal" && " 🎯"}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-gray-400 text-sm">To lose</p>
+                    <p className="text-gray-400 text-sm">Remaining</p>
                     <p className="text-lg font-bold text-white">
                       {formatValue(milestone.weightToLose)} kg
                     </p>

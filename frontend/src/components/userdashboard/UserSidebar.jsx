@@ -10,6 +10,7 @@ import {
 import { MdOutlineContactSupport } from "react-icons/md";
 import { GoGoal } from "react-icons/go";
 import { GiProgression } from "react-icons/gi";
+import { HiOutlineX } from "react-icons/hi";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -33,7 +34,7 @@ const UserSidebar = ({
   setIsCollapsed,
   setMobileOpen,
 }) => {
-  const { user, setUser } = useAuth();
+  const { setUser } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -58,6 +59,8 @@ const UserSidebar = ({
         border-r border-cyan-400/20
         transition-all duration-300
       "
+      role="navigation"
+      aria-label="Dashboard sidebar"
     >
       <div className="flex items-center justify-between p-5 border-b border-white/10">
         {!isCollapsed && (
@@ -65,6 +68,14 @@ const UserSidebar = ({
             HealthUP
           </h1>
         )}
+
+        <button
+          onClick={() => setMobileOpen(false)}
+          className="md:hidden inline-flex items-center justify-center size-8 rounded-lg border border-white/10 hover:bg-white/10 transition cursor-pointer text-white"
+          aria-label="Close sidebar"
+        >
+          <HiOutlineX className="text-lg" />
+        </button>
 
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
@@ -85,6 +96,8 @@ const UserSidebar = ({
                 setActive(item.id);
                 setMobileOpen(false);
               }}
+              aria-current={isActive ? "page" : undefined}
+              aria-label={item.label}
               className={`
                 w-full flex items-center ${isCollapsed ? "justify-center" : "justify-start"} gap-4 px-4 py-3 rounded-xl
                 transition-all duration-300 group cursor-pointer border

@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { FiSend } from "react-icons/fi";
 import api from "../config/Api";
-import { FaPhoneAlt } from "react-icons/fa";
 
 const Contact = () => {
   const [contactData, setContactData] = useState({
@@ -43,19 +42,17 @@ const Contact = () => {
 
   return (
     <>
-      <div className="min-h-screen bg-linear-to-br from-[#020617] to-[#0f172a] text-white py-32 px-6 relative overflow-hidden">
-        {/* Background Glow */}
-        <div className="absolute w-96 h-96 bg-purple-600/20 rounded-full blur-[120px] -top-20 -left-20" />
-        <div className="absolute w-96 h-96 bg-blue-600/20 rounded-full blur-[120px] -bottom-20 -right-20" />
+      <div className="min-h-screen bg-[#030712] text-white py-28 px-6 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_25%,rgba(168,85,247,0.25),transparent_40%),radial-gradient(circle_at_75%_75%,rgba(59,130,246,0.25),transparent_40%)]" />
 
-        <div className="max-w-6xl mx-auto relative py-12 z-10">
+        <div className="max-w-7xl mx-auto relative py-12 z-10">
           {/* Header */}
           <div className="text-center mb-16">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-linear-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-4 bg-linear-to-r from-purple-400 via-cyan-400 to-pink-400 bg-clip-text text-transparent">
               Let's Improve Health Together
             </h1>
 
-            <p className="text-gray-400 max-w-2xl mx-auto">
+            <p className="text-gray-400 max-w-2xl mx-auto text-base sm:text-lg">
               Questions, feedback, or collaboration ideas — HealthUP is always
               open to meaningful conversations that help build better health
               experiences for everyone.
@@ -65,7 +62,7 @@ const Contact = () => {
           {/* Main Grid */}
           <div className="grid md:grid-cols-2 gap-12">
             {/* Info Card */}
-            <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-2xl shadow-xl">
+            <div className="bg-white/5 backdrop-blur-2xl border border-cyan-400/20 p-8 rounded-3xl shadow-[0_0_35px_rgba(59,130,246,0.3)]">
               <h2 className="text-xl font-semibold mb-6 text-purple-400">
                 Connect With HealthUP
               </h2>
@@ -92,7 +89,7 @@ const Contact = () => {
             </div>
 
             {/* Form Card */}
-            <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-2xl shadow-xl">
+            <div className="bg-white/5 backdrop-blur-2xl border border-cyan-400/20 p-8 rounded-3xl shadow-[0_0_35px_rgba(59,130,246,0.3)]">
               <div>
                 <div className="text-xl font-semibold mb-6 text-purple-400 ">
                   Get in Touch
@@ -110,7 +107,7 @@ const Contact = () => {
                     onChange={handleChange}
                     disabled={isLoading}
                     required
-                    className="bg-white/5 border border-white/10 px-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none placeholder-gray-400"
+                    className="bg-white/5 border border-cyan-400/20 px-4 py-3 rounded-xl focus:ring-2 focus:ring-cyan-400/60 outline-none placeholder-gray-400"
                   />
 
                   <input
@@ -121,7 +118,7 @@ const Contact = () => {
                     onChange={handleChange}
                     disabled={isLoading}
                     required
-                    className="bg-white/5 border border-white/10 px-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none placeholder-gray-400"
+                    className="bg-white/5 border border-cyan-400/20 px-4 py-3 rounded-xl focus:ring-2 focus:ring-cyan-400/60 outline-none placeholder-gray-400"
                   />
 
                   <textarea
@@ -131,13 +128,13 @@ const Contact = () => {
                     value={contactData.message}
                     onChange={handleChange}
                     disabled={isLoading}
-                    className="bg-white/5 border border-white/10 px-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none placeholder-gray-400"
+                    className="bg-white/5 border border-cyan-400/20 px-4 py-3 rounded-xl focus:ring-2 focus:ring-cyan-400/60 outline-none placeholder-gray-400"
                   />
 
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="bg-linear-to-r from-purple-500 to-blue-500 py-3 rounded-xl font-semibold hover:scale-105 transition shadow-lg flex items-center justify-center gap-2"
+                    className="bg-linear-to-r from-purple-500 to-cyan-500 py-3 rounded-full font-semibold hover:scale-105 transition duration-300 shadow-[0_0_25px_rgba(168,85,247,0.6)] flex items-center justify-center gap-2"
                   >
                     <FiSend />
                     {isLoading ? "Sending..." : "Send Message"}
@@ -150,7 +147,7 @@ const Contact = () => {
       </div>
 
       {/* Footer Notes */}
-      <footer className="bg-[#020617] text-white border-t border-white/10">
+      <footer className="bg-[#030712] text-white border-t border-cyan-400/20">
         <div className="border-t border-white/10 text-center py-6 text-gray-500 text-md">
           © {new Date().getFullYear()} HealthUP • All Rights reserved.
         </div>
