@@ -92,10 +92,10 @@ const UserGoal = () => {
   }, [setUser]);
 
   return (
-    <div className="min-h-screen pb-10 md:p-6">
+    <div className="min-h-screen pb-10 ">
       {/* HERO SECTION */}
 
-      <div className=" mx-auto md:mt-6">
+      <div className=" mx-auto ">
         <h1 className="text-3xl md:text-4xl font-bold mb-4 bg-linear-to-r from-purple-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent">
           Your Fitness Journey
         </h1>

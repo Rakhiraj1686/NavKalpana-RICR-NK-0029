@@ -49,8 +49,9 @@ const smoothAnalogSeries = (data) => {
     const next = normalized[index + 1] || point;
 
     const smoothValue = (key) =>
-      Math.round((prev[key] * 0.25 + point[key] * 0.5 + next[key] * 0.25) * 10) /
-      10;
+      Math.round(
+        (prev[key] * 0.25 + point[key] * 0.5 + next[key] * 0.25) * 10,
+      ) / 10;
 
     return {
       ...point,
@@ -116,7 +117,10 @@ const ProgressGraph = () => {
   );
   const hasRealGraphData = smoothedRealGraphData.length > 0;
   const chartData = smoothedRealGraphData;
-  const growthSummary = useMemo(() => buildGrowthSummary(chartData), [chartData]);
+  const growthSummary = useMemo(
+    () => buildGrowthSummary(chartData),
+    [chartData],
+  );
 
   // Get calorie and habit targets from goal data
   const profileCalories = Number(user?.aiPlan?.calories);
@@ -179,7 +183,10 @@ const ProgressGraph = () => {
 
       {error && <p className="mb-4 text-xs sm:text-sm text-red-300">{error}</p>}
 
-      <ProgressSummaryCards dashboard={dashboard} calorieTarget={calorieTarget} />
+      <ProgressSummaryCards
+        dashboard={dashboard}
+        calorieTarget={calorieTarget}
+      />
 
       {/* Calorie and Habit Targets Info Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 sm:mb-8">
@@ -390,67 +397,75 @@ const ProgressGraph = () => {
         </div>
       </form>
 
-      <div className="mb-6 sm:mb-8 rounded-2xl border border-cyan-400/20 bg-linear-to-br from-[#0B1228]/95 to-[#111A34]/95 p-4 sm:p-6 shadow-[0_0_30px_rgba(59,130,246,0.18)]">
-        <div className="flex items-center justify-between mb-3 sm:mb-4">
-          <h3 className="text-sm sm:text-base font-semibold text-white">
+      <div className="mb-8 rounded-2xl border border-cyan-400/20 bg-linear-to-br from-[#0B1228]/95 to-[#111A34]/95 p-4 sm:p-6 lg:p-8 shadow-[0_0_30px_rgba(59,130,246,0.18)] w-full">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-6">
+          <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-white">
             Daily Progress Tracking
           </h3>
+
           <span className="text-[11px] sm:text-xs text-gray-400">
             Analog trend view (0-100%)
           </span>
         </div>
 
-        <div className="h-72 sm:h-80 w-full">
-          <div className="mb-4 grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
-            {(growthSummary || []).map((item) => (
-              <div
-                key={item.key}
-                className="rounded-xl border border-cyan-400/20 bg-white/5 px-3 py-2"
-              >
-                <p className="text-[11px] text-gray-400">{item.label} Growth</p>
-                <div className="flex items-center justify-between mt-1.5">
-                  <p className="text-sm text-gray-300">
-                    {item.start}% to {item.end}%
-                  </p>
-                  <p
-                    className={`text-sm font-semibold ${
-                      item.direction === "up"
-                        ? "text-emerald-400"
-                        : item.direction === "down"
-                          ? "text-rose-400"
-                          : "text-cyan-300"
-                    }`}
-                  >
-                    {item.delta > 0 ? `+${item.delta}` : item.delta}%
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
+        {/* Growth Cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 gap-3 lg:gap-4 mb-6">
+          {(growthSummary || []).map((item) => (
+            <div
+              key={item.key}
+              className="rounded-xl border border-cyan-400/20 bg-white/5 px-3 py-3 lg:px-4"
+            >
+              <p className="text-[11px] text-gray-400">{item.label} Growth</p>
 
+              <div className="flex items-center justify-between mt-2">
+                <p className="text-xs sm:text-sm text-gray-300">
+                  {item.start}% to {item.end}%
+                </p>
+
+                <p
+                  className={`text-xs sm:text-sm font-semibold ${
+                    item.direction === "up"
+                      ? "text-emerald-400"
+                      : item.direction === "down"
+                        ? "text-rose-400"
+                        : "text-cyan-300"
+                  }`}
+                >
+                  {item.delta > 0 ? `+${item.delta}` : item.delta}%
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Chart */}
+        <div className="w-full h-65 sm:h-80 lg:h-105 xl:h-115">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
               data={chartData}
-              margin={{ top: 10, right: 8, left: 0, bottom: 8 }}
+              margin={{ top: 20, right: 20, left: 0, bottom: 10 }}
             >
               <CartesianGrid
                 strokeDasharray="2 6"
                 stroke="rgba(148,163,184,0.25)"
                 vertical={false}
               />
+
               <XAxis
                 dataKey="dateLabel"
                 stroke="#94a3b8"
-                tick={{ fontSize: 11, fill: "#cbd5e1" }}
-                tickMargin={8}
-                minTickGap={24}
+                tick={{ fontSize: 12, fill: "#cbd5e1" }}
+                tickMargin={10}
               />
+
               <YAxis
                 stroke="#94a3b8"
                 domain={[0, 100]}
-                tick={{ fontSize: 11, fill: "#cbd5e1" }}
-                width={34}
+                tick={{ fontSize: 12, fill: "#cbd5e1" }}
+                width={40}
               />
+
               <Tooltip
                 formatter={(value) => `${value}%`}
                 labelFormatter={(label) => `Date: ${label}`}
@@ -460,58 +475,57 @@ const ProgressGraph = () => {
                   borderRadius: "12px",
                   color: "#e2e8f0",
                   fontSize: "12px",
-                  boxShadow: "0 8px 24px rgba(0,0,0,0.35)",
                 }}
               />
-              <Legend wrapperStyle={{ paddingTop: "12px", fontSize: "12px" }} />
+
+              <Legend wrapperStyle={{ paddingTop: "14px", fontSize: "13px" }} />
 
               <Line
                 type="natural"
                 dataKey="workout"
                 stroke="#8b5cf6"
                 name="Workout Adherence"
-                connectNulls
-                isAnimationActive={true}
                 strokeWidth={3}
-                dot={{ r: 2, fill: "#a78bfa", strokeWidth: 0 }}
-                activeDot={{ r: 5, fill: "#c4b5fd", stroke: "#a78bfa", strokeWidth: 2 }}
+                dot={{ r: 3 }}
+                activeDot={{ r: 6 }}
               />
+
               <Line
                 type="natural"
                 dataKey="diet"
                 stroke="#38bdf8"
                 name="Diet Adherence"
-                connectNulls
-                isAnimationActive={true}
                 strokeWidth={3}
-                dot={{ r: 2, fill: "#38bdf8", strokeWidth: 0 }}
-                activeDot={{ r: 5, fill: "#67e8f9", stroke: "#38bdf8", strokeWidth: 2 }}
+                dot={{ r: 3 }}
+                activeDot={{ r: 6 }}
               />
+
               <Line
                 type="natural"
                 dataKey="habit"
                 stroke="#10b981"
                 name="Habit Score"
-                connectNulls
-                isAnimationActive={true}
                 strokeWidth={3}
-                dot={{ r: 2, fill: "#34d399", strokeWidth: 0 }}
-                activeDot={{ r: 5, fill: "#6ee7b7", stroke: "#34d399", strokeWidth: 2 }}
+                dot={{ r: 3 }}
+                activeDot={{ r: 6 }}
               />
             </LineChart>
           </ResponsiveContainer>
         </div>
       </div>
 
+      
       <BadgeShelf badges={dashboard?.badges || []} />
 
       {hasRealGraphData ? (
         <p className="text-xs sm:text-sm text-gray-400 mt-4">
-          To validate the real analog trend, fill daily data for 3-7 days, then check the growth cards above for exact increase or decrease.
+          To validate the real analog trend, fill daily data for 3-7 days, then
+          check the growth cards above for exact increase or decrease.
         </p>
       ) : (
         <p className="text-xs sm:text-sm text-cyan-300 mt-4">
-          No real progress points are available yet. Select an Entry Date and save data for a few days to display the graph.
+          No real progress points are available yet. Select an Entry Date and
+          save data for a few days to display the graph.
         </p>
       )}
     </div>

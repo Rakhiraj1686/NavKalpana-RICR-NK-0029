@@ -52,15 +52,14 @@ const UserSidebar = ({
 
   return (
     <div
-      className="
-        h-full flex flex-col
-        bg-linear-to-b from-[#030712] via-[#0f172a] to-[#020617]
-        backdrop-blur-3xl
-        border-r border-cyan-400/20
-        transition-all duration-300
-      "
-      role="navigation"
-      aria-label="Dashboard sidebar"
+      className={`
+    h-full flex flex-col
+    ${isCollapsed ? "w-20" : "w-72"}
+    bg-linear-to-b from-[#030712] via-[#0f172a] to-[#020617]
+    backdrop-blur-3xl
+    border-r border-cyan-400/20
+    transition-all duration-300
+  `}
     >
       <div className="flex items-center justify-between p-5 border-b border-white/10">
         {!isCollapsed && (

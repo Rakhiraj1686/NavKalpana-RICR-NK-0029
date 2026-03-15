@@ -116,6 +116,7 @@ const UserDashboard = () => {
             isCollapsed ? "max-w-7xl" : "max-w-6xl"
           }`}
         >
+           <DashboardDisclaimer section={active} />
           {active === "overview" && <UserOverview />}
           {active === "plan" && <UserPlan />}
           {active === "progression" && <ProgressionPlan />}
@@ -124,7 +125,7 @@ const UserDashboard = () => {
           {active === "profile" && <UserProfile />}
           {active === "goal" && <UserGoal />}
           {active === "support" && <UserSupport />}
-          <DashboardDisclaimer section={active} />
+         
         </div>
       </main>
     </div>

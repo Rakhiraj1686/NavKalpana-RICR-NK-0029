@@ -333,8 +333,8 @@ export default function Support() {
       </div>
 
       {/* Disclaimer */}
-      <div className="border border-red-600 bg-red-900/20 rounded-xl p-3 sm:p-4 mb-6 text-xs sm:text-sm text-red-300">
-        ⚠ This platform provides general fitness guidance and does not replace
+      <div className="border border-red-600 bg-red-900/20 rounded-xl p-3 sm:p-4 mb-6 text-xs sm:text-sm text-red-300 text-center">
+        ⚠This platform provides general fitness guidance and does not replace
         professional medical advice. Always consult a healthcare professional
         before starting a new program.
       </div>

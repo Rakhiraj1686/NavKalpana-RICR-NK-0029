@@ -1,8 +1,18 @@
+// import express from "express";
+// import { getDietSuggestion } from "../controllers/aiController.js";
+
+// const router = express.Router();
+
+// router.post("/suggest", getDietSuggestion);
+
+// export default router;
+
 import express from "express";
-import { getDietSuggestion } from "../controllers/aiController.js";
+import { generateDietPlan, generateWorkoutPlan } from "../controllers/aiController.js";
 
 const router = express.Router();
 
-router.post("/suggest", getDietSuggestion);
+router.post("/diet", generateDietPlan);
+router.post("/workout", generateWorkoutPlan);
 
 export default router;

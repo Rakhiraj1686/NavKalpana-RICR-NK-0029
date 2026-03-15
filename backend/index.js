@@ -1,9 +1,8 @@
-import dotenv from "dotenv";
-dotenv.config();
+import 'dotenv/config';
 
 // DEBUG: check if Node can read it
 // console.log("DEBUG - MONGO_URI:", process.env.MONGO_URI);
-
+import aiRouter from "./src/routers/aiRoutes.js"
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -29,6 +28,7 @@ app.use("/auth", AuthRouter);
 app.use("/user", UserRouter);
 app.use("/api/ticket", ticketRouter);
 app.use("/api/v1/progress", progressRoutes);
+app.use("/api/ai",aiRouter);
 
 app.get("/", (req, res) => {
   console.log("server is working");

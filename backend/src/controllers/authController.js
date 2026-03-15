@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import User from "../models/userProfileModel.js";
-import { genToken ,genOtpToken} from "../utils/authToken.js";
+import { genToken, genOtpToken } from "../utils/authToken.js";
 import OTP from "../models/otpModal.js";
 import { sendOTPEmail } from "../utils/emailService.js";
 import Ticket from "../models/ticketModel.js";
@@ -20,9 +20,20 @@ export const UserRegister = async (req, res, next) => {
     console.log({ fullName, mobileNumber, email, password });
 
     //check for duplicate user before refistration
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({
+      $or: [{ email }, { mobileNumber }],
+    });
+
     if (existingUser) {
-      const error = new Error("Email already registered");
+      let message = "";
+
+      if (existingUser.email === email) {
+        message = "Email already registered";
+      } else if (existingUser.mobileNumber === mobileNumber) {
+        message = "Mobile number already registered";
+      }
+
+      const error = new Error(message);
       error.statusCode = 409;
       return next(error);
     }
@@ -232,4 +243,3 @@ export const UserForgetPassword = async (req, res, next) => {
     next(error);
   }
 };
-

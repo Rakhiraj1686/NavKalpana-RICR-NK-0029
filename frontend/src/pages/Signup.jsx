@@ -75,13 +75,13 @@ const Signup = () => {
 
     try {
       const res = await api.post("/auth/register", formData);
-      toast.success(res.data.data);
+      toast.success(res.data.message);
       navigate("/login");
       handleClear();
     } catch (error) {
       console.log({ error });
 
-      toast.error(error?.message);
+      toast.error(error?.response?.data?.message);
     } finally {
       setIsLoading(false);
     }

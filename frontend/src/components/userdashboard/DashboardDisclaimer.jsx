@@ -25,9 +25,11 @@ const DashboardDisclaimer = ({ section }) => {
     "⚠ This platform provides general wellness guidance and does not replace professional medical advice.";
 
   return (
-    <div className="mt-2 rounded-xl border border-amber-500/40 bg-amber-900/20 px-4 py-3 text-xs sm:text-sm text-amber-200 mb-15">
+   <div className="flex justify-center items-center">
+     <div className="mt-2 rounded-xl border border-amber-500/40 bg-amber-900/20 px-4 py-3 text-xs sm:text-sm w-fit text-amber-200 mb-10">
       Disclaimer: {text}
     </div>
+   </div>
   );
 };
 
