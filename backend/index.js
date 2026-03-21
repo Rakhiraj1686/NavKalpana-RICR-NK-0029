@@ -18,8 +18,16 @@ import { startWeeklyPlanAdjustmentScheduler } from "./src/services/weeklyPlanAdj
 const app = express();
 
 //"http://localhost:5173" is the frontend URL, adjust if different in production
-app.use(cors({ origin: ["http://localhost:5173","https://healthup-ai.netlify.app"], credentials: true }));
-app.use(express.json());
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://healthup-ai.netlify.app"
+    ],
+    credentials: true,
+    methods: ["GET","POST","PUT","PATCH","DELETE"],
+  })
+);app.use(express.json());
 app.use(cookieParser());
 app.use(morgan("dev"));
 

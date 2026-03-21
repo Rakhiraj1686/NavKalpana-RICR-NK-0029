@@ -4,6 +4,7 @@ import User from "../models/userProfileModel.js";
 export const Protect = async (req, res, next) => {
   try {
     const token = req.cookies.HealthUP;
+    console.log("cookies received" , token)
     console.log("Token received in cookies:", token);
 
     if (!token) {
