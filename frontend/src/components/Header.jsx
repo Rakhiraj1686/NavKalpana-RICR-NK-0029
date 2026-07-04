@@ -1,200 +1,176 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { HiOutlineMenu, HiOutlineX } from "react-icons/hi";
-import { FaRegCircleUser } from "react-icons/fa6";
-import { useAuth } from "../context/AuthContext";
-import toast from "react-hot-toast";
-import api from "../config/Api";
+import { FiHome, FiInfo, FiPhone, FiLogIn, FiUserPlus } from "react-icons/fi";
+import logo from "../assets/logo.png";
 
 const Header = () => {
-  const { user, isLogin, setUser, setIsLogin } = useAuth();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [profileOpen, setProfileOpen] = useState(false);
-
-  const logout = async () => {
-    const res = await api.get("/auth/logout");
-    toast.success(res.data.message);
-    sessionStorage.removeItem("HealthUP");
-    setUser("");
-    setIsLogin(false);
-    navigate("/");
-  };
-
-  const handleProfileClick = () => {
-    navigate("/user-dashboard");
-  };
-
-  // useEffect(() => {
-  //   function handleClickOutside(event) {
-  //     if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-  //       setProfileOpen(false);
-  //     }
-  //   }
-  //   document.addEventListener("mousedown", handleClickOutside);
-  //   return () => {
-  //     document.removeEventListener("mousedown", handleClickOutside);
-  //   };
-  // }, []);
 
   return (
     <>
-      <header className="fixed top-0 left-1/2 -translate-x-1/2 z-50 w-full">
-        <div
-          className="mx-auto flex items-center justify-between 
-          px-4 py-2.5 md:px-16 md:py-3 
-          bg-[#0f172a]/80 backdrop-blur-xl 
-          border border-white/10 shadow-xl"
-        >
+      {/* HEADER */}
+      <header className="fixed inset-x-0 top-0 z-50 ">
+        <div className="h-18 flex items-center justify-between px-5 md:px-10 lg:px-16 bg-[#020617]/75 backdrop-blur-2xl border-b border-white/10 shadow-[0_8px_40px_rgba(0,0,0,0.25)]">
           {/* Logo */}
-          <Link
-            to="/"
-            className="text-2xl font-bold bg-linear-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent"
-          >
-            HealthUP
+          <Link to="/" className="flex items-center gap-3 shrink-0 group">
+            <img
+              src={logo}
+              alt="HealthUP"
+              className="w-11 h-11 object-contain transition duration-300 group-hover:scale-110"
+            />
+            <div className="leading-none">
+              <h1 className="text-2xl font-black tracking-tight bg-linear-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+                HealthUP
+              </h1>
+              <p className="text-[10px] uppercase tracking-[0.35em] text-gray-500">
+                Adaptive FitAI
+              </p>
+            </div>
           </Link>
 
-          {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-8 text-gray-300 font-medium">
-            <Link className="hover:text-purple-400 transition" to="/">
-              Home
-            </Link>
-            <Link className="hover:text-purple-400 transition" to="/about">
-              About
-            </Link>
-            <Link className="hover:text-purple-400 transition" to="/contact">
-              Contact
-            </Link>
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center gap-2">
+            {[
+              { title: "Home", to: "/" },
+              { title: "About", to: "/about" },
+              { title: "Contact", to: "/contact" },
+            ].map((item) => (
+              <Link
+                key={item.title}
+                to={item.to}
+                className="px-6 py-1 rounded-full text-gray-300 hover:text-white hover:bg-white/5 transition-all duration-300"
+              >
+                {item.title}
+              </Link>
+            ))}
           </nav>
 
-          {/* Auth Section */}
-          <div className="hidden md:block">
-            {!isLogin ? (
-              <div className="flex gap-4">
-                <button
-                  onClick={() => navigate("/login")}
-                  className="px-5 py-1.5 rounded-full border border-purple-400 
-                  hover:bg-linear-to-r from-purple-500 to-blue-500 
-                  transition text-white cursor-pointer"
-                >
-                  Login
-                </button>
-
-                <button
-                  onClick={() => navigate("/signup")}
-                  className="px-5 py-1.5 rounded-full 
-                  bg-linear-to-r from-purple-500 to-blue-500 
-                  transition text-white cursor-pointer"
-                >
-                  Sign Up
-                </button>
-              </div>
-            ) : (
-              <div
-                className="relative ml-4 flex items-center gap-5"
-
-                // ref={dropdownRef}
+          {/* Desktop Right */}
+          <div className="hidden md:flex items-center">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => navigate("/login")}
+                className="cursor-pointer flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border border-purple-500/40 text-white hover:bg-white/5 transition-all duration-300"
               >
-                {/* Username */}
-                <button
-                  onClick={() => {
-                    setProfileOpen(!profileOpen);
-                    handleProfileClick();
-                  }}
-                  className="cursor-pointer flex items-center gap-4 
-                  px-4 py-2 rounded-xl 
-                  bg-white/10 hover:bg-white/20 
-                  border border-white/10 backdrop-blur-md transition"
-                >
-                  <span className="w-6 h-6 rounded-full ">
-                    {user.photo.url ? (
-                      <img
-                        src={user?.photo?.url}
-                        className="w-6 h-6 rounded-full object-cover border"
-                      />
-                    ) : (
-                      <FaRegCircleUser className="w-6 h-6 text-white" />
-                    )}
-                  </span>
-                  {/* Username */}
-                  <span className="font-medium text-white">
-                    {user?.fullName || "User"}
-                  </span>
-                </button>
-              </div>
-            )}
+                <FiLogIn className="text-lg text-purple-400" />
+                <span>Login</span>
+              </button>
+
+              <button
+                onClick={() => navigate("/signup")}
+                className="cursor-pointer flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-linear-to-r from-purple-500 to-blue-500 text-white hover:shadow-lg hover:shadow-purple-500/30 transition-all duration-300"
+              >
+                <FiUserPlus className="text-lg" />
+                <span>Create Account</span>
+              </button>
+            </div>
           </div>
 
-          {/* Mobile Menu Icon */}
-          <HiOutlineMenu
-            className="w-7 h-7 md:hidden cursor-pointer text-white"
-            onClick={() => setMenuOpen(true)}
-          />
+          {/* Mobile Menu */}
+          <button onClick={() => setMenuOpen(true)} className="md:hidden">
+            <HiOutlineMenu className="text-4xl text-white/80" />
+          </button>
         </div>
       </header>
 
-      {/* Overlay */}
+      {/* MOBILE OVERLAY */}
+
       <div
-        className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden transition ${
-          menuOpen ? "visible opacity-100" : "invisible opacity-0"
-        }`}
         onClick={() => setMenuOpen(false)}
+        className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-all duration-300 md:hidden ${menuOpen ? "opacity-100 visible" : "opacity-0 invisible"}
+      `}
       />
 
-      {/* Mobile Drawer */}
-      <div
-        className={`fixed right-0 top-0 h-full w-[60%] max-w-sm bg-[#020617] text-white z-50 transform transition-transform duration-300 md:hidden ${
-          menuOpen ? "translate-x-0" : "translate-x-full"
-        }`}
+      {/* MOBILE DRAWER */}
+
+      <aside
+        className={`fixed right-0 top-0 h-screen w-[82vw] max-w-[320px] dashboard-scroll overflow-y-auto bg-linear-to-b from-[#020617] via-[#0f172a] to-[#020617] backdrop-blur-3xl border-white/10 shadow-2xl z-50 transition-transform duration-300 md:hidden ${menuOpen ? "translate-x-0" : "translate-x-full"}`}
       >
-        <div className="flex justify-between items-center px-6 py-3 border-b border-white/10">
-          <span className="text-xl font-semibold">HealthUP</span>
-          <HiOutlineX
-            className="w-6 h-6 text-red-600"
-            onClick={() => setMenuOpen(false)}
-          />
+        {/* Drawer Header */}
+        <div className="flex items-center justify-between px-5 h-18 border-b border-white/10">
+          <Link to="/" onClick={() => setMenuOpen(false)}>
+            <div className="leading-none">
+              <h1 className="text-2xl font-black tracking-tight bg-linear-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+                HealthUP
+              </h1>
+              <p className="text-[10px] uppercase tracking-[0.35em] text-gray-500">
+                Adaptive FitAI
+              </p>
+            </div>
+          </Link>
+
+          <button onClick={() => setMenuOpen(false)} className="">
+            <HiOutlineX className="text-red-500 text-4xl" />
+          </button>
         </div>
 
-        <nav className="flex flex-col gap-4 px-6 py-4 text-lg">
-          <Link to="/" onClick={() => setMenuOpen(false)}>
-            Home
-          </Link>
-          <Link to="/about" onClick={() => setMenuOpen(false)}>
-            About
-          </Link>
-          <Link to="/contact" onClick={() => setMenuOpen(false)}>
-            Contact
-          </Link>
+        {/* Navigation */}
+        <nav className="dashboard-scroll flex-1 overflow-y-auto px-4 py-5">
+          <div className="space-y-2">
+            <Link
+              to="/"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center gap-4 rounded-xl px-4 py-3 text-gray-300 hover:bg-white/5 hover:text-white transition-all duration-300 group"
+            >
+              <FiHome className="text-lg text-purple-400 group-hover:scale-110 transition-transform" />
+              <span>Home</span>
+            </Link>
 
-          <div className="border-t border-white pt-4 ">
-            {!isLogin ? (
-              <div className="grid grid-cols-2 gap-4 text-purple-500">
-                <Link to="/login" onClick={() => setMenuOpen(false)}>
-                  Login
-                </Link>
-                <br />
-                <Link to="/signup" onClick={() => setMenuOpen(false)}>
-                  Sign Up
-                </Link>
-              </div>
-            ) : (
-              <div className=" grid grid-cols-1 gap-4 text-purple-500">
-                <button
-                  onClick={() => {
-                    navigate("/user-dashboard");
-                    setMenuOpen(false);
-                  }}
-                >
-                  Dashboard
-                </button>
-                <button onClick={logout} className="text-red-400">
-                  Logout
-                </button>
-              </div>
-            )}
+            <Link
+              to="/about"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center gap-4 rounded-xl px-4 py-3 text-gray-300 hover:bg-white/5 hover:text-white transition-all duration-300 group"
+            >
+              <FiInfo className="text-lg text-cyan-400 group-hover:scale-110 transition-transform" />
+              <span>About</span>
+            </Link>
+
+            <Link
+              to="/contact"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center gap-4 rounded-xl px-4 py-3 text-gray-300 hover:bg-white/5 hover:text-white transition-all duration-300 group"
+            >
+              <FiPhone className="text-lg text-pink-400 group-hover:scale-110 transition-transform" />
+              <span>Contact</span>
+            </Link>
+          </div>
+
+          <div className="mt-8 border-t border-white/10 pt-6">
+            <div className="space-y-3">
+              <button
+                onClick={() => {
+                  navigate("/login");
+                  setMenuOpen(false);
+                }}
+                className="w-full flex items-center justify-center gap-3 py-3 rounded-xl border border-purple-500/40 text-white hover:bg-white/5 transition-all duration-300"
+              >
+                <FiLogIn className="text-lg text-purple-400" />
+                <span>Login</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  navigate("/signup");
+                  setMenuOpen(false);
+                }}
+                className="w-full flex items-center justify-center gap-3 py-3 rounded-xl bg-linear-to-r from-purple-500 to-blue-500 text-white transition-all duration-300"
+              >
+                <FiUserPlus className="text-lg" />
+                <span>Create Account</span>
+              </button>
+            </div>
           </div>
         </nav>
-      </div>
+
+        {/* Footer */}
+        <div className="border-t border-white/10 p-5">
+          <p className="text-center text-xs text-gray-500">
+            © {new Date().getFullYear()} HealthUP
+          </p>
+        </div>
+      </aside>
     </>
   );
 };

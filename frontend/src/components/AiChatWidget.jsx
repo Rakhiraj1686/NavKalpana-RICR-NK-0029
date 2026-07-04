@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import api from "../config/Api";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
+import logo from "../assets/logo.png";
 
 const AiChatWidget = ({ chatOpen, setChatOpen }) => {
   const navigate = useNavigate();
@@ -35,22 +36,23 @@ const AiChatWidget = ({ chatOpen, setChatOpen }) => {
     }
   }, [messages, storageKey]);
 
-  // Welcome message when first opened
   useEffect(() => {
-    if (!chatOpen) return;
+    const saved = sessionStorage.getItem(storageKey);
 
-    if (messages.length === 0) {
+    if (saved) {
+      setMessages(JSON.parse(saved));
+    } else {
       const welcome = [
         {
           role: "ai",
-          text: "Hi, I'm FitAI. Ask me about health queries..",
+          text: "👋 Hi, I'm FitAI. Ask me anything about workouts, diet, nutrition, weight loss, muscle gain, or your health goals!",
         },
       ];
 
       setMessages(welcome);
       sessionStorage.setItem(storageKey, JSON.stringify(welcome));
     }
-  }, [chatOpen]);
+  }, [storageKey]);
 
   const detectType = (text) => {
     if (text.includes("workout")) return "WORKOUT_PLAN";
@@ -105,72 +107,113 @@ const AiChatWidget = ({ chatOpen, setChatOpen }) => {
     }
   };
 
-  useEffect(() => {
-    setChatOpen(false);
-  }, [location, setChatOpen]);
-
   return (
     <>
-      {/* Floating Button */}
-      <button
-        onClick={() => setChatOpen(!chatOpen)}
-        disabled={chatOpen}
-        className={`fixed bottom-6 right-4 md:bottom-4 md:right-6 z-50 bg-linear-to-r from-blue-500 to-blue-400 backdrop-blur-xl border border-white/10 text-white px-3 py-2 rounded-full shadow-2xltransition-all duration-300  ${chatOpen ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
-      >
-        Ask FitAI
-      </button>
-
-      {/* Chat Window */}
-      {chatOpen && (
-        <div className="fixed bottom-16 right-6 w-80 h-100 bg-[#020617]/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden z-50">
-          {/* Header */}
-          <div className="p-4 border-b border-white/10 flex justify-between">
-            <h3 className="text-white font-semibold">Chat with FitAI</h3>
-            <button
-              onClick={() => setChatOpen(false)}
-              className="text-white cursor-pointer hover:text-red-500"
-            >
-              ✕
-            </button>
+      <div className="fixed inset-0 bg-[#020617] flex flex-col">
+        {/* Header */}
+        <div className="h-16 px-6 md:px-24 border-b border-white/10 bg-[#020617]/90 backdrop-blur-xl flex items-center justify-between ">
+          <div>
+            <h2 className="text-lg md:text-xl font-bold bg-linear-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
+              FitAI Assistant
+            </h2>
+            <p className="text-xs text-gray-400">
+              Your personal AI health coach
+            </p>
           </div>
 
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3  no-scrollbar ">
-            {messages.map((msg, i) => (
-              <div
-                key={i}
-                className={`max-w-[80%] px-4 py-2 rounded-xl text-sm ${
-                  msg.role === "user"
-                    ? "bg-blue-600 ml-auto text-white"
-                    : "bg-gray-700 text-white"
-                }`}
-              >
-                {msg.text}
-              </div>
-            ))}
+          <button
+            onClick={() => navigate("/user-dashboard")}
+            className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all duration-300 cursor-pointer"
+          >
+            ← Dashboard
+          </button>
+        </div>
 
-            {typing && <p className="text-gray-400 text-sm">AI is typing...</p>}
+        {/* Messages */}
+        <div className="relative flex-1 overflow-y-auto px-4 md:px-28 py-6 no-scrollbar dashboard-scroll">
+          {messages.length <= 1 ? (
+            <div className="h-full flex flex-col items-center justify-center text-center">
+              <img
+                src={logo}
+                alt="FitAI"
+                className="w-24 h-24 md:w-32 md:h-32 object-contain mb-6"
+              />
+
+              <h2 className="text-2xl md:text-4xl font-bold bg-linear-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
+                Welcome to FitAI
+              </h2>
+
+              <p className="mt-3 max-w-md text-gray-400 text-xs md:text-base">
+                Your personal AI fitness coach. Ask anything about workouts,
+                nutrition, weight loss, muscle gain, or healthy living.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {messages.map((msg, i) => (
+                <div
+                  key={i}
+                  className={`w-fit max-w-[80%] md:max-w-[40%] px-4 py-2 rounded-2xl text-sm md:text-base ${
+                    msg.role === "user"
+                      ? "ml-auto bg-linear-to-r from-cyan-500 to-blue-500 text-white"
+                      : "bg-white/5 border border-white/10 text-gray-100"
+                  }`}
+                >
+                  {msg.text}
+                </div>
+              ))}
+
+              {typing && (
+                <div className="bg-white/5 border border-white/10 rounded-2xl px-4 py-2 w-fit">
+                  <p className="text-sm text-gray-400">FitAI is typing...</p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Logo */}
+        {messages.length > 1 ? (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
+            <img
+              src={logo}
+              alt="FitAI"
+              className="w-40 md:w-56 lg:w-64 opacity-[0.04] object-contain"
+            />
           </div>
+        ) : (
+          ""
+        )}
 
-          {/* Input */}
-          <div className="p-2 border-t border-white/10 flex gap-2">
+        {/* Disclaimer */}
+
+        <div className="absolute bottom-18 left-1/2 -translate-x-1/2 z-0 pointer-events-none select-none">
+          <p className="text-xs md:text-sm text-red-300 whitespace-nowrap  opacity-50">
+            <span className="font-semibold">Medical Disclaimer:</span> FitAI can
+            make mistakes.
+          </p>
+        </div>
+
+        {/* Input */}
+        <div className="border-t border-white/10 p-3 bg-[#020617]">
+          <div className="flex items-center gap-3 max-w-6xl mx-auto">
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask about health..."
-              className="flex-1 bg-[#0f172a] text-white px-6 py-2 rounded-full outline-none"
               onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+              placeholder="Ask about workout, diet, nutrition, BMI..."
+              className="flex-1 h-12 rounded-full bg-white/5 border border-white/10 px-6 text-white placeholder:text-gray-500 outline-none focus:border-cyan-400 transition-all"
             />
 
             <button
               onClick={sendMessage}
-              className="bg-linear-to-r from-purple-500 to-purple-600 cursor-pointer px-4 rounded-full text-white"
+              className="h-12 px-7 rounded-full bg-linear-to-r from-purple-500 to-cyan-500 text-white font-medium cursor-pointer active:scale-95 transition-all duration-300"
             >
               Send
             </button>
           </div>
         </div>
-      )}
+      </div>
     </>
   );
 };

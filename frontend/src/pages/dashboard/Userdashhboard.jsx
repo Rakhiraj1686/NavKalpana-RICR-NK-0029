@@ -8,15 +8,15 @@ import UserProgress from "../../components/userdashboard/UserProgress";
 import UserProfile from "../../components/userdashboard/UserProfile";
 import UserGoal from "../../components/userdashboard/UserGoal";
 import UserPlan from "../../components/userdashboard/UserPlan";
-import { FaBars } from "react-icons/fa";
+import { HiOutlineBars3 } from "react-icons/hi2";
+import { HiSparkles } from "react-icons/hi2";
 import ProgressionPlan from "../../components/ProgressionPlan";
 import AdvancedAnalytics from "../../components/AdvancedAnalytics";
 import DashboardDisclaimer from "../../components/userdashboard/DashboardDisclaimer";
 
 const UserDashboard = () => {
-  const { isLogin } = useAuth();
+  const { isLogin, user } = useAuth();
   const navigate = useNavigate();
-
   const [active, setActive] = useState("overview");
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -29,7 +29,6 @@ const UserDashboard = () => {
     progress: "Progress",
     profile: "Profile",
     goal: "Goal",
-    support: "Support",
   };
 
   useEffect(() => {
@@ -65,7 +64,7 @@ const UserDashboard = () => {
   };
 
   return (
-    <div className="fixed inset-x-0 top-12 bottom-0 flex overflow-hidden bg-linear-to-br from-[#020617] to-[#0f172a] text-white md:gap-4 md:top-15">
+    <div className="fixed top-0 left-0 right-0 bottom-0 dashboard-scroll flex overflow-hidden bg-linear-to-br from-[#020617] to-[#0f172a] text-white md:gap-4">
       {/* Mobile overlay */}
       {mobileOpen && (
         <div
@@ -77,15 +76,7 @@ const UserDashboard = () => {
 
       {/* Sidebar */}
       <aside
-        className={`
-          fixed left-0 top-0 z-50 h-full
-          bg-[#020617] border-r border-white/10
-          transition-transform duration-300 ease-out
-          ${mobileOpen ? "translate-x-0" : "-translate-x-full"}
-          md:static md:translate-x-0
-          w-[82vw] max-w-[320px] md:max-w-none md:w-auto
-          ${isCollapsed ? "md:w-20" : "md:w-96"}
-        `}
+        className={`fixed top-0 left-0 z-50 h-screen w-[72vw] max-w-65 md:static md:h-auto md:max-w-none ${isCollapsed ? "md:w-20" : "md:w-62"} bg-[#020617] border-r border-white/10 transform transition-transform duration-300 ease-in-out ${mobileOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 overflow-hidden shrink-0`}
       >
         <UserSidebar
           active={active}
@@ -96,19 +87,53 @@ const UserDashboard = () => {
         />
       </aside>
 
-      {/* Main Content */}
+      {/* Main Content :- Mobile Topbar */}
+
       <main className="flex-1 overflow-y-auto md:pl-1">
-        {/* Mobile Topbar */}
-        <div className="md:hidden px-4 py-3 border-b border-white/10 flex items-center justify-between sticky top-0 bg-[#020617]/95 backdrop-blur z-30">
-          <button
-            onClick={handleOpenMobileMenu}
-            className="inline-flex items-center justify-center size-9 rounded-lg border border-white/15 text-gray-200"
-            aria-label="Open sidebar"
-          >
-            <FaBars />
-          </button>
-          <p className="text-sm font-semibold text-gray-200">{sectionTitles[active] || "Overview"}</p>
-          <span className="size-9" />
+        <div className="md:hidden sticky top-0 z-30 border-b border-white/10 bg-[#020617]/80 backdrop-blur-2xl">
+          <div className="flex items-center justify-between px-6 py-3">
+            {/* Menu Button */}
+            <button
+              onClick={handleOpenMobileMenu}
+              aria-label="Open sidebar"
+              className="cursor-pointer p-1 active:scale-95 transition-transform duration-150"
+            >
+              <HiOutlineBars3 className="text-3xl text-purple-400" />
+            </button>
+
+            {/* Page Title */}
+            <div className="flex flex-col items-center">
+              <span className="text-[10px] uppercase tracking-[0.35em] text-gray-500">
+                Dashboard
+              </span>
+
+              <h1 className="bg-linear-to-r from-purple-400 to-cyan-400 bg-clip-text text-lg font-bold text-transparent">
+                {sectionTitles[active] || "Overview"}
+              </h1>
+            </div>
+
+            {/* Profile */}
+            <button
+              onClick={() => {
+                setActive("profile");
+              }}
+              className="relative"
+            >
+              {user?.photo?.url ? (
+                <img
+                  src={user.photo.url}
+                  alt={user.fullName}
+                  className="h-11 w-11 rounded-full border border-cyan-400/30 object-cover"
+                />
+              ) : (
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-linear-to-br from-purple-500 via-cyan-500 to-pink-500 font-bold text-white">
+                  {user?.fullName?.charAt(0).toUpperCase() || "H"}
+                </div>
+              )}
+
+              <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-[#020617] bg-green-400" />
+            </button>
+          </div>
         </div>
 
         <div
@@ -116,7 +141,7 @@ const UserDashboard = () => {
             isCollapsed ? "max-w-7xl" : "max-w-6xl"
           }`}
         >
-           <DashboardDisclaimer section={active} />
+          <DashboardDisclaimer section={active} />
           {active === "overview" && <UserOverview />}
           {active === "plan" && <UserPlan />}
           {active === "progression" && <ProgressionPlan />}
@@ -125,61 +150,22 @@ const UserDashboard = () => {
           {active === "profile" && <UserProfile />}
           {active === "goal" && <UserGoal />}
           {active === "support" && <UserSupport />}
-         
         </div>
       </main>
+
+      {/* AI Chat Open Button */}
+
+      <button
+        onClick={() => navigate("/user-dashboard/ai-chat")}
+        className="fixed bottom-8 md:right-8 right-6 z-50 flex items-center justify-center gap-2 h-14 px-5 rounded-full bg-linear-to-r from-purple-500 to-cyan-500 text-white shadow-[0_0_10px_rgba(59,130,246,0.35)] cursor-pointer active:scale-95 transition-all duration-300"
+        aria-label="Chat with AI"
+      >
+        <HiSparkles className="text-2xl" />
+        <span className="text-sm font-medium whitespace-nowrap">
+          Chat with AI
+        </span>
+      </button>
     </div>
-
-    // <div className="min-h-screen flex bg-gradient-to-br from-[#020617] to-[#0f172a] text-white">
-
-    // // {/* Overlay (Mobile only) */}
-    // {mobileOpen && (
-    //   <div
-    //     className="fixed inset-0 bg-black/50 z-40 md:hidden"
-    //     onClick={() => setMobileOpen(false)}
-    //   />
-    // )}
-
-    // // {/* Sidebar */}
-    // <aside
-    //   className={`
-    //     fixed md:static z-50 h-full bg-[#020617]
-    //     border-r border-white/10 transition-all duration-300
-    //     ${mobileOpen ? "left-0" : "-left-full"}
-    //     md:left-0
-    //     ${isCollapsed ? "w-20" : "w-64"}
-    //   `}
-    // >
-    //   <UserSidebar
-    //     active={active}
-    //     setActive={setActive}
-    //     isCollapsed={isCollapsed}
-    //     setIsCollapsed={setIsCollapsed}
-    //     setMobileOpen={setMobileOpen}
-    //   />
-    // </aside>
-
-    // {/* Main Content */}
-    // <main className="flex-1 flex flex-col overflow-hidden">
-
-    //   {/* Mobile Header */}
-    //   <div className="md:hidden flex items-center p-4 border-b border-white/10">
-    //     <button onClick={() => setMobileOpen(true)}>
-    //       <FaBars />
-    //     </button>
-    //   </div>
-
-    //   {/* Page Content */}
-    //   <div className="flex-1 overflow-y-auto p-4 md:p-6">
-    //     {active === "overview" && <UserOverview />}
-    //     {active === "plan" && <UserPlan />}
-    //     {active === "progress" && <UserProgress />}
-    //     {active === "profile" && <UserProfile />}
-    //     {active === "goal" && <UserGoal />}
-    //     {active === "support" && <UserSupport />}
-    //   </div>
-    // </main>
-    // </div>
   );
 };
 
