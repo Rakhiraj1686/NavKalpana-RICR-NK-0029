@@ -1,291 +1,284 @@
-# 🏋️ HealthUP (FitAI) – Adaptive Fitness Intelligence Platform
+# HealthUP (FitAI) – Adaptive Fitness Intelligence Platform
 
----
+HealthUP is an AI-powered adaptive fitness platform that combines workout planning, diet guidance, progress tracking, analytics, and chatbot support in a single full-stack application. It is built to move beyond static fitness templates by adjusting recommendations from user activity, progress history, and AI-driven coaching logic.
 
-## 📌 Overview
+## Overview
 
-**HealthUP** is an AI‑powered adaptive fitness intelligence platform designed to provide personalized workout plans, diet recommendations, habit tracking, and AI coaching. The system continuously adapts based on user progress, health metrics, fatigue levels, and behavioral patterns.
+The application is organized around a continuous fitness loop:
 
-### Adaptive Loop Model
+Profile -> Plan -> Execute -> Track -> Analyze -> Adjust -> Coach -> Repeat
 
-**Profile → Plan → Execute → Track → Analyze → Adjust → Coach → Repeat**
+That loop is implemented through a React frontend, an Express/MongoDB backend, and AI services for plan generation, chat assistance, and adaptive recommendations.
 
-This closed‑loop system helps users build sustainable fitness habits rather than relying on static fitness templates.
+## Current Working Scope
 
----
+The project currently includes:
 
-## 🎯 Project Vision
+* Public pages for Home, About, Contact, Login, and Signup.
+* A protected user dashboard with overview, plan, progression, analytics, progress, profile, goal, and support views.
+* AI chat for logged-in users and a separate guest chat flow with limits.
+* Workout and diet plan generation through backend AI endpoints.
+* Progress logging for weight, workouts, and daily check-ins.
+* Goal tracking, streak tracking, badges, dashboards, reports, and analytics.
+* Premium coaching endpoints for macro customization, meal swaps, meal adjustments, and recovery insights.
+* Ticket creation and ticket listing for support workflows.
+* Email-based OTP and password recovery flow.
+* Cloudinary-backed image upload for profile photos.
+* Weekly plan adjustment scheduler on the backend.
 
-* Promote sustainable fitness habits
-* Provide structured health guidance without a personal trainer
-* Use AI for intelligent coaching and adaptation
-* Enable long‑term health tracking and transformation
+## Contributors
 
----
+| Name | Role |
+| --- | --- |
+| Rakhi Rani | Full Stack Developer |
+| Nitish Kumar | Full Stack Developer |
 
-## 👥 Team Members & Roles
+## What the App Does
 
-| Name                 | Role                               |
-| -------------------- | ---------------------------------- |
-| **Rakhi Rani**       | Full Stack Developer (Team Leader) |
-| **Nitish Kumar**     | Full Stack Developer               |
-| **Neha Khatun**      | Frontend Developer                 |
-| **Md. Musharaf Ali** | Frontend Developer                  |
+HealthUP helps a user:
 
----
+* register and log in securely,
+* manage a personal fitness profile and goal,
+* generate or regenerate workout and diet plans,
+* chat with an AI fitness assistant,
+* log progress and review analytics,
+* receive premium coaching style adjustments,
+* track monthly fitness reports and habit trends,
+* raise support tickets when needed.
 
-## 🧩 Problem Statement
+The backend is built to adapt based on user progress rather than only storing static plan data.
 
-Most fitness apps provide static workout and diet templates that fail to adapt to individual progress, fatigue, or adherence levels. This often leads to inconsistent results, reduced motivation, and lack of structured guidance.
+## Architecture
 
-**HealthUP addresses this by:**
+### Frontend
 
-* Personalized adaptive workout & diet plans
-* Progress monitoring and analytics
-* Habit intelligence scoring
-* AI coaching assistance
-* Dynamic plan adjustment for safety and sustainability
+The frontend is a Vite + React application. It handles routing, dashboard navigation, toast notifications, AI chat entry points, and the user experience for plan/progress pages.
 
----
+### Backend
 
-## 🏗️ System Architecture
+The backend is an Express server that exposes authentication, user management, progress tracking, AI generation, contact, and ticket routes. It also connects to MongoDB, Cloudinary, and email services.
 
-### Frontend Layer
+### Data Layer
 
-* User interface & visualization
-* Dashboard & analytics
-* AI chat interface
+MongoDB stores users, goals, plans, progress records, streaks, badges, tickets, chat history, and related fitness data.
 
-### Backend Layer
+## Tech Stack
 
-* REST API services
-* Authentication & security
-* Adaptive fitness logic
-* AI integration
+### Frontend
 
-### Database Layer
-
-* User profiles
-* Fitness logs
-* Plans & analytics
-
----
-
-## ⚙️ Tech Stack
-
-### 🖥️ Frontend
-
-* React.js
-* Tailwind CSS
-* Axios
+* React 19
+* Vite
 * React Router DOM
+* Axios
+* Tailwind CSS
 * Framer Motion
+* Recharts
 * React Hot Toast
 * React Icons
+* lucide-react
 
-### ⚙️ Backend
+### Backend
 
 * Node.js
-* Express.js
-* MongoDB + Mongoose
-* JWT Authentication
-* bcrypt Password Hashing
-* Cloudinary Media Storage
-*
-* Nodemailer Email Integration
-* Groq SDK (AI Chat)
-* CORS & Cookie Parser
-* Morgan Logger
-* dotenv Environment Config
-* UUID
+* Express
+* MongoDB with Mongoose
+* JWT authentication
+* bcrypt
+* Cloudinary
+* Nodemailer
+* Groq SDK
+* multer
+* cookie-parser
+* cors
+* morgan
+* pdfkit
 
----
+## Frontend Routes
 
-## ✨ Core Features
+The current React routes are:
 
-### 🔐 Authentication & Security
+* / - Home
+* /about - About page
+* /contact - Contact page
+* /login - Login page
+* /signup - Signup page
+* /user-dashboard - Protected dashboard
+* /user-dashboard/ai-chat - AI chat view
 
-* Secure login/signup
-* JWT session handling
-* Password encryption
+The dashboard contains sections for overview, plan, progression, analytics, progress, profile, goal, and support. A floating button opens the AI chat screen.
 
-### 🧠 Adaptive Fitness Planning
+## Backend Routes
 
-* Personalized workout plans
-* AI diet planning
-* Calorie and BMI calculations
+### Public Routes
 
-### 📊 Progress Tracking
+Mounted at /public:
 
-* Weight tracking
-* Workout adherence tracking
-* Diet adherence tracking
-* Body measurements monitoring
+* POST /public/contactMessage
+* POST /public/ai-chat
 
-### 🔄 Habit Intelligence Engine
+### Authentication Routes
 
-* Habit score calculation
-* Drop‑off detection
-* Motivation prompts
+Mounted at /auth:
 
-### ⚡ Recovery Intelligence
+* POST /auth/login
+* POST /auth/register
+* GET /auth/logout
+* POST /auth/genOtp
+* POST /auth/verifyOtp
+* POST /auth/forgetPassword
 
-* Fatigue tracking
-* Adaptive training adjustments
-* Recovery suggestions
+### User Routes
 
-### 🤖 AI Fitness Assistant
+Mounted at /user:
 
-* Interactive fitness chatbot
-* Coaching suggestions
-* Data‑driven recommendations
+* PATCH /user/resetPassword
+* PATCH /user/updateProfile
+* PATCH /user/changePhoto
+* PUT /user/setGoal
+* PUT /user/completeGoal
+* GET /user/goal
+* POST /user/chat
+* POST /user/premium/chat
+* POST /user/regenerate-plan
+* POST /user/generatePlan
+* POST /user/plan/evaluate
+* POST /user/premium/coaching-layer
+* POST /user/premium/macros
+* POST /user/premium/meal-swap
+* POST /user/premium/meal-adjustments
+* POST /user/premium/recovery-insights
+* POST /user/progress
+* GET /user/progress-graph
+* GET /user/mytickets
 
-### 📈 Analytics Dashboard
+### Progress Routes
 
-* Goal forecasting
-* Trend visualization
-* Habit analytics
+Mounted at /api/v1/progress:
 
----
+* POST /api/v1/progress/weight
+* POST /api/v1/progress/workouts
+* POST /api/v1/progress/checkin
+* GET /api/v1/progress/timeline/weight
+* GET /api/v1/progress/streak
+* GET /api/v1/progress/goal-progress
+* GET /api/v1/progress/insights/latest
+* GET /api/v1/progress/analytics/weekly
+* GET /api/v1/progress/analytics/monthly
+* GET /api/v1/progress/analytics/advanced
+* GET /api/v1/progress/plan/progression
+* GET /api/v1/progress/plan/week/:week
+* GET /api/v1/progress/badges
+* GET /api/v1/progress/dashboard
+* GET /api/v1/progress/report/monthly
+* GET /api/v1/progress/report/monthly/pdf
+* GET /api/v1/progress/overview-graph
 
-## 🧑‍💻 Installation Guide
+### AI Routes
 
-### 1️⃣ Clone Repository
+Mounted at /api/ai:
+
+* POST /api/ai/diet
+* POST /api/ai/workout
+
+### Ticket Routes
+
+Mounted at /api/ticket:
+
+* POST /api/ticket/createTicket
+* GET /api/ticket/mytickets
+
+## Installation
+
+### 1. Clone the repository
 
 ```bash
-git clone <https://github.com/Rakhiraj1686/NavKalpana-RICR-NK-0029>
-cd HealthUP
+git clone <repository-url>
+cd NavKalpana-RICR-NK-0029
 ```
 
----
-
-### 2️⃣ Backend Setup
+### 2. Backend setup
 
 ```bash
 cd backend
 npm install
 ```
 
-Create `.env` file:
+Create a backend .env file with the required values:
 
-```
-PORT=
+```env
+PORT=5000
 MONGO_URI=
 JWT_SECRET=
-CLOUDINARY_KEY=
-EMAIL_CONFIG=
+GROQ_API_KEY=
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+GMAIL_USER=
+GMAIL_PASSCODE=
 ```
 
-Run backend:
+Start the backend:
 
 ```bash
 npm run dev
 ```
 
----
-
-### 3️⃣ Frontend Setup
+### 3. Frontend setup
 
 ```bash
-cd frontend
+cd ../frontend
 npm install
+```
+
+Create a frontend .env file:
+
+```env
+VITE_BASE_URL=http://localhost:5000
+```
+
+Start the frontend:
+
+```bash
 npm run dev
 ```
 
----
-
-## 🔌 API Overview
-
-### Authentication APIs
-
-* POST `/auth/register`
-* POST `/auth/login`
-* GET `/auth/profile`
-
-### Fitness Plan APIs
-
-* POST `/plan/create`
-* GET `/plan/user`
-
-### Progress Tracking APIs
-
-* POST `/progress/add`
-* GET `/progress/history`
-
-### AI Chat API
-
-* POST `/chat/message`
-
-*(Endpoints may vary depending on deployment.)*
-
----
-
-## 📸 Screenshots
-
-Add screenshots here:
-
-### Dashboard
-![Dashboard](./public/UserProfileDashboard.png)
-
-### AI Chat
-![AI Chat](./public/AIChatInterface1.png)
-![AI Chat](./public/AIChatInterface2.png)
-
-### Workout Plan Page
-![Workout Plan](./public/UserWorkoutPlan.png)
-
-### Diet Plan Page
-![Diet Plan](./public/UserDietPlan.png)
-
-### Analytics Graphs
-
-![Analytics](./public/UserAnalytics
-.png)
-
----
-
-## 🚀 Deployment (Recommended)
-
-### Frontend
-
-* Vercel / Netlify
+## Scripts
 
 ### Backend
 
-* Render / Railway / AWS / Azure
+* npm run dev - start the server with nodemon
+* npm start - start the server with node
 
-### Database
+### Frontend
 
-* MongoDB Atlas
+* npm run dev - start Vite dev server
+* npm run build - create production build
+* npm run lint - run ESLint
+* npm run preview - preview the production build
 
----
+## How It Works
 
-## 🔮 Future Improvements
+1. A user opens the frontend and signs up or logs in.
+2. The backend issues a secure session using JWT cookies.
+3. The dashboard loads profile, goals, plan data, and progress analytics.
+4. The user can log weight, workouts, and check-ins.
+5. AI services generate or adjust workout and diet recommendations.
+6. The app tracks streaks, badges, reports, and monthly analytics.
+7. Support tickets and contact messages can be submitted when needed.
+8. A weekly backend scheduler keeps plan adjustments active over time.
 
-* Advanced AI health monitoring
-* Wearable device integration
+## Deployment Notes
+
+The frontend is deployed on Vercel, backend on Render while MongoDB Atlas is used as the managed database.
+
+## Future Improvements
+
 * Mobile app version
-* Smarter nutrition insights
+* Smarter nutrition suggestions
+* More advanced health monitoring
+* Richer predictive analytics
 * Automated coaching recommendations
-* Advanced analytics dashboard
 
----
+## License
 
-## 🤝 Contribution Guidelines
-
-* We used meaningful commit messages
-* Followed clean code practices
-* Maintain modular structure
-* Update documentation when needed
-
----
-
-## 📜 License
-
-This project is developed for educational, research, and hackathon purposes.
-
----
-
-## ❤️ Acknowledgement
-
-HealthUP aims to become a complete AI fitness companion combining adaptive intelligence, behavioral analytics, and personalized coaching to help users achieve sustainable health goals.
+This project is intended for educational, research, and hackathon use.

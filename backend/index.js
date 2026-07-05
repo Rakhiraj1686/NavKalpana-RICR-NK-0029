@@ -22,7 +22,6 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://healthup-ai.netlify.app",
       "https://healthup-ai.vercel.app",
     ],
     credentials: true,
