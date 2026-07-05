@@ -1,8 +1,8 @@
-import 'dotenv/config';
+import "dotenv/config";
 
 // DEBUG: check if Node can read it
 // console.log("DEBUG - MONGO_URI:", process.env.MONGO_URI);
-import aiRouter from "./src/routers/aiRoutes.js"
+import aiRouter from "./src/routers/aiRoutes.js";
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -22,12 +22,14 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://healthup-ai.netlify.app"
+      "https://healthup-ai.netlify.app",
+      "https://healthup-ai.vercel.app",
     ],
     credentials: true,
-    methods: ["GET","POST","PUT","PATCH","DELETE"],
-  })
-);app.use(express.json());
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+  }),
+);
+app.use(express.json());
 app.use(cookieParser());
 app.use(morgan("dev"));
 
@@ -36,7 +38,7 @@ app.use("/auth", AuthRouter);
 app.use("/user", UserRouter);
 app.use("/api/ticket", ticketRouter);
 app.use("/api/v1/progress", progressRoutes);
-app.use("/api/ai",aiRouter);
+app.use("/api/ai", aiRouter);
 
 app.get("/", (req, res) => {
   console.log("server is working");
