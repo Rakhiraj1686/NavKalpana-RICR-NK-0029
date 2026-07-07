@@ -195,19 +195,18 @@ const AiChatWidget = ({ chatOpen, setChatOpen }) => {
         </div>
 
         {/* Input */}
-        <div className="border-t border-white/10 p-3 bg-[#020617]">
-          <div className="flex items-center gap-3 max-w-6xl mx-auto">
+        <div className="border-t border-white/10 bg-[#020617] p-4">
+          <div className="mx-auto flex items-center gap-3 max-w-5xl">
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && sendMessage()}
               placeholder="Ask about workout, diet, nutrition, BMI..."
-              className="flex-1 h-12 rounded-full bg-white/5 border border-white/10 px-6 text-white placeholder:text-gray-500 outline-none focus:border-cyan-400 transition-all"
+              className="flex-1 h-11 rounded-full border border-white/10 bg-white/5 px-5 text-sm text-white placeholder:text-gray-500 outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-500/20 transition-all"
             />
-
             <button
               onClick={sendMessage}
-              className="h-12 px-7 rounded-full bg-linear-to-r from-purple-500 to-cyan-500 text-white font-medium cursor-pointer active:scale-95 transition-all duration-300"
+              className="h-11 min-w-22.5 rounded-full bg-linear-to-r from-purple-500 to-cyan-500 px-6 text-sm font-semibold text-white shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 hover:scale-[1.02] active:scale-95 transition-all duration-300 cursor-pointer"
             >
               Send
             </button>

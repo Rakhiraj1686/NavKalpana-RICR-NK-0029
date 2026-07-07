@@ -1,13 +1,43 @@
 import React, { useState, useEffect, useMemo } from "react";
+
+import {
+  FaCamera,
+  FaHeartbeat,
+  FaRulerVertical,
+  FaOilCan,
+  FaWeight ,
+} from "react-icons/fa";
+import { FaDumbbell, FaUser } from "react-icons/fa6";
+import {
+  FiActivity,
+  FiCalendar,
+  FiClock,
+  FiCpu,
+  FiDownload,
+  FiEdit,
+  FiHeart,
+  FiLogOut,
+  FiMail,
+  FiPhone,
+  FiRefreshCw,
+  FiTrendingUp,
+  FiTrash2,
+  FiUser,
+} from "react-icons/fi";
+import { HiOutlineBadgeCheck, HiSparkles } from "react-icons/hi";
+import { MdLocalFireDepartment, MdOutlinePendingActions } from "react-icons/md";
+import { GiMeat, GiProgression } from "react-icons/gi";
+import { LuCalendarDays, LuUtensilsCrossed } from "react-icons/lu";
+import { PiBreadBold } from "react-icons/pi";
+import { TbTargetArrow } from "react-icons/tb";
+import { RiResetLeftLine } from "react-icons/ri";
+
 import { useAuth } from "../../context/AuthContext";
 import UserImage from "../../assets/userImage.jpg";
-import { FaCamera, FaPhoneAlt } from "react-icons/fa";
-import { MdOutlineEmail } from "react-icons/md";
+import api from "../../config/Api";
+import toast from "react-hot-toast";
 import ResetPasswordModal from "./modals/ResetPasswordModal";
 import UpdateProfileModal from "./modals/UpdateProfileModal";
-import toast from "react-hot-toast";
-import api from "../../config/Api";
-// import ProgressGraph from "../components/ProgressGraph";
 
 const UserProfile = () => {
   const { user, setUser } = useAuth();
@@ -18,16 +48,7 @@ const UserProfile = () => {
     useState(false);
   const [tickets, setTickets] = useState([]);
   const [preview, setPreview] = useState("");
- const [progressData, setProgressData] = useState([]);
-
-  // Get BMI category and color
-  const getBMIStatus = (bmi) => {
-    if (!bmi) return { status: "N/A", color: "text-gray-400", bgColor: "bg-gray-400/10" };
-    if (bmi < 18.5) return { status: "Underweight", color: "text-blue-300", bgColor: "bg-blue-400/10" };
-    if (bmi < 25) return { status: "Normal", color: "text-green-300", bgColor: "bg-green-400/10" };
-    if (bmi < 30) return { status: "Overweight", color: "text-yellow-300", bgColor: "bg-yellow-400/10" };
-    return { status: "Obese", color: "text-red-300", bgColor: "bg-red-400/10" };
-  };
+  const [progressData, setProgressData] = useState([]);
 
   const changePhoto = async (photo) => {
     const form_Data = new FormData();
@@ -92,24 +113,6 @@ const UserProfile = () => {
     }
   };
 
-//   const saveProgress = async () => {
-//   try {
-//     await api.post("/user/progress", {
-//       workoutAdherencePercent: 80,
-//       dietAdherencePercent: 75,
-//       habitScore: 85,
-//     });
-
-//     // Refresh graph after saving
-//     const res = await api.get("/user/progress-graph");
-//     setProgressData(res.data.graphData);
-
-//   } catch (error) {
-//     console.log(error);
-//   }
-// };
-
-
   useEffect(() => {
     const fetchTickets = async () => {
       try {
@@ -130,97 +133,146 @@ const UserProfile = () => {
     return () => clearInterval(intervalId);
   }, []);
 
- 
-
   return (
     <>
-      <div className="min-h-screen text-white p-4 sm:p-8">
-        <div className="max-w-7xl mx-auto space-y-8">
-          {/* Top Section */}
-          <div className="grid lg:grid-cols-1 gap-8">
-            {/* LEFT: Profile Card */}
-            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-xl">
-              <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
-                {/* LEFT → Profile Image */}
-                <div className="flex flex-col items-center">
-                  <div className="relative flex flex-col items-center">
-                    <div className="w-36 h-36 rounded-full overflow-hidden border-4 border-purple-500">
-                      <img
-                        src={preview || user?.photo?.url || UserImage}
-                        alt="Profile"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
+      {/* Porfile Overview : - Completed */}
+      <section className="overflow-hidden rounded-2xl border border-white/10 bg-white/10 shadow-xl backdrop-blur-xl">
+        <div className="bg-linear-to-r from-purple-500/10 via-cyan-500/10 to-blue-500/10 p-4">
+          <div className="flex flex-col lg:px-4 lg:flex-row lg:items-center lg:h-48">
+            {/* User information */}
 
-                    <label
-                      htmlFor="imageUpload"
-                      className="absolute bottom-2 right-2 bg-linear-to-r from-purple-500 to-blue-500 p-3 rounded-full cursor-pointer hover:scale-110 transition"
-                    >
-                      <FaCamera size={16} />
-                    </label>
-                    <input
-                      type="file"
-                      id="imageUpload"
-                      className="hidden"
-                      accept="image/*"
-                      onChange={handlePhotoChange}
+            <div className="lg:w-4/7 flex flex-col lg:flex-row gap-10 lg:items-center justify-between ">
+              {/* User Profile photo */}
+
+              <div className="flex flex-col items-center lg:w-3/11 h-full">
+                <div className="relative">
+                  <div className="h-32 w-32 overflow-hidden rounded-full border-4 border-purple-500 sm:h-36 sm:w-36">
+                    <img
+                      src={preview || user?.photo?.url || UserImage}
+                      alt="Profile"
+                      className="h-full w-full object-cover"
                     />
                   </div>
-                  <p className="text-gray-500 text-xs mt-2">
-                    Click camera to change photo
-                  </p>
+
+                  <label
+                    htmlFor="imageUpload"
+                    className="absolute bottom-1 right-1 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-linear-to-r from-purple-500 to-blue-500 shadow-lg transition hover:scale-110"
+                  >
+                    <FaCamera size={17} />
+                  </label>
+
+                  <input
+                    id="imageUpload"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handlePhotoChange}
+                  />
                 </div>
 
-                {/* CENTER → User Details */}
-                <div className="flex-1 text-center md:text-left">
-                  <h1 className="text-2xl font-bold">{user?.fullName}</h1>
+                <p className="mt-3 text-center text-xs text-gray-500">
+                  Click camera to change photo
+                </p>
+              </div>
 
-                  <div className="flex gap-4 items-center">
-                    <span className="inline-block mt-2 px-4 py-1 rounded-full text-sm bg-linear-to-r from-purple-500 to-blue-500 text-white">
-                      {user?.role}
-                    </span>
-
-                    <span
-                      className={`mt-2 px-4 py-1  rounded-full text-sm font-semibold ${
-                        user?.isActive
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
-                      }`}
-                    >
-                      {user?.isActive ? "Active" : "Inactive"}
-                    </span>
+              {/* User Details */}
+              <div className="flex-1 py-3">
+                <div className="flex flex-col items-start gap-2 ">
+                  <div className="flex flex-wrap items-center justify-start gap-2 lg:justify-start">
+                    <h1 className="text-xl font-bold text-white sm:text-2xl lg:text-3xl">
+                      {user?.fullName}
+                    </h1>
+                    <HiOutlineBadgeCheck className="text-xl text-cyan-400" />
                   </div>
 
-                  <div className="mt-6 space-y-2 text-sm text-gray-300">
-                    <p className="flex items-center gap-2">
-                      <strong>
-                        <MdOutlineEmail />
-                      </strong>
-                      {user?.email}
-                    </p>
-                    <p className="flex items-center gap-2">
-                      <strong>
-                        <FaPhoneAlt className="text-xs" />
-                      </strong>
-                      {user?.mobileNumber}
-                    </p>
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center justify-start gap-2 text-gray-300  break-all">
+                      <FiMail className="shrink-0 text-cyan-400" />
+                      <span>{user?.email}</span>
+                    </div>
+
+                    <div className="flex items-center justify-start gap-2 text-gray-300 ">
+                      <FiPhone className="shrink-0 text-cyan-400" />
+                      <span>+91 {user?.mobileNumber}</span>
+                    </div>
                   </div>
                 </div>
 
-                {/* RIGHT → Progress + Actions */}
-                <div className="w-full md:w-72">
-                  <div className="flex justify-between text-sm mb-2">
-                    <span>Profile Completion</span>
-                    <span>{profileCompletion}%</span>
+                <div className="mt-2 lg:w-54">
+                  <div className="mb-2 flex items-center justify-between">
+                    <span className="text-sm text-gray-400">
+                      Profile Completion :
+                    </span>
+
+                    <span className="font-semibold text-cyan-400">
+                      {profileCompletion}%
+                    </span>
                   </div>
 
-                  <div className="w-full bg-white/10 rounded-full h-2">
+                  <div className="h-2 overflow-hidden rounded-full bg-white/10">
                     <div
-                      className="bg-linear-to-r from-purple-500 to-blue-500 h-2 rounded-full"
+                      className="h-full rounded-full bg-linear-to-r from-purple-500 to-cyan-500 transition-all duration-700"
                       style={{ width: `${profileCompletion}%` }}
                     />
                   </div>
+                </div>
+              </div>
+            </div>
 
+            {/* Membership */}
+            {user?.profileCompleted ? (
+              <>
+                <div className="lg:w-3/7 px-2 py-3 h-full">
+                  <h3 className="mb-2 text-lg font-semibold text-white">
+                    Membership Details
+                  </h3>
+
+                  <div className="space-y-2 xl:w-3/5">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-gray-400">Member Since :</span>
+
+                      <span className="text-right text-xs font-medium text-white">
+                        {new Date(user?.createdAt).toLocaleDateString("en-IN", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-gray-400">User Type :</span>
+
+                      <span className="inline-flex items-center gap-2 rounded-full border border-green-500/20 bg-green-500/10 px-3 py-0.5 text-xs font-medium capitalize text-green-400">
+                        <FaUser size={10} /> {user?.role}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-gray-400">AI Plan :</span>
+
+                      <span className="inline-flex items-center gap-2 rounded-full border border-green-500/20 bg-green-500/10 px-3 py-0.5 text-xs font-medium text-green-400">
+                        <span className="h-1.5 w-1.5 rounded-full bg-green-400" />
+                        Active
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-gray-400">Account Status :</span>
+
+                      <span className="inline-flex items-center gap-2 rounded-full border border-green-500/20 bg-green-500/10 px-3 py-0.5 text-xs font-medium text-cyan-400">
+                        <span className="h-1.5 w-1.5 rounded-full bg-cyan-400" />
+                        Verified
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="lg:w-3/7 px-2 py-3 h-full">
+                  <h3 className="mb-2 text-lg font-semibold text-white">
+                    Edit your details to access Dashboard
+                  </h3>
                   <div className="flex flex-col gap-3 mt-6">
                     <button
                       onClick={() => setIsUpdateProfileModalOpen(true)}
@@ -235,175 +287,471 @@ const UserProfile = () => {
                     >
                       Reset Password
                     </button>
-
-                    {/* <button
-                      onClick={handleRegenerate}
-                      className="mb-6 bg-purple-600 px-4 py-2 rounded-lg hover:bg-purple-700 transition"
-                    >
-                      Regenerate AI Plan
-                    </button> */}
                   </div>
                 </div>
-              </div>
-            </div>
-
-            {user?.aiPlan && (
-              <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-xl">
-                <h3 className="text-xl font-bold mb-6 bg-linear-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-                  AI Nutrition Plan
-                </h3>
-
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-6 text-sm">
-                  <div className="bg-white/5 p-4 rounded-xl text-center">
-                    <p className="text-gray-400">Calories</p>
-                    <p className="text-lg font-semibold text-white">
-                      {user?.aiPlan?.calories}
-                    </p>
-                  </div>
-
-                  <div className="bg-white/5 p-4 rounded-xl text-center">
-                    <p className="text-gray-400">Protein</p>
-                    <p className="text-lg font-semibold text-white">
-                      {user?.aiPlan?.macros?.protein}g
-                    </p>
-                  </div>
-
-                  <div className="bg-white/5 p-4 rounded-xl text-center">
-                    <p className="text-gray-400">Carbs</p>
-                    <p className="text-lg font-semibold text-white">
-                      {user?.aiPlan?.macros?.carbs}g
-                    </p>
-                  </div>
-
-                  <div className="bg-white/5 p-4 rounded-xl text-center">
-                    <p className="text-gray-400">Fats</p>
-                    <p className="text-lg font-semibold text-white">
-                      {user?.aiPlan?.macros?.fats}g
-                    </p>
-                  </div>
-
-                  <div className="bg-white/5 p-4 rounded-xl text-center col-span-2 md:col-span-1">
-                    <p className="text-gray-400">Workout Level</p>
-                    <p className="text-lg font-semibold text-white capitalize">
-                      {user?.aiPlan?.workoutLevel}
-                    </p>
-                  </div>
-
-                  <div className="bg-white/5 p-4 rounded-xl text-center">
-                    <p className="text-gray-400">BMI</p>
-                    <p className="text-lg font-semibold text-white">
-                      {user?.bmi ? user.bmi.toFixed(1) : "--"}
-                    </p>
-                    <p className={`text-sm mt-2 font-medium ${getBMIStatus(user?.bmi).color}`}>
-                      {getBMIStatus(user?.bmi).status}
-                    </p>
-                  </div>
-                </div>
-              </div>
+              </>
             )}
-
-            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-xl flex justify-between items-center">
-              <div>
-                <h2 className="text-xl font-bold mb-4 bg-linear-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-                  AI Fitness Status
-                </h2>
-                <p className="text-gray-300 text-sm">
-                  {user?.profileCompleted
-                    ? "Your profile is ready. AI plans and insights are fully enabled."
-                    : "Complete your health details to unlock adaptive AI workout and diet plans."}
-                </p>
-              </div>
-              {/* <button
-                onClick={handleRegenerate}
-                className="mb-6 bg-purple-600 px-4 py-2 rounded-lg hover:bg-purple-700 transition cursor-pointer"
-              >
-                Regenerate AI Plan
-              </button> */}
-            </div>
-
-            {/* <ProgressGraph data={progressData} /> */}
-
-            {/* Support Tickets Section */}
-            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-xl mb-6">
-              <h2 className="text-xl font-bold mb-6 bg-linear-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-                My Support Tickets
-              </h2>
-
-              {tickets.length === 0 ? (
-                <p className="text-gray-400 text-sm">No tickets raised yet.</p>
-              ) : (
-                tickets.map((ticket) => (
-                  <div
-                    key={ticket._id}
-                    className="bg-white/10 p-4 rounded-xl mb-4 flex flex-col gap-3 border border-white/5 hover:border-purple-500/40 transition-all cursor-pointer"
-                  >
-                    <div className="flex justify-between items-start gap-3">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <p className="font-semibold text-white">{ticket.type}</p>
-                          <span className="text-xs bg-purple-500/20 text-purple-300 px-2 py-1 rounded border border-purple-500/40">
-                            {getTicketId(ticket._id)}
-                          </span>
-                        </div>
-                        <p className="text-sm text-gray-400 mt-1">
-                          {ticket.description}
-                        </p>
-                      </div>
-
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${
-                          ticket.status === "Open"
-                            ? "bg-green-500/20 text-green-400 border border-green-500/40"
-                            : ticket.status === "In Progress"
-                              ? "bg-yellow-500/20 text-yellow-400 border border-yellow-500/40"
-                              : "bg-blue-500/20 text-blue-400 border border-blue-500/40"
-                        }`}
-                      >
-                        🔘 {ticket.status}
-                      </span>
-                    </div>
-
-                    {ticket.solution && (
-                      <div className="bg-white/5 p-3 rounded-lg border-l-2 border-blue-500">
-                        <p className="text-xs text-blue-300 font-semibold mb-1">✓ Solution:</p>
-                        <p className="text-sm text-gray-300">{ticket.solution}</p>
-                      </div>
-                    )}
-
-                    {ticket.resolvedAt && (
-                      <p className="text-xs text-gray-500">
-                        Resolved: {new Date(ticket.resolvedAt).toLocaleDateString("en-IN")}
-                      </p>
-                    )}
-                  </div>
-                ))
-              )}
-            </div>
           </div>
         </div>
+      </section>
 
-        {isUpdateProfileModalOpen && (
-          <UpdateProfileModal
-            onClose={() => setIsUpdateProfileModalOpen(false)}
-          />
-        )}
-        {isResetPasswordModalOpen && (
-          <ResetPasswordModal
-            onClose={() => setIsResetPasswordModalOpen(false)}
-          />
-        )}
-      </div>
+      {user?.profileCompleted ? (
+        <>
+          {/* Health Information */}
+
+          <section className="mt-8 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-4 shadow-xl">
+            <div className="flex items-center gap-3 mb-4">
+              <FiHeart className="text-2xl text-red-400" />
+              <h2 className="text-2xl font-bold text-white">
+                Health Information
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="rounded-xl border border-white/10 bg-[#111827]/60 p-5">
+                <FiCalendar className="text-purple-400 text-xl mb-3" />
+                <p className="text-xs uppercase tracking-wider text-gray-500">
+                  Age
+                </p>
+                <h3 className="mt-2 text-2xl font-bold text-white">
+                  {user?.age}{" "}
+                  <span className="text-sm text-gray-400">Years</span>
+                </h3>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-[#111827]/60 p-5">
+                <FiUser className="text-cyan-400 text-xl mb-3" />
+                <p className="text-xs uppercase tracking-wider text-gray-500">
+                  Gender
+                </p>
+                <h3 className="mt-2 text-lg font-semibold text-white capitalize">
+                  {user?.biologicalSex}
+                </h3>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-[#111827]/60 p-5">
+                <FaRulerVertical className="text-blue-400 text-xl mb-3" />
+                <p className="text-xs uppercase tracking-wider text-gray-500">
+                  Height
+                </p>
+                <h3 className="mt-2 text-2xl font-bold text-white">
+                  {user?.height}
+                  <span className="text-sm text-gray-400 ml-1">cm</span>
+                </h3>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-[#111827]/60 p-5">
+                <FaWeight className="text-green-400 text-xl mb-3" />
+                <p className="text-xs uppercase tracking-wider text-gray-500">
+                  Weight
+                </p>
+                <h3 className="mt-2 text-2xl font-bold text-white">
+                  {user?.weight}
+                  <span className="text-sm text-gray-400 ml-1">kg</span>
+                </h3>
+              </div>
+
+              <div
+                className={`rounded-2xl p-5 bg-[#111827]/60 ${
+                  user?.bmi < 18.5
+                    ? "border border-red-500/40"
+                    : user?.bmi >= 18.5 && user?.bmi <= 24.9
+                      ? "border border-green-500/20"
+                      : user?.bmi >= 25 && user?.bmi <= 29.9
+                        ? "border border-yellow-500/20"
+                        : "border border-red-500/40"
+                }`}
+              >
+                <FiActivity className="text-pink-400 text-xl mb-3" />
+                <p className="text-xs uppercase tracking-wider text-gray-500">
+                  BMI
+                </p>
+                <h3 className="mt-2 text-2xl font-bold text-white">
+                  {user?.bmi}{" "}
+                  <span className="text-sm text-gray-400 ml-1">Kg/m²</span>
+                </h3>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-[#111827]/60 p-5">
+                <MdLocalFireDepartment className="text-orange-400 text-xl mb-3" />
+                <p className="text-xs uppercase tracking-wider text-gray-500">
+                  BMR
+                </p>
+                <h3 className="mt-2 text-2xl font-bold text-white">
+                  {user?.bmr}
+                  <span className="text-sm text-gray-400 ml-1">kcal</span>
+                </h3>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-[#111827]/60 p-5">
+                <FiTrendingUp className="text-emerald-400 text-xl mb-3" />
+                <p className="text-xs uppercase tracking-wider text-gray-500">
+                  Activity Level
+                </p>
+                <h3 className="mt-2 text-lg font-semibold text-white capitalize">
+                  {user?.activityLevel}
+                </h3>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-[#111827]/60 p-5">
+                <LuUtensilsCrossed className="text-green-400 text-xl mb-3" />
+                <p className="text-xs uppercase tracking-wider text-gray-500">
+                  Food Preference
+                </p>
+                <h3 className="mt-2 text-lg font-semibold text-white capitalize">
+                  {user?.foodPreference}
+                </h3>
+              </div>
+            </div>
+          </section>
+
+          {/* Workout & Nutritions Prefernces */}
+
+          <section className="mt-8 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-4 shadow-xl">
+            <div className="flex items-center gap-3 mb-6">
+              <FaHeartbeat className="text-2xl text-green-400" />
+              <h2 className="text-2xl font-bold text-white">
+                Workout & Nutritions Preferences
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+              <div className="rounded-2xl border border-white/10 bg-[#111827]/60 p-5">
+                <FaDumbbell className="text-purple-400 text-xl mb-3" />
+                <p className="text-xs uppercase tracking-wider text-gray-500">
+                  Workout Style
+                </p>
+                <h3 className="mt-2 text-lg font-semibold text-white capitalize">
+                  {user?.workoutPreference?.replaceAll("_", " ")}
+                </h3>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-[#111827]/60 p-5">
+                <GiProgression className="text-cyan-400 text-xl mb-3" />
+                <p className="text-xs uppercase tracking-wider text-gray-500">
+                  Workout Level
+                </p>
+                <h3 className="mt-2 text-lg font-semibold text-white capitalize">
+                  {user?.aiPlan?.workoutLevel}
+                </h3>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-[#111827]/60 p-5">
+                <TbTargetArrow className="text-pink-400 text-xl mb-3" />
+                <p className="text-xs uppercase tracking-wider text-gray-500">
+                  Experience
+                </p>
+                <h3 className="mt-2 text-lg font-semibold text-white capitalize">
+                  {user?.experienceLevel}
+                </h3>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-[#111827]/60 p-5">
+                <LuCalendarDays className="text-orange-400 text-xl mb-3" />
+                <p className="text-xs uppercase tracking-wider text-gray-500">
+                  Weekly Sessions
+                </p>
+                <h3 className="mt-2 text-2xl font-bold text-white">
+                  {user?.workoutsPerWeek}
+                  <span className="text-sm text-gray-400 ml-1">Days</span>
+                </h3>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-[#111827]/60 p-5">
+                <MdLocalFireDepartment className="text-orange-400 text-xl mb-3" />
+                <p className="text-xs uppercase tracking-wider text-gray-500">
+                  Daily Calories
+                </p>
+                <h3 className="mt-2 text-2xl font-bold text-white">
+                  {user?.aiPlan?.calories}
+                  <span className="text-sm text-gray-400 ml-1">kcal</span>
+                </h3>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-[#111827]/60 p-5">
+                <GiMeat className="text-red-400 text-xl mb-3" />
+                <p className="text-xs uppercase tracking-wider text-gray-500">
+                  Protein
+                </p>
+                <h3 className="mt-2 text-2xl font-bold text-white">
+                  {user?.aiPlan?.macros?.protein}
+                  <span className="text-sm text-gray-400 ml-1">g</span>
+                </h3>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-[#111827]/60 p-5">
+                <PiBreadBold className="text-yellow-400 text-xl mb-3" />
+                <p className="text-xs uppercase tracking-wider text-gray-500">
+                  Carbohydrates
+                </p>
+                <h3 className="mt-2 text-2xl font-bold text-white">
+                  {user?.aiPlan?.macros?.carbs}
+                  <span className="text-sm text-gray-400 ml-1">g</span>
+                </h3>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-[#111827]/60 p-5">
+                <FaOilCan className="text-cyan-400 text-xl mb-3" />
+                <p className="text-xs uppercase tracking-wider text-gray-500">
+                  Healthy Fats
+                </p>
+                <h3 className="mt-2 text-2xl font-bold text-white">
+                  {user?.aiPlan?.macros?.fats}
+                  <span className="text-sm text-gray-400 ml-1">g</span>
+                </h3>
+              </div>
+            </div>
+          </section>
+
+          {/* AI Coach */}
+
+          <section className="mt-8 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-4 shadow-xl">
+            <div className="flex items-center gap-3 mb-6">
+              <HiSparkles className="text-2xl text-purple-400" />
+              <h2 className="text-2xl font-bold text-white">AI Coach</h2>
+            </div>
+
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+              <div className="rounded-2xl border border-white/10 bg-[#111827]/60 p-5">
+                <FiCpu className="text-cyan-400 text-xl mb-3" />
+                <p className="text-xs uppercase tracking-wider text-gray-500">
+                  AI Provider
+                </p>
+
+                <h3 className="mt-2 text-lg font-semibold text-white capitalize">
+                  {user?.aiPlan?.aiSource}
+                </h3>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-[#111827]/60 p-5">
+                <HiSparkles className="text-purple-400 text-xl mb-3" />
+                <p className="text-xs uppercase tracking-wider text-gray-500">
+                  Plan Mode
+                </p>
+
+                <h3 className="mt-2 text-lg font-semibold text-white capitalize">
+                  {user?.aiPlan?.progressInsights?.planMode?.replaceAll(
+                    "_",
+                    " ",
+                  )}
+                </h3>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-[#111827]/60 p-5">
+                <FiClock className="text-orange-400 text-xl mb-3" />
+                <p className="text-xs uppercase tracking-wider text-gray-500">
+                  Generated
+                </p>
+
+                <h3 className="mt-2 text-sm font-semibold text-white">
+                  {new Date(user?.aiPlan?.generatedAt).toLocaleDateString()}
+                </h3>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-[#111827]/60 p-5">
+                <HiOutlineBadgeCheck className="text-green-400 text-xl mb-3" />
+                <p className="text-xs uppercase tracking-wider text-gray-500">
+                  Plan Status
+                </p>
+
+                <h3 className="mt-2 text-lg font-semibold text-green-400">
+                  Active
+                </h3>
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <button className="flex items-center gap-2 rounded-xl bg-linear-to-r from-purple-500 to-cyan-500 px-5 py-3 text-white font-medium hover:shadow-[0_0_10px_rgba(59,130,246,0.35)] hover:shadow-purple-500/30 transition-all duration-300 cursor-pointer">
+                <FiRefreshCw />
+                Regenerate AI Plan
+              </button>
+            </div>
+          </section>
+
+          {/* Support Tickets */}
+          <div className="mt-8 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-xl">
+            <h2 className="text-xl font-bold mb-6 bg-linear-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+              My Support Tickets
+            </h2>
+
+            {tickets.length === 0 ? (
+              <p className="text-gray-400 text-sm">No tickets raised yet.</p>
+            ) : (
+              tickets.map((ticket) => (
+                <div
+                  key={ticket._id}
+                  className="bg-white/10 p-4 rounded-xl mb-4 flex flex-col gap-3 border border-white/5 hover:border-purple-500/40 transition-all cursor-pointer"
+                >
+                  <div className="flex justify-between items-start gap-3">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="font-semibold text-white">
+                          {ticket.type}
+                        </p>
+                        <span className="text-xs bg-purple-500/20 text-purple-300 px-2 py-1 rounded border border-purple-500/40">
+                          {getTicketId(ticket._id)}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-400 mt-1">
+                        {ticket.description}
+                      </p>
+                    </div>
+
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${
+                        ticket.status === "Open"
+                          ? "bg-green-500/20 text-green-400 border border-green-500/40"
+                          : ticket.status === "In Progress"
+                            ? "bg-yellow-500/20 text-yellow-400 border border-yellow-500/40"
+                            : "bg-blue-500/20 text-blue-400 border border-blue-500/40"
+                      }`}
+                    >
+                      🔘 {ticket.status}
+                    </span>
+                  </div>
+
+                  {ticket.solution && (
+                    <div className="bg-white/5 p-3 rounded-lg border-l-2 border-blue-500">
+                      <p className="text-xs text-blue-300 font-semibold mb-1">
+                        ✓ Solution:
+                      </p>
+                      <p className="text-sm text-gray-300">{ticket.solution}</p>
+                    </div>
+                  )}
+
+                  {ticket.resolvedAt && (
+                    <p className="text-xs text-gray-500">
+                      Resolved:{" "}
+                      {new Date(ticket.resolvedAt).toLocaleDateString("en-IN")}
+                    </p>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Quick Actions */}
+
+          <section className="mt-8 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-4 shadow-xl">
+            <div className="flex items-center gap-3 mb-4">
+              <MdOutlinePendingActions className="text-2xl text-yellow-400" />
+              <h2 className="text-2xl font-bold text-white">Quick Actions</h2>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+              {/* Edit Profile */}
+
+              <button
+                onClick={() => setIsUpdateProfileModalOpen(true)}
+                className="group rounded-2xl border border-cyan-500/20 bg-cyan-500/10 p-5 hover:bg-cyan-500/20 transition-all duration-300 cursor-pointer"
+              >
+                <div className=" flex items-baseline gap-3">
+                  <FiEdit className="text-xl text-cyan-400 mb-2 transition-transform duration-300 group-hover:scale-105" />
+                  <h3 className="text-lg font-semibold text-white">
+                    Edit Profile
+                  </h3>
+                </div>
+
+                <p className="flex-1 mt-1 text-xs text-start text-gray-400">
+                  Update your personal information and preferences.
+                </p>
+              </button>
+
+              {/* Reset password */}
+
+              <button
+                onClick={() => setIsResetPasswordModalOpen(true)}
+                className="group cursor-pointer rounded-2xl border border-amber-500/20 bg-amber-500/10 p-5 transition-all duration-300 hover:bg-amber-500/20"
+              >
+                <div className="flex items-baseline gap-3">
+                  <RiResetLeftLine className="mb-2 text-xl text-amber-400 transition-transform duration-300 group-hover:rotate-180" />
+
+                  <h3 className="text-lg font-semibold text-white">
+                    Reset Password
+                  </h3>
+                </div>
+
+                <p className="mt-1 text-start text-xs text-gray-400">
+                  Change your password to keep your profile secure.
+                </p>
+              </button>
+
+              {/* Download Report */}
+
+              <button className="group rounded-2xl border-green-500/20 bg-green-500/10 p-5 hover:bg-green-500/20 transition-all duration-300 cursor-pointer">
+                <div className=" flex items-baseline gap-3">
+                  <FiDownload className="text-xl text-green-400 mb-2 transition-transform duration-300 group-hover:scale-105" />
+                  <h3 className="text-lg font-semibold text-white">
+                    {" "}
+                    Download Report
+                  </h3>
+                </div>
+
+                <p className="flex-1 mt-1 text-start  text-xs text-gray-400">
+                  Export your health summary.
+                </p>
+              </button>
+
+              {/* Logout */}
+
+              <button
+                //onClick={() => handleLogout}
+                className="group rounded-2xl border border-orange-500/20 bg-orange-500/10 p-5 hover:bg-orange-500/20 transition-all duration-300 cursor-pointer"
+              >
+                <div className=" flex items-baseline gap-3">
+                  <FiLogOut className="text-xl text-orange-400 mb-2 transition-transform duration-300 group-hover:scale-105" />
+                  <h3 className="text-lg font-semibold text-white">Logout</h3>
+                </div>
+
+                <p className="flex-1 mt-1 text-xs text-start text-gray-400">
+                  Sign out of your account.
+                </p>
+              </button>
+
+              {/* Delete Account */}
+
+              <button
+                //onClick={() => handleAccountDelete}
+                className="group rounded-2xl border  border-red-500/20 bg-red-500/10 p-5 hover:bg-red-500/20 transition-all duration-300 cursor-pointer"
+              >
+                <div className=" flex items-baseline gap-3">
+                  <FiTrash2 className="text-xl text-red-400 mb-2 transition-transform duration-300 group-hover:scale-105" />
+                  <h3 className="text-lg font-semibold text-white">
+                    Delete Account
+                  </h3>
+                </div>
+
+                <p className="flex-1 mt-1 text-xs text-start text-gray-400">
+                  Permanently remove your account.
+                </p>
+              </button>
+            </div>
+          </section>
+
+          <div className="text-center text-gray-400 mt-10">
+            Your profile is ready. AI plans and insights are fully enabled.
+          </div>
+        </>
+      ) : (
+        <div className="text-center text-gray-400 my-10">
+          Complete your health details to unlock adaptive AI workout and diet
+          plans.
+        </div>
+      )}
+
+      {isUpdateProfileModalOpen && (
+        <UpdateProfileModal
+          onClose={() => setIsUpdateProfileModalOpen(false)}
+        />
+      )}
+
+      {isResetPasswordModalOpen && (
+        <ResetPasswordModal
+          onClose={() => setIsResetPasswordModalOpen(false)}
+        />
+      )}
     </>
   );
 };
-
-// function Stat({ label, value }) {
-//   return (
-//     <div className="bg-white/5 border border-white/10 rounded-xl p-4 text-center">
-//       <p className="text-gray-400 text-xs mb-1">{label}</p>
-//       <p className="font-semibold">{value}</p>
-//     </div>
-//   );
-// }
 
 export default UserProfile;

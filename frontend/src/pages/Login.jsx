@@ -41,10 +41,11 @@ const Login = () => {
     setIsLoading(true);
     try {
       const res = await api.post("/auth/login", formData);
-      console.log("Login Data", formData);
-      toast.success(res.data.message);
-      setUser(res.data.data);
-      sessionStorage.setItem("HealthUP", JSON.stringify(res.data.data));
+      toast.success(res?.data?.message);
+      setUser(res?.data?.data);
+      console.log(res.data.data);
+
+      sessionStorage.setItem("HealthUP", JSON.stringify(res?.data?.data));
       navigate("/user-dashboard");
       handleClear();
     } catch (error) {

@@ -2,12 +2,11 @@ import React from "react";
 import { FiLogOut } from "react-icons/fi";
 import {
   PiSquaresFourBold,
-  PiBarbellBold,
   PiGraphBold,
   PiChartLineUpBold,
   PiPulseBold,
 } from "react-icons/pi";
-import { LuTarget } from "react-icons/lu";
+import { LuTarget, LuCalendarDays } from "react-icons/lu";
 import { MdOutlineContactSupport, MdOutlineArrowBackIos } from "react-icons/md";
 import { HiOutlineX } from "react-icons/hi";
 import { useAuth } from "../../context/AuthContext";
@@ -24,32 +23,32 @@ const menuItems = [
   },
   {
     id: "plan",
-    label: "Workout Plan",
-    icon: <PiBarbellBold />,
+    label: "Daily Plan",
+    icon: <LuCalendarDays />,
   },
   {
     id: "progression",
-    label: "Progression",
+    label: "User Progression",
     icon: <PiGraphBold />,
   },
   {
     id: "analytics",
-    label: "Analytics",
+    label: "Daily Analytics",
     icon: <PiChartLineUpBold />,
   },
   {
     id: "progress",
-    label: "Progress",
+    label: "Your Progress",
     icon: <PiPulseBold />,
   },
   {
     id: "goal",
-    label: "Goals",
+    label: "Current Goals",
     icon: <LuTarget />,
   },
   {
     id: "support",
-    label: "Support",
+    label: "User Support",
     icon: <MdOutlineContactSupport />,
   },
 ];
@@ -68,7 +67,6 @@ const UserSidebar = ({
     try {
       const res = await api.get("/auth/logout");
       toast.success(res.data.message);
-
       sessionStorage.removeItem("HealthUP");
       setUser("");
       navigate("/");
@@ -78,7 +76,7 @@ const UserSidebar = ({
   };
 
   return (
-    <div className=" h-full w-full flex flex-col bg-linear-to-b from-[#030712] via-[#0f172a] to-[#020617] backdrop-blur-3x border-r border-cyan-400/20">
+    <div className="h-full w-full flex flex-col bg-linear-to-b from-[#030712] via-[#0f172a] to-[#020617] backdrop-blur-3xl border-r border-cyan-400/20">
       {/* Sidebar: Header */}
       <div className="flex items-center justify-between px-4 py-3 md:py-2 border-b border-white/10 bg-white/5 backdrop-blur-md">
         {/* Logo */}
@@ -108,7 +106,7 @@ const UserSidebar = ({
 
                 <button
                   onClick={() => setIsCollapsed(!isCollapsed)}
-                  className="hidden md:block cursor-pointer text-purple-400 hover:text-white/70 transition-colors border rounded-full p-1.5 border-white/20 hover:border-purple-400/40"
+                  className="hidden lg:block cursor-pointer text-purple-400 hover:text-white/70 transition-colors border rounded-full p-1.5 border-white/20 hover:border-purple-400/40"
                 >
                   <MdOutlineArrowBackIos className="transition-transform duration-300" />
                 </button>
@@ -121,7 +119,7 @@ const UserSidebar = ({
         <div className="flex items-center gap-2">
           <button
             onClick={() => setMobileOpen(false)}
-            className="md:hidden text-red-500 text-4xl"
+            className="lg:hidden text-red-500 text-4xl cursor-pointer"
             aria-label="Close sidebar"
           >
             <HiOutlineX />
@@ -129,7 +127,7 @@ const UserSidebar = ({
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto py-6 px-2 space-y-3">
+      <div className="dashboard-scroll flex-1 overflow-y-auto px-2 py-6 space-y-3">
         {menuItems.map((item) => {
           const isActive = active === item.id;
 
@@ -142,33 +140,21 @@ const UserSidebar = ({
               }}
               aria-current={isActive ? "page" : undefined}
               title={isCollapsed && item.label}
-              className={`
-                 flex items-center ${isCollapsed ? "justify-center rounded-full" : "justify-start w-full rounded-xl"} gap-4 py-2 px-4 
-                transition-all duration-300 group cursor-pointer border
-                ${
-                  isActive
-                    ? "bg-linear-to-r from-purple-500/20 to-cyan-500/20 border-cyan-400/30 shadow-[0_0_5px_rgba(59,130,246,0.4)]"
-                    : "border-transparent hover:bg-white/5"
-                }
-              `}
+              className={`flex items-center ${isCollapsed ? "justify-center rounded-full" : "w-full justify-start rounded-xl"} gap-4 px-4 py-2 border transition-all duration-300 cursor-pointer group ${
+                isActive
+                  ? "bg-linear-to-r from-purple-500/20 to-cyan-500/20 border-cyan-400/30 shadow-[0_0_5px_rgba(59,130,246,0.4)]"
+                  : "border-transparent hover:bg-white/5"
+              }`}
             >
               <span
-                className={`text-2xl ${
-                  isActive
-                    ? "text-cyan-400"
-                    : "text-gray-400 group-hover:text-white"
-                }`}
+                className={`text-lg ${isActive ? "text-cyan-400" : "text-gray-400 group-hover:text-white"}`}
               >
                 {item.icon}
               </span>
 
               {!isCollapsed && (
                 <span
-                  className={`text-[15px] font-normal uppercase ${
-                    isActive
-                      ? "text-white"
-                      : "text-gray-400 group-hover:text-white"
-                  }`}
+                  className={`text-base font-semibold ${isActive ? "text-white" : "text-gray-400 group-hover:text-white"}`}
                 >
                   {item.label}
                 </span>
@@ -177,11 +163,9 @@ const UserSidebar = ({
           );
         })}
 
-        <div className="mt-auto pt-4 border-t border-white/5">
+        <div className="mt-auto">
           <div
-            className={`flex items-center ${
-              isCollapsed ? "flex-col gap-6" : "justify-between"
-            }`}
+            className={`flex items-center ${isCollapsed ? "flex-col gap-6" : "justify-between"}`}
           >
             {/* Profile */}
             <button
@@ -190,9 +174,11 @@ const UserSidebar = ({
                 setMobileOpen(false);
               }}
               title={isCollapsed ? "Profile" : ""}
-              className={`flex items-center ${
-                isCollapsed ? "justify-center hover:scale-105" : "gap-3 flex-1 rounded-2xl px-2 py-1 hover:bg-white/5 transition-all duration-300 "
-              } overflow-hidden cursor-pointer text-left`}
+              className={`flex items-center overflow-hidden cursor-pointer text-left ${
+                isCollapsed
+                  ? "justify-center hover:scale-105"
+                  : "flex-1 gap-3 rounded-2xl px-2 py-1 hover:bg-white/5 transition-all duration-300"
+              }`}
             >
               <div className="relative shrink-0">
                 {user?.photo?.url ? (
@@ -202,7 +188,7 @@ const UserSidebar = ({
                     className="w-11 h-11 rounded-full object-cover border-2 border-cyan-400/30 shadow-lg"
                   />
                 ) : (
-                  <div className="w-11 h-11 rounded-full bg-linear-to-br from-purple-500 via-cyan-500 to-pink-500 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                  <div className="flex items-center justify-center w-11 h-11 rounded-full bg-linear-to-br from-purple-500 via-cyan-500 to-pink-500 text-lg font-bold text-white shadow-lg">
                     {user?.fullName?.charAt(0).toUpperCase() || "H"}
                   </div>
                 )}
@@ -212,7 +198,7 @@ const UserSidebar = ({
 
               {!isCollapsed && (
                 <div className="min-w-0">
-                  <h4 className="truncate font-medium text-white hover:text-cyan-400 transition-colors">
+                  <h4 className="truncate font-medium text-white transition-colors hover:text-cyan-400">
                     {user?.fullName || "HealthUP User"}
                   </h4>
 

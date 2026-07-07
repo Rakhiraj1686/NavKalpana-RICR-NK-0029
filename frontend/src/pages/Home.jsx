@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
 import { Link } from "react-router-dom";
 
-export default function Home() {
+const Home = () => {
   return (
     <div className="min-h-screen bg-[#030712] text-white relative overflow-hidden">
       {/* Background Glow */}
@@ -15,7 +15,9 @@ export default function Home() {
       </div>
     </div>
   );
-}
+};
+
+export default Home();
 
 /* ================= HERO ================= */
 
@@ -46,7 +48,6 @@ function Hero() {
 
   return (
     <section className="min-h-screen grid md:grid-cols-2 items-center px-6 sm:px-10 md:px-20 py-20 gap-16">
-
       {/* LEFT SIDE */}
       <div className="space-y-8 text-center md:text-left">
         <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight">
@@ -79,7 +80,6 @@ function Hero() {
 
       {/* RIGHT SIDE – DASHBOARD */}
       <div className="relative flex justify-center items-center perspective-1000">
-
         {/* Glow */}
         <div className="absolute w-72 sm:w-96 h-72 sm:h-96 bg-cyan-500/20 rounded-full blur-3xl animate-pulse" />
 
@@ -148,9 +148,7 @@ function GlowStat({ title, value }) {
       <div className="text-base sm:text-xl font-bold text-purple-400">
         {value}
       </div>
-      <div className="text-[10px] sm:text-xs text-gray-400">
-        {title}
-      </div>
+      <div className="text-[10px] sm:text-xs text-gray-400">{title}</div>
     </div>
   );
 }
@@ -180,9 +178,7 @@ function HowItWorks() {
             className="bg-white/5 backdrop-blur-xl border border-cyan-400/20 p-6 sm:p-8 rounded-3xl transition-all duration-300"
           >
             {/* <div className="text-cyan-400 font-bold mb-3">{i + 1}</div> */}
-            <div className="text-gray-300 text-sm sm:text-base">
-              {step}
-            </div>
+            <div className="text-gray-300 text-sm sm:text-base">{step}</div>
           </div>
         ))}
       </div>

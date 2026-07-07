@@ -64,11 +64,11 @@ const UserDashboard = () => {
   };
 
   return (
-    <div className="fixed top-0 left-0 right-0 bottom-0 dashboard-scroll flex overflow-hidden bg-linear-to-br from-[#020617] to-[#0f172a] text-white md:gap-4">
+    <div className="fixed inset-0 flex overflow-hidden bg-linear-to-br from-[#020617] to-[#0f172a] text-white dashboard-scroll lg:gap-4">
       {/* Mobile overlay */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 bg-black/60 md:hidden z-40"
+          className="fixed inset-0 z-40 bg-black/60 lg:hidden"
           onClick={() => setMobileOpen(false)}
           aria-hidden="true"
         />
@@ -76,7 +76,11 @@ const UserDashboard = () => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 z-50 h-screen w-[72vw] max-w-65 md:static md:h-auto md:max-w-none ${isCollapsed ? "md:w-20" : "md:w-62"} bg-[#020617] border-r border-white/10 transform transition-transform duration-300 ease-in-out ${mobileOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 overflow-hidden shrink-0`}
+        className={`fixed top-0 left-0 z-50 h-screen w-[72vw] max-w-70 bg-[#020617] border-r border-white/10 overflow-hidden shrink-0 transform transition-transform duration-300 ease-in-out ${
+          mobileOpen ? "translate-x-0" : "-translate-x-full"
+        } lg:static lg:h-auto lg:max-w-none lg:translate-x-0 ${
+          isCollapsed ? "lg:w-20" : "lg:w-62"
+        }`}
       >
         <UserSidebar
           active={active}
@@ -89,8 +93,8 @@ const UserDashboard = () => {
 
       {/* Main Content :- Mobile Topbar */}
 
-      <main className="flex-1 overflow-y-auto md:pl-1">
-        <div className="md:hidden sticky top-0 z-30 border-b border-white/10 bg-[#020617]/80 backdrop-blur-2xl">
+      <main className="flex-1 overflow-y-auto lg:pl-1">
+        <div className="sticky top-0 z-30 border-b border-white/10 bg-[#020617]/80 backdrop-blur-2xl lg:hidden">
           <div className="flex items-center justify-between px-6 py-3">
             {/* Menu Button */}
             <button
@@ -137,7 +141,7 @@ const UserDashboard = () => {
         </div>
 
         <div
-          className={`w-full mx-auto p-4 md:p-6 lg:p-8 transition-all duration-300 ${
+          className={`w-full mx-auto p-4 lg:p-6 xl:p-8 transition-all duration-300 ${
             isCollapsed ? "max-w-7xl" : "max-w-6xl"
           }`}
         >
@@ -157,11 +161,11 @@ const UserDashboard = () => {
 
       <button
         onClick={() => navigate("/user-dashboard/ai-chat")}
-        className="fixed bottom-8 md:right-8 right-6 z-50 flex items-center justify-center gap-2 h-14 px-5 rounded-full bg-linear-to-r from-purple-500 to-cyan-500 text-white shadow-[0_0_10px_rgba(59,130,246,0.35)] cursor-pointer active:scale-95 transition-all duration-300"
+        className="fixed bottom-8 right-6 lg:right-8 z-50 flex h-10 items-center justify-center gap-2 rounded-full bg-linear-to-r from-purple-500 to-cyan-500 px-3 text-white shadow-[0_0_10px_rgba(59,130,246,0.35)] transition-all duration-300 active:scale-95 cursor-pointer"
         aria-label="Chat with AI"
       >
-        <HiSparkles className="text-2xl" />
-        <span className="text-sm font-medium whitespace-nowrap">
+        <HiSparkles className="text-lg" />
+        <span className="whitespace-nowrap text-xs font-medium">
           Chat with AI
         </span>
       </button>
