@@ -32,6 +32,8 @@ The project currently includes:
 | --- | --- |
 | Rakhi Rani | Full Stack Developer |
 | Nitish Kumar | Full Stack Developer |
+| Neha Khatun | Full Stack Developer |
+| Md Musharaf Ali | Full Stack Developer |
 
 ## What the App Does
 
